@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import PokemonSlotGrid from "./PokemonSlotGrid";
-import { useSlotDragDrop } from "./useSlotDragDrop";
+import { useSlotDragDrop } from "../hooks/useSlotDragDrop";
 
 /*
   PartyAndPC
