@@ -1,18 +1,2088 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Niflheim Online</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-[#050a12]">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niflheim — Home Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #050a12;
+    --panel: #0A1420;
+    --panel-2: #0D1B2C;
+    --border: #234258;
+    --ice: #8FE3FF;
+    --ice-dim: #3E7A94;
+    --frost: #C9F3FF;
+    --text: #EAF6FF;
+    --text-muted: #7FA0B8;
+    --green: #4ADE80;
+    --yellow: #FBD34D;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    padding-bottom: 100px;
+    background:
+      radial-gradient(ellipse 500px 300px at 20% 0%, rgba(143,227,255,0.08), transparent 60%),
+      radial-gradient(ellipse 400px 260px at 100% 30%, rgba(143,227,255,0.05), transparent 60%),
+      var(--bg);
+    overflow-x:hidden;
+  }
+
+  /* drifting snow */
+  .snow{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .flake{
+    position:absolute; top:-10px;
+    background: var(--frost);
+    border-radius:50%;
+    opacity:0.5;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) translateX(20px); }
+  }
+
+  /* ---- "flicker into existence" glitch for panel/overlay open ---- */
+  @keyframes flickerIn{
+    0%{ opacity:0; clip-path: inset(0 0 0 0); transform: translate(0,0); filter:none; }
+    4%{ opacity:1; clip-path: inset(10% 0 60% 0); transform: translate(-4px,0); filter: brightness(2) hue-rotate(15deg); }
+    8%{ opacity:0.2; clip-path: inset(60% 0 5% 0); transform: translate(3px,0); }
+    14%{ opacity:1; clip-path: inset(20% 0 40% 0); transform: translate(-2px,0); filter: brightness(1.5) hue-rotate(-10deg); }
+    20%{ opacity:0.3; clip-path: inset(0 0 75% 0); }
+    26%{ opacity:1; clip-path: inset(0 0 0 0); transform: translate(0,0); filter:none; }
+    100%{ opacity:1; clip-path: inset(0 0 0 0); transform: translate(0,0); filter:none; }
+  }
+  .glitch-in{ animation: flickerIn 0.45s steps(1,end); }
+
+  /* ============ SCENE MANAGEMENT ============ */
+  .scene{
+    position:fixed; inset:0;
+    opacity:0; pointer-events:none;
+    overflow-y:auto;
+    transition: opacity 0.4s ease;
+  }
+  .scene.active{ opacity:1; pointer-events:auto; }
+
+  /* corner brackets — shared ambient framing on login/intro */
+  .frame-corner{
+    position:fixed; width:26px; height:26px;
+    border:1.5px solid rgba(143,227,255,0.3);
+    z-index:5; pointer-events:none;
+  }
+  .frame-corner.tl{ top:16px; left:16px; border-right:none; border-bottom:none; }
+  .frame-corner.tr{ top:16px; right:16px; border-left:none; border-bottom:none; }
+  .frame-corner.bl{ bottom:16px; left:16px; border-right:none; border-top:none; }
+  .frame-corner.br{ bottom:16px; right:16px; border-left:none; border-top:none; }
+  body.past-intro .frame-corner{ display:none; }
+
+  /* ============ LOGIN / SIGNUP SCENE ============ */
+  #scene-login{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:26px; padding:32px 20px;
+  }
+  .sys-eyebrow{
+    font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.24em;
+    color:var(--ice); text-transform:uppercase; opacity:0.85;
+    display:flex; align-items:center; gap:10px;
+  }
+  .sys-eyebrow::before{
+    content:''; width:6px; height:6px; border-radius:50%;
+    background:var(--ice); box-shadow:0 0 8px var(--ice), 0 0 16px var(--ice);
+    animation: pulse-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .auth-title{
+    font-family:'Cinzel',serif; font-weight:600;
+    font-size: clamp(26px, 7vw, 36px);
+    letter-spacing:.06em; text-align:center; color:var(--text);
+    text-shadow: 0 0 24px rgba(143,227,255,0.2);
+  }
+  .auth-title span{ color:var(--ice); }
+
+  .auth-panel{
+    position:relative;
+    width:min(400px, 92vw);
+    background: linear-gradient(160deg,#0D1F30,#081420 75%);
+    border:1.5px solid var(--ice-dim);
+    border-radius:10px;
+    box-shadow: 0 0 0 1px rgba(143,227,255,0.06), 0 0 30px rgba(143,227,255,0.08);
+    padding: 28px 24px 24px;
+  }
+  .auth-panel::before, .auth-panel::after{
+    content:"◆"; position:absolute; color:var(--ice); font-size:10px; opacity:0.7;
+  }
+  .auth-panel::before{ top:12px; left:12px; }
+  .auth-panel::after{ top:12px; right:12px; }
+
+  .mode-toggle{
+    display:flex; gap:2px; margin: 4px auto 22px;
+    border:1px solid var(--border); padding:3px; width:fit-content;
+  }
+  .mode-toggle button{
+    font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    background:none; border:none; color:var(--text-muted);
+    padding:7px 18px; cursor:pointer; border-radius:4px; transition:all 0.2s;
+  }
+  .mode-toggle button.active{ background: rgba(143,227,255,0.12); color:var(--ice); }
+
+  .field-group{ margin-bottom:16px; }
+  .field-label{
+    font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:7px;
+  }
+  .field-row{ display:flex; gap:8px; }
+  .field-input, .field-select{
+    width:100%; background: rgba(143,227,255,0.03);
+    border:1px solid var(--border); border-radius:6px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:14px;
+    padding:11px 13px; outline:none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .field-select{ flex:0 0 88px; font-size:13px; }
+  .field-input:focus, .field-select:focus{
+    border-color:var(--ice);
+    box-shadow: 0 0 0 1px rgba(143,227,255,0.3), 0 0 16px rgba(143,227,255,0.12);
+    background: rgba(143,227,255,0.05);
+  }
+  .field-input::placeholder{ color:var(--text-muted); opacity:0.6; }
+  .field-hint{
+    font-family:'Inter',sans-serif; font-size:10px; color:var(--text-muted);
+    margin-top:6px; opacity:0.75;
+  }
+  .field-error{
+    font-family:'Inter',sans-serif; font-size:10.5px; color:#ff8a8a;
+    margin-top:6px; display:none;
+  }
+  .field-error.show{ display:block; }
+
+  .submit-btn{
+    width:100%; margin-top:6px;
+    background: linear-gradient(135deg, rgba(143,227,255,0.14), rgba(62,214,255,0.08));
+    border:1px solid var(--ice-dim); border-radius:6px;
+    color:var(--ice); font-family:'Cinzel',serif; font-weight:600;
+    font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+    padding:13px; cursor:pointer;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    position:relative; overflow:hidden;
+  }
+  .submit-btn:hover{
+    background: linear-gradient(135deg, rgba(143,227,255,0.25), rgba(62,214,255,0.16));
+    box-shadow: 0 0 24px rgba(143,227,255,0.2); color:var(--frost);
+  }
+  .submit-btn:active{ transform: translateY(1px); }
+  .submit-btn.loading{ pointer-events:none; color:var(--text-muted); }
+  .submit-btn .scan{
+    position:absolute; top:0; left:-100%; width:60%; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(143,227,255,0.35), transparent);
+  }
+  .submit-btn.loading .scan{ animation: scan-sweep 0.9s linear infinite; }
+  @keyframes scan-sweep{ to{ left:120%; } }
+
+  .switch-line{ text-align:center; margin-top:18px; font-size:12.5px; color:var(--text-muted); }
+  .switch-line button{
+    background:none; border:none; color:var(--ice);
+    font-family:'Inter',sans-serif; font-size:12.5px; cursor:pointer;
+    text-decoration:underline; text-underline-offset:3px; padding:0;
+  }
+
+  .auth-toast{
+    position:fixed; top:22px; left:50%; transform:translateX(-50%) translateY(-16px);
+    display:flex; align-items:center; gap:10px;
+    background: rgba(15,35,26,0.92); border:1px solid rgba(74,222,128,0.4);
+    box-shadow: 0 0 24px rgba(74,222,128,0.15);
+    padding:12px 18px; border-radius:8px;
+    opacity:0; pointer-events:none; z-index:60;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .auth-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .auth-toast .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 8px var(--green), 0 0 16px var(--green); flex:none;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+  .auth-toast .msg{ font-family:'Inter',sans-serif; font-size:12.5px; color:#b9f5cf; }
+  .auth-toast .msg b{ color:var(--green); }
+
+  /* ============ TRANSITION (boot) SCENE ============ */
+  #scene-transition{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+  }
+  .boot-line{
+    font-family:'Inter',sans-serif; font-size:12px; color:var(--ice);
+    letter-spacing:.08em; opacity:0; text-align:center;
+  }
+  .boot-line.show{ animation: boot-flicker 0.5s ease forwards; }
+  @keyframes boot-flicker{
+    0%{ opacity:0; transform:translateY(4px); }
+    30%{ opacity:1; } 45%{ opacity:0.2; } 60%{ opacity:1; }
+    100%{ opacity:1; transform:translateY(0); }
+  }
+  .boot-bar-track{ width:240px; height:3px; background: rgba(255,255,255,0.06); margin-top:8px; overflow:hidden; border-radius:2px; }
+  .boot-bar-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--ice-dim), var(--ice)); box-shadow:0 0 10px var(--ice); }
+  .flash-white{ position:fixed; inset:0; background:var(--frost); opacity:0; pointer-events:none; z-index:50; }
+
+  /* ============ INTRO (lore) SCENE ============ */
+  #scene-intro{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:24px; padding: 40px 24px;
+  }
+  .intro-wordmark{
+    font-family:'Cinzel',serif; font-weight:700;
+    font-size: clamp(34px, 9vw, 52px);
+    letter-spacing:.1em; text-align:center; color:var(--text);
+    text-shadow: 0 0 30px rgba(143,227,255,0.3);
+  }
+  .intro-wordmark span{ color:var(--ice); }
+  .intro-sub{
+    font-family:'Inter',sans-serif; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--text-muted); text-align:center; margin-top:-14px;
+  }
+  .lore-panel{
+    position:relative;
+    width:min(460px, 92vw); max-height:42vh;
+    overflow-y:auto;
+    background: linear-gradient(160deg,#0D1F30,#081420 75%);
+    border:1.5px solid var(--ice-dim); border-radius:10px;
+    padding:22px 20px; box-shadow: 0 0 0 1px rgba(143,227,255,0.06), 0 0 30px rgba(143,227,255,0.08);
+  }
+  .lore-panel::before, .lore-panel::after{
+    content:"◆"; position:absolute; color:var(--ice); font-size:10px; opacity:0.7;
+  }
+  .lore-panel::before{ top:10px; left:10px; }
+  .lore-panel::after{ top:10px; right:10px; }
+  .lore-panel p{ font-size:13.5px; line-height:1.75; color:var(--text-muted); margin-bottom:12px; }
+  .lore-panel p:last-child{ margin-bottom:0; }
+  .lore-panel p b{ color:var(--ice); font-weight:600; }
+
+  .intro-enter-btn{
+    background: linear-gradient(135deg, rgba(143,227,255,0.14), rgba(62,214,255,0.08));
+    border:1px solid var(--ice-dim); border-radius:6px;
+    color:var(--ice); font-family:'Cinzel',serif; font-weight:600;
+    font-size:14px; letter-spacing:.12em; text-transform:uppercase;
+    padding:14px 32px; cursor:pointer;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  }
+  .intro-enter-btn:hover{
+    background: linear-gradient(135deg, rgba(143,227,255,0.25), rgba(62,214,255,0.16));
+    box-shadow: 0 0 24px rgba(143,227,255,0.2); color:var(--frost);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+
+  /* ============ HEADER ============ */
+  .home-header{
+    position:relative; z-index:1;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 20px 0;
+  }
+  .home-title{ font-family:'Cinzel',serif; font-size:19px; letter-spacing:.08em; }
+  .home-title span{ color:var(--ice); }
+  .icon-btn{
+    width:36px;height:36px;border:1px solid var(--border);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--text-muted);
+  }
+
+  /* ============ PROFILE CARD ============ */
+  .profile-wrap{ position:relative; z-index:1; padding: 20px 20px 0; perspective: 1200px; }
+  .profile-card{
+    position:relative;
+    width:100%;
+    min-height: 230px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(.4,.2,.2,1);
+    cursor:pointer;
+  }
+  .profile-card.flipped{ transform: rotateY(180deg); }
+
+  .card-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius:10px;
+    background: linear-gradient(160deg,#0D1F30,#081420 70%);
+    border: 1.5px solid var(--ice-dim);
+    box-shadow: 0 0 0 1px rgba(143,227,255,0.06), 0 0 30px rgba(143,227,255,0.08);
+    padding: 16px;
+    overflow:hidden;
+  }
+  /* corner ice motifs */
+  .card-face::before, .card-face::after{
+    content:"◆"; position:absolute; color: var(--ice); font-size:10px; opacity:0.7;
+  }
+  .card-face::before{ top:10px; left:10px; }
+  .card-face::after{ top:10px; right:10px; }
+
+  .card-front{ display:flex; gap:14px; }
+  .avatar-frame{
+    width:88px;height:88px;flex-shrink:0;
+    border-radius:8px;
+    border:1.5px solid var(--ice-dim);
+    background: radial-gradient(circle at 50% 40%, #2a6f8c, #0a1622 75%);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .avatar-frame .swirl{
+    width:70%;height:70%;border-radius:50%;
+    background: conic-gradient(from 90deg, #9FE8FF, #1B4A5C, #9FE8FF);
+    filter: blur(0.5px);
+    box-shadow: 0 0 18px rgba(143,227,255,0.5) inset;
+  }
+
+  .card-fields{ flex:1; display:flex; flex-direction:column; gap:7px; padding-top:2px; }
+  .field-row{ display:flex; gap:14px; font-size:12.5px; }
+  .field-row .k{ color:var(--text-muted); }
+  .field-row .v{ color:var(--text); font-weight:600; }
+
+  .badge-strip{
+    position:absolute; left:16px; right:16px; bottom:32px;
+    height:34px;
+    border:1px solid var(--ice-dim);
+    border-radius:6px;
+    background: rgba(143,227,255,0.04);
+    display:flex; align-items:center; gap:6px; padding:0 8px;
+    overflow:hidden;
+  }
+  .badge-strip .mini-badge{
+    width:22px;height:22px;border-radius:50%;
+    background: linear-gradient(160deg,#9FE8FF,#2C5F73);
+    flex-shrink:0;
+    box-shadow: 0 0 6px rgba(143,227,255,0.5);
+  }
+  .badge-strip .mini-badge.empty{
+    background:none; border:1px dashed var(--border);
+    box-shadow:none;
+  }
+
+  .card-footer{
+    position:absolute; left:0; right:0; bottom:0;
+    text-align:center; font-family:'Cinzel',serif;
+    font-size:11px; letter-spacing:.14em; color: var(--ice);
+    padding: 8px 0; border-top: 1px solid rgba(143,227,255,0.15);
+  }
+
+  /* back face */
+  .card-back{ transform: rotateY(180deg); display:flex; flex-direction:column; gap:12px; padding-top:20px; }
+  .back-row{ display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; }
+  .back-row .k{ color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase; font-size:10.5px; }
+  .back-row .v{ font-weight:600; }
+  .bio-block p{ font-size:12px; line-height:1.6; color:var(--text-muted); margin:4px 0 0; }
+  .flip-hint{
+    position:absolute; bottom:10px; right:14px;
+    font-size:9px; letter-spacing:.1em; color:var(--text-muted); opacity:0.6;
+  }
+
+  .joined-line{
+    text-align:center; font-size:10.5px; color:var(--text-muted);
+    margin-top:8px; letter-spacing:.05em;
+  }
+
+  /* ============ SCROLLABLE RECTANGLE (Stats/Inventory/Badges tabs) ============ */
+  .tab-rect-wrap{ position:relative; z-index:1; margin: 22px 20px 0; }
+  .tab-bar{
+    display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:14px;
+  }
+  .tab-btn{
+    flex:1; text-align:center; padding:10px 4px;
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--text-muted); background:none; border:none;
+    font-family:'Inter',sans-serif; cursor:pointer;
+    position:relative;
+  }
+  .tab-btn.active{ color:var(--ice); }
+  .tab-btn.active::after{
+    content:""; position:absolute; left:20%; right:20%; bottom:-1px; height:2px;
+    background:var(--ice); box-shadow:0 0 8px var(--ice);
+  }
+
+  .tab-scroll{
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    display:flex;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .tab-scroll::-webkit-scrollbar{ display:none; }
+  .tab-pane{
+    min-width:100%; max-width:100%; width:100%;
+    box-sizing:border-box;
+    scroll-snap-align:start; scroll-snap-stop:always; flex-shrink:0;
+  }
+
+  /* --- stats pane content: taller rectangle, mini-square drags with scroll --- */
+  .stats-rect{
+    position:relative;
+    border:1px solid var(--border); border-radius:8px;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    min-height: 260px;
+    padding: 16px;
+  }
+  .stat-line{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed rgba(143,227,255,0.12); font-size:13px; }
+  .stat-line .k{ color:var(--text-muted); }
+  .stat-line .v{ font-weight:700; color:var(--text); }
+  .stat-line:last-child{ border-bottom:none; }
+
+  /* --- inventory pane --- */
+  .inv-row{
+    display:flex; align-items:center; gap:12px; padding:10px 4px;
+    border-bottom:1px solid rgba(143,227,255,0.06);
+  }
+  .inv-icon{
+    width:38px;height:38px;border-radius:6px;flex-shrink:0;
+    background: linear-gradient(160deg,#2C5F73,#0D1F30);
+    border:1px solid var(--ice-dim);
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .inv-namewrap{ flex:1; min-width:0; overflow:hidden; }
+  .inv-name{ font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .inv-name.marquee span{
+    display:inline-block;
+    white-space:nowrap;
+    animation: marquee-bounce 6s ease-in-out infinite;
+  }
+  @keyframes marquee-bounce{
+    0%, 10%{ transform:translateX(0); }
+    50%, 60%{ transform:translateX(var(--marquee-shift, -60%)); }
+    100%{ transform:translateX(0); }
+  }
+  .inv-qty{ font-size:10.5px; color:var(--text-muted); margin-top:1px; }
+
+  /* item detail — compact modal popup, Solo Leveling status-window style */
+  .item-overlay{
+    position:fixed; inset:0; z-index:20;
+    background: rgba(2,6,12,0.55);
+    backdrop-filter: blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+  }
+  .item-panel{
+    position:relative;
+    width:100%; max-width:340px;
+    max-height:70vh;
+    background: linear-gradient(160deg,#0D1F30,#081420 75%);
+    border:1.5px solid var(--ice-dim);
+    border-radius:12px;
+    box-shadow: 0 0 0 1px rgba(143,227,255,0.08), 0 12px 40px rgba(0,0,0,0.5), 0 0 30px rgba(143,227,255,0.1);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .item-panel-head{
+    position:relative; z-index:2;
+    display:flex; gap:12px; align-items:center;
+    padding: 18px 44px 14px 18px;
+    border-bottom:1px solid rgba(143,227,255,0.12);
+    background: linear-gradient(160deg,#0D1F30,#081420 75%);
+    flex-shrink:0;
+  }
+  .item-panel-scroll-clip{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+  }
+  .item-panel .inv-icon{ width:44px;height:44px;font-size:20px; flex-shrink:0; }
+  .item-panel-meta .name{ font-family:'Cinzel',serif; font-size:14.5px; font-weight:700; }
+  .item-panel-meta .sub{ font-size:10.5px; color:var(--text-muted); margin-top:4px; }
+
+  .item-panel-scroll{
+    overflow-y:auto;
+    padding: 16px 18px 20px;
+    height:100%;
+    box-sizing:border-box;
+  }
+  .item-panel .desc{ font-size:12.5px; line-height:1.65; color:var(--text-muted); margin-top:14px; }
+  .item-panel .desc:first-child{ margin-top:0; }
+  .item-panel .desc b{ color:var(--ice); display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:5px; }
+
+  .close-x{
+    position:absolute; top:14px; right:14px; z-index:2;
+    width:28px;height:28px;border-radius:50%;
+    border:1px solid var(--border); background:rgba(255,255,255,0.03);
+    color:var(--text-muted); font-size:13px;
+  }
+
+  /* --- badges pane --- */
+  .badge-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .badge-tile{
+    border:1px solid var(--border); border-radius:8px;
+    background: linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:14px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    text-align:center;
+  }
+  .badge-tile.locked{ opacity:0.35; border-style:dashed; }
+  .badge-icon{
+    width:44px;height:44px;border-radius:50%;
+    background: linear-gradient(160deg,#9FE8FF,#245A70);
+    box-shadow:0 0 14px rgba(143,227,255,0.45);
+  }
+  .badge-tile.locked .badge-icon{ background:none; border:1px dashed var(--border); box-shadow:none; }
+  .badge-name{ font-size:11px; font-weight:600; }
+
+  /* ============ PARTY / PC ============ */
+  .section-block{ position:relative; z-index:1; margin: 30px 20px 0; }
+  .section-head{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:12px; padding-bottom:8px;
+    border-bottom:1px dashed var(--border);
+  }
+  .section-head h3{
+    font-family:'Cinzel',serif; font-size:14px; letter-spacing:.06em; margin:0;
+  }
+  .section-head h3 span{ color:var(--ice); }
+  .section-head .trainer-tag{ font-size:10px; color:var(--text-muted); letter-spacing:.1em; }
+
+  .party-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .party-card{
+    border-radius:8px; background: linear-gradient(160deg,#0D1F30,#081420);
+    border:1px solid var(--border); border-left:3px solid var(--ice);
+    padding:10px; min-height:96px; position:relative; overflow:hidden;
+  }
+  .party-card.empty{
+    border-left:3px solid var(--border);
+    border-style:dashed; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:6px; color:var(--text-muted);
+  }
+  .party-card.empty .plus{ font-size:20px; opacity:0.5; }
+  .party-card.empty .lbl{ font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; opacity:0.6; }
+
+  .party-top{ display:flex; gap:8px; align-items:flex-start; }
+  .party-sprite{
+    width:48px;height:48px;border-radius:6px;flex-shrink:0;
+    background: radial-gradient(circle at 40% 30%, #2a6f8c, #0a1622 75%);
+  }
+  .party-meta{ flex:1; min-width:0; }
+  .party-name{ font-size:12.5px; font-weight:700; }
+  .party-badges{ display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+  .type-pill{
+    font-size:8.5px; font-weight:700; letter-spacing:.05em;
+    padding:2px 6px; border-radius:4px; text-transform:uppercase;
+  }
+  .type-grass{ background:rgba(74,222,128,0.15); color:#4ADE80; border:1px solid rgba(74,222,128,0.3); }
+  .type-water{ background:rgba(96,165,250,0.15); color:#60A5FA; border:1px solid rgba(96,165,250,0.3); }
+  .type-fire{ background:rgba(251,146,60,0.15); color:#FB923C; border:1px solid rgba(251,146,60,0.3); }
+  .type-electric{ background:rgba(251,211,77,0.15); color:#FBD34D; border:1px solid rgba(251,211,77,0.3); }
+  .type-ice{ background:rgba(143,227,255,0.15); color:#8FE3FF; border:1px solid rgba(143,227,255,0.3); }
+  .type-fighting{ background:rgba(217,119,87,0.15); color:#D97757; border:1px solid rgba(217,119,87,0.3); }
+  .type-poison{ background:rgba(168,85,247,0.15); color:#A855F7; border:1px solid rgba(168,85,247,0.3); }
+  .type-ground{ background:rgba(217,180,120,0.15); color:#D9B478; border:1px solid rgba(217,180,120,0.3); }
+  .type-flying{ background:rgba(165,180,252,0.15); color:#A5B4FC; border:1px solid rgba(165,180,252,0.3); }
+  .type-psychic{ background:rgba(244,114,182,0.15); color:#F472B6; border:1px solid rgba(244,114,182,0.3); }
+  .type-bug{ background:rgba(163,203,80,0.15); color:#A3CB50; border:1px solid rgba(163,203,80,0.3); }
+  .type-rock{ background:rgba(180,155,90,0.15); color:#B49B5A; border:1px solid rgba(180,155,90,0.3); }
+  .type-ghost{ background:rgba(115,90,180,0.15); color:#735AB4; border:1px solid rgba(115,90,180,0.3); }
+  .type-dragon{ background:rgba(122,92,255,0.15); color:#7A5CFF; border:1px solid rgba(122,92,255,0.3); }
+  .type-dark{ background:rgba(120,110,105,0.15); color:#786E69; border:1px solid rgba(120,110,105,0.3); }
+  .type-steel{ background:rgba(148,163,184,0.15); color:#94A3B8; border:1px solid rgba(148,163,184,0.3); }
+  .type-fairy{ background:rgba(240,171,209,0.15); color:#F0ABD1; border:1px solid rgba(240,171,209,0.3); }
+  .type-normal{ background:rgba(200,200,180,0.15); color:#C8C8B4; border:1px solid rgba(200,200,180,0.3); }
+  .lvl-pill{ font-size:8.5px; font-weight:700; padding:2px 6px; border-radius:4px; background:rgba(143,227,255,0.1); color:var(--ice); }
+  .stat-pill{ font-size:8.5px; font-weight:700; padding:2px 6px; border-radius:4px; background:rgba(251,211,77,0.15); color:var(--yellow); }
+
+  .hp-row{ margin-top:8px; }
+  .hp-label{ display:flex; justify-content:space-between; font-size:8.5px; color:var(--text-muted); margin-bottom:3px; }
+  .hp-bar{ height:5px; border-radius:3px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .hp-fill{ height:100%; background:linear-gradient(90deg,#4ADE80,#22C55E); border-radius:3px; }
+
+  .pc-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pc-card{ text-align:center; }
+  .pc-sprite{
+    width:100%; aspect-ratio:1; border-radius:8px;
+    background: radial-gradient(circle at 40% 30%, #1c4c60, #081420 75%);
+    border:1px solid var(--border);
+  }
+  .pc-name{ font-size:10.5px; margin-top:6px; color:var(--text-muted); }
+
+  /* ============ RIBBON ============ */
+  .ribbon{
+    position:fixed; bottom:0; left:0; right:0; z-index:5;
+    display:flex; justify-content:space-around; align-items:center;
+    padding:14px 10px calc(14px + env(safe-area-inset-bottom));
+    background:rgba(5,10,18,0.92); backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+  }
+  .ribbon .item{ display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text-muted); font-size:10px; background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; padding:0; }
+  .ribbon .item.active{ color:var(--ice); }
+  .ribbon .item svg{ width:20px;height:20px; }
+  .ribbon .item.active svg{ filter:drop-shadow(0 0 6px rgba(143,227,255,0.7)); }
+
+  /* ============ SHARED: PAGE HEAD (Leaderboard / Zones / Pokédex) ============ */
+  .lb-page-head{ position:relative; z-index:1; padding: 20px 20px 0; }
+  .lb-page-head h1{ font-family:'Cinzel',serif; font-size:20px; letter-spacing:.08em; color:var(--text); margin:0 0 4px; }
+  .lb-page-head p{ font-size:12px; color:var(--text-muted); margin:0; }
+
+  /* ============ LEADERBOARD ============ */
+  .lb-list{ display:flex; flex-direction:column; gap:8px; }
+  .lb-row{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:8px;
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  }
+  .lb-row.top1{ border-color:#FBD34D; box-shadow:0 0 14px rgba(251,211,77,0.12); }
+  .lb-row.top2{ border-color:#C9D6E3; box-shadow:0 0 10px rgba(201,214,227,0.1); }
+  .lb-row.top3{ border-color:#D8935A; box-shadow:0 0 10px rgba(216,147,90,0.1); }
+  .lb-rank{ width:26px; flex-shrink:0; text-align:center; font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:var(--text-muted); }
+  .lb-row.top1 .lb-rank{ color:#FBD34D; }
+  .lb-row.top2 .lb-rank{ color:#C9D6E3; }
+  .lb-row.top3 .lb-rank{ color:#D8935A; }
+  .lb-avatar{ width:34px;height:34px;border-radius:50%;flex-shrink:0; background: radial-gradient(circle at 40% 30%, #2a6f8c, #0a1622 75%); border:1px solid var(--ice-dim); }
+  .lb-name{ flex:1; min-width:0; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lb-stat{ font-size:13px; font-weight:700; color:var(--ice); flex-shrink:0; }
+  .lb-stat .unit{ font-size:10px; font-weight:500; color:var(--text-muted); margin-left:2px; }
+
+  /* ============ ZONES ============ */
+  .map-dropdown{ position:relative; z-index:1; margin: 16px 20px 0; border:1px solid var(--border); border-radius:10px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); overflow:hidden; }
+  .map-dropdown-toggle{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:none; border:none; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    padding:13px 14px; cursor:pointer;
+  }
+  .map-dropdown-toggle .chev{ transition: transform 0.3s ease; color:var(--text-muted); }
+  .map-dropdown.open .chev{ transform: rotate(180deg); }
+  .map-dropdown-body{ max-height:0; overflow:hidden; transition: max-height 0.4s cubic-bezier(.2,.8,.2,1); }
+  .map-dropdown.open .map-dropdown-body{ max-height:600px; }
+  .type-filter-row{ display:flex; flex-wrap:wrap; gap:6px; padding: 0 14px 12px; }
+  .type-chip{
+    font-size:10px; font-weight:600; padding:4px 10px; border-radius:12px;
+    border:1px solid var(--border); color:var(--text-muted); cursor:pointer; user-select:none;
+    background:rgba(255,255,255,0.02); transition: all 0.15s;
+  }
+  .type-chip.active{ border-color: var(--ice); color:var(--ice); background:rgba(143,227,255,0.1); }
+  .world-map-viewport{ position:relative; height:280px; overflow:hidden; touch-action:none; background:rgba(0,0,0,0.15); }
+  .world-map-inner{ position:absolute; inset:0; transform-origin: 0 0; }
+  .world-map{ position:relative; width:900px; height:640px; }
+  .map-route{ position:absolute; background:var(--border); height:2px; transform-origin:0 0; z-index:0; }
+  .map-node{
+    position:absolute; width:78px; transform:translate(-50%,-50%);
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:8px 6px; border-radius:8px; border:1px solid var(--border);
+    background: linear-gradient(180deg, var(--panel-2), var(--panel)); cursor:pointer;
+    transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s; z-index:1;
+  }
+  .map-node .zn-name{ font-size:9.5px; font-weight:600; color:var(--text); line-height:1.2; }
+  .map-node .zn-danger{ font-size:9px; color:var(--text-muted); margin-top:3px; }
+  .map-node.dim{ opacity:0.25; }
+  .map-node.hl{ border-color:var(--ice); box-shadow: 0 0 18px rgba(143,227,255,0.35); }
+  .map-zoom-controls{ position:absolute; right:10px; bottom:10px; display:flex; flex-direction:column; gap:6px; z-index:2; }
+  .map-zoom-btn{
+    width:28px;height:28px; border-radius:6px; border:1px solid var(--border);
+    background:rgba(5,10,18,0.85); color:var(--ice); font-size:16px; line-height:1;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .map-zoom-reset{
+    position:absolute; left:10px; bottom:10px; font-size:10px; color:var(--text-muted);
+    border:1px solid var(--border); border-radius:6px; padding:5px 9px; cursor:pointer;
+    background:rgba(5,10,18,0.85); z-index:2;
+  }
+  .map-hint{ font-size:10px; color:var(--text-muted); text-align:center; padding: 2px 14px 14px; opacity:0.7; }
+
+  .zone-list{ position:relative; z-index:1; margin: 18px 20px 0; display:flex; flex-direction:column; gap:8px; }
+  .zone-row{ border:1px solid var(--border); border-radius:8px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); overflow:hidden; }
+  .zone-row-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 14px; cursor:pointer; }
+  .zone-row-head .zn-title{ display:flex; align-items:center; gap:10px; }
+  .zone-row-head .zn-name{ font-family:'Cinzel',serif; font-size:13px; color:var(--text); }
+  .zone-danger-badge{ font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:10px; letter-spacing:.04em; text-transform:uppercase; flex-shrink:0; }
+  .zone-row-head .chev{ color:var(--text-muted); transition: transform 0.3s ease; flex-shrink:0; }
+  .zone-row.open .chev{ transform: rotate(180deg); }
+  .zone-row-body{ max-height:0; overflow:hidden; transition: max-height 0.35s cubic-bezier(.2,.8,.2,1); }
+  .zone-row.open .zone-row-body{ max-height:300px; }
+  .zone-row-body-inner{ padding: 0 14px 16px; }
+  .zone-meta-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .zone-types{ display:flex; flex-wrap:wrap; gap:6px; }
+
+  /* ============ POKÉDEX ============ */
+  .dex-tabs-wrap{ position:sticky; top:0; z-index:4; background:var(--bg); padding-top:4px; transition: transform 0.3s ease, opacity 0.3s ease; }
+  .dex-tabs-wrap.hidden{ transform: translateY(-120%); opacity:0; }
+  .dex-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 0 20px 10px; }
+  .dex-pills{ display:flex; gap:6px; border:1px solid var(--border); padding:3px; border-radius:8px; width:fit-content; }
+  .dex-pills button{
+    font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    background:none; border:none; color:var(--text-muted); padding:7px 16px; cursor:pointer; border-radius:6px; transition:all 0.2s;
+  }
+  .dex-pills button.active{ background: rgba(143,227,255,0.12); color:var(--ice); }
+  .dex-sort-wrap{ position:relative; }
+  .dex-sort-btn{
+    display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted);
+    border:1px solid var(--border); border-radius:8px; padding:8px 12px; cursor:pointer; background:rgba(255,255,255,0.02);
+  }
+  .dex-sort-btn svg{ width:12px; height:12px; }
+  .dex-sort-menu{
+    position:absolute; right:0; top:calc(100% + 6px); z-index:10; min-width:150px;
+    border:1px solid var(--border); border-radius:8px; background: linear-gradient(160deg,#0D1F30,#081420 85%);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); display:none; overflow:hidden;
+  }
+  .dex-sort-menu.open{ display:block; }
+  .dex-sort-menu button{
+    display:block; width:100%; text-align:left; background:none; border:none; color:var(--text-muted);
+    font-family:'Inter',sans-serif; font-size:12px; padding:10px 14px; cursor:pointer;
+  }
+  .dex-sort-menu button:hover{ background:rgba(143,227,255,0.08); color:var(--text); }
+  .dex-sort-menu button.active{ color:var(--ice); }
+
+  .dex-scroll{
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    display:flex;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .dex-scroll::-webkit-scrollbar{ display:none; }
+  .dex-pane{
+    min-width:100%; max-width:100%; width:100%;
+    box-sizing:border-box;
+    scroll-snap-align:start; scroll-snap-stop:always; flex-shrink:0;
+  }
+  .dex-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding: 6px 20px 0; }
+  .dex-card{ text-align:center; cursor:pointer; }
+  .dex-sprite{
+    width:100%; aspect-ratio:1; border-radius:10px; position:relative; overflow:hidden;
+    background: radial-gradient(circle at 40% 30%, #1c4c60, #081420 75%);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+  }
+  .dex-sprite img{ width:72%; height:72%; object-fit:contain; }
+  .dex-sprite .num{ position:absolute; top:5px; left:6px; font-size:9px; color:var(--text-muted); font-weight:600; }
+  .dex-card.unseen .dex-sprite{ background: radial-gradient(circle at 40% 30%, #17232c, #050a10 75%); }
+  .dex-card.unseen .dex-sprite img{ filter: brightness(0); opacity:0.55; }
+  .dex-name{ font-size:10.5px; margin-top:6px; color:var(--text-muted); }
+  .dex-card.caught .dex-name{ color:var(--text); }
+  .dex-card.unseen .dex-name{ opacity:0.5; }
+  .dex-caught-dot{ position:absolute; top:5px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); }
+</style>
+</head>
+<body>
+
+<div class="frame-corner tl"></div>
+<div class="frame-corner tr"></div>
+<div class="frame-corner bl"></div>
+<div class="frame-corner br"></div>
+<div class="flash-white" id="flash"></div>
+<div class="auth-toast" id="toast"><span class="dot"></span><span class="msg" id="toast-msg">Account created — <b>log in with your details</b></span></div>
+
+<!-- ══ LOGIN / SIGNUP SCENE ══ -->
+<div class="scene active" id="scene-login">
+  <div class="snow" id="snow-login"></div>
+  <div class="sys-eyebrow">NIFLHEIM // SYSTEM ACCESS</div>
+  <div class="auth-title">TRAINER <span>LOGIN</span></div>
+
+  <div class="auth-panel">
+    <div class="mode-toggle">
+      <button class="active" id="tab-login">Log In</button>
+      <button id="tab-signup">Sign Up</button>
+    </div>
+
+    <form id="auth-form" autocomplete="on">
+    <div id="signup-only" style="display:none;">
+      <div class="field-group">
+        <label class="field-label">Username</label>
+        <input class="field-input" id="input-username" type="text" name="username" placeholder="Choose a trainer name" maxlength="50" autocomplete="username">
+        <div class="field-hint">up to 50 characters — this becomes your in-game name</div>
+        <div class="field-error" id="err-username">Enter a trainer name.</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Phone Number</label>
+      <div class="field-row">
+        <select class="field-select" id="input-country"><option>+234</option><option>+1</option><option>+44</option></select>
+        <input class="field-input" id="input-phone" type="tel" name="tel" placeholder="8031234567" autocomplete="tel-national">
+      </div>
+      <div class="field-hint">leading 0 is stripped automatically</div>
+      <div class="field-error" id="err-phone">Enter a valid phone number.</div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Password</label>
+      <input class="field-input" id="input-password" type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="field-hint" id="pw-hint">min. 5 characters</div>
+      <div class="field-error" id="err-password">Password must be at least 5 characters.</div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" type="submit"><span class="scan"></span><span id="submit-label">Log In</span></button>
+
+    <div class="switch-line" id="switch-line">
+      New here? <button type="button" id="switch-to-signup">Create an account</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ TRANSITION (system boot) SCENE ══ -->
+<div class="scene" id="scene-transition">
+  <div class="boot-line" id="bl1">◈ VERIFYING CREDENTIALS</div>
+  <div class="boot-line" id="bl2">◈ SYNCING TRAINER RECORD</div>
+  <div class="boot-line" id="bl3">◈ WELCOME BACK</div>
+  <div class="boot-bar-track"><div class="boot-bar-fill" id="boot-fill"></div></div>
+</div>
+
+<!-- ══ INTRO (lore) SCENE ══ -->
+<div class="scene" id="scene-intro">
+  <div class="snow" id="snow-intro"></div>
+  <div class="intro-wordmark glitch-in">NIFL<span>HEIM</span></div>
+  <div class="intro-sub">Welcome to Niflheim</div>
+  <div class="lore-panel glitch-in">
+    <p>Niflheim is a realm carved from ice — <b>frost-bound towns</b>, wild frontier
+    routes, and waters that never fully thaw. Trainers arrive at Oak Town with
+    nothing but a starter and an objective, and build their name from there.</p>
+    <p>Every battle, every catch, every badge earned carries you further from
+    the lab and deeper into the frozen wild. <b>Gyms guard their routes.</b>
+    Legends sleep beneath the ice. What you become is yours to decide.</p>
+    <p>This is your status window now — <b>check it often.</b></p>
+  </div>
+  <button class="intro-enter-btn" id="intro-enter-btn">Welcome to Niflheim</button>
+</div>
+
+<!-- ══ HOME SCENE ══ -->
+<div class="scene" id="scene-home">
+<div class="snow" id="snow-home"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">NIFL<span>HEIM</span></div>
+    <div class="icon-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>
+    </div>
+  </div>
+
+  <!-- PROFILE CARD -->
+  <div class="profile-wrap">
+    <div class="profile-card glitch-in" id="profileCard" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="avatar-frame"><div class="swirl"></div></div>
+        <div class="card-fields">
+          <div class="field-row"><span class="k">Name:</span><span class="v" id="card-name">—</span></div>
+          <div class="field-row"><span class="k">Level:</span><span class="v" id="card-level">—</span><span class="k" style="margin-left:auto">Rank:</span><span class="v" id="card-rank">—</span></div>
+          <div class="field-row"><span class="k">Region:</span><span class="v" id="card-region">—</span></div>
+          <div class="field-row"><span class="k">Guild:</span><span class="v" id="card-guild">—</span></div>
+        </div>
+        <div class="badge-strip" id="card-badge-strip"></div>
+        <div class="card-footer">Welcome to Niflheim</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="back-row"><span class="k">Bio</span></div>
+        <div class="bio-block"><p id="card-bio">—</p></div>
+        <div class="back-row"><span class="k">PvP Record</span><span class="v" id="card-pvp">—</span></div>
+        <div class="back-row"><span class="k">Badges Earned</span><span class="v" id="card-badges-count">—</span></div>
+        <div class="back-row"><span class="k">Pokémon Caught</span><span class="v" id="card-caught">—</span></div>
+        <div class="back-row"><span class="k">Play Time</span><span class="v" style="color:var(--text-muted)">— not tracked yet</span></div>
+        <div class="flip-hint">tap to flip back</div>
+      </div>
+    </div>
+    <div class="joined-line">Trainer since June 2026</div>
+  </div>
+
+  <!-- STATS / INVENTORY / BADGES TABS -->
+  <div class="tab-rect-wrap">
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="0">Stats</button>
+      <button class="tab-btn" data-tab="1">Pokémon</button>
+      <button class="tab-btn" data-tab="2">Inventory</button>
+      <button class="tab-btn" data-tab="3">Badges</button>
+    </div>
+    <div class="tab-scroll" id="tabScroll">
+
+      <div class="tab-pane">
+        <div class="stats-rect" id="stats-rect">
+          <div class="stat-line"><span class="k">Name</span><span class="v" id="stat-name">—</span></div>
+          <div class="stat-line"><span class="k">Level</span><span class="v" id="stat-level">—</span></div>
+          <div class="stat-line"><span class="k">Rank</span><span class="v" id="stat-rank">—</span></div>
+          <div class="stat-line"><span class="k">Region</span><span class="v" id="stat-region">—</span></div>
+          <div class="stat-line"><span class="k">Guild</span><span class="v" id="stat-guild">—</span></div>
+          <div class="stat-line"><span class="k">Pokémon Caught</span><span class="v" id="stat-caught">—</span></div>
+          <div class="stat-line"><span class="k">Battles Won</span><span class="v" id="stat-wins">—</span></div>
+          <div class="stat-line"><span class="k">Battles Lost</span><span class="v" id="stat-losses">—</span></div>
+          <div class="stat-line"><span class="k">Badges Earned</span><span class="v" id="stat-badges">—</span></div>
+          <div class="stat-line"><span class="k">Coins</span><span class="v" id="stat-coins">—</span></div>
+          <div class="stat-line"><span class="k">Play Time</span><span class="v" style="color:var(--text-muted); font-weight:500;">not tracked yet</span></div>
+          <div class="stat-line" style="border-bottom:none; flex-direction:column; align-items:flex-start; gap:6px; padding-top:14px;">
+            <span class="k" style="font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;">Bio</span>
+            <span id="stat-bio" style="font-size:12.5px; line-height:1.6; color:var(--text-muted); font-weight:400;">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane">
+        <div class="section-head" style="margin-bottom:12px; border-bottom:1px dashed var(--border); padding-bottom:8px;">
+          <h3 style="font-family:'Cinzel',serif; font-size:13px; margin:0;">PARTY // <span style="color:var(--ice);">ACTIVE</span></h3>
+        </div>
+        <div class="party-grid" id="party-grid" style="margin-bottom:24px;"></div>
+
+        <div class="section-head" style="margin-bottom:12px; border-bottom:1px dashed var(--border); padding-bottom:8px;">
+          <h3 style="font-family:'Cinzel',serif; font-size:13px; margin:0;">PC // <span style="color:var(--ice);">STORAGE</span></h3>
+        </div>
+        <div class="pc-grid" id="pc-grid"></div>
+      </div>
+
+      <div class="tab-pane">
+        <div id="invList"></div>
+      </div>
+
+      <div class="tab-pane">
+        <div class="badge-grid" id="badge-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Party/PC now live inside the Pokémon tab above -->
+
+  <div class="ribbon" data-ribbon="home"></div>
+</div>
+</div>
+<!-- ══ /HOME SCENE ══ -->
+
+<!-- ══ LEADERBOARD SCENE ══ -->
+<div class="scene" id="scene-leaderboard">
+<div class="snow" id="snow-leaderboard"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">NIFL<span>HEIM</span></div>
+    <div class="icon-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>
+    </div>
+  </div>
+
+  <div class="lb-page-head">
+    <h1>LEADERBOARD</h1>
+    <p>Top trainers across Niflheim, ranked by category.</p>
+  </div>
+
+  <div class="tab-rect-wrap">
+    <div class="tab-bar" data-tabgroup="lb">
+      <button class="tab-btn active" data-tab="0">Level</button>
+      <button class="tab-btn" data-tab="1">PvP Wins</button>
+      <button class="tab-btn" data-tab="2">Caught</button>
+      <button class="tab-btn" data-tab="3">Badges</button>
+    </div>
+    <div class="tab-scroll" id="tabScroll-lb" data-tabgroup-scroll="lb">
+      <div class="tab-pane"><div class="lb-list" id="lb-level"></div></div>
+      <div class="tab-pane"><div class="lb-list" id="lb-pvp"></div></div>
+      <div class="tab-pane"><div class="lb-list" id="lb-caught"></div></div>
+      <div class="tab-pane"><div class="lb-list" id="lb-badges"></div></div>
+    </div>
+  </div>
+
+  <div class="ribbon" data-ribbon="leaderboard"></div>
+</div>
+</div>
+<!-- ══ /LEADERBOARD SCENE ══ -->
+
+<!-- ══ ZONES SCENE ══ -->
+<div class="scene" id="scene-zones">
+<div class="snow" id="snow-zones"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">NIFL<span>HEIM</span></div>
+    <div class="icon-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>
+    </div>
+  </div>
+
+  <div class="lb-page-head">
+    <h1>WORLD &amp; ZONES</h1>
+    <p>The lands of Niflheim — towns, routes, and the wild beyond.</p>
+  </div>
+
+  <div class="map-dropdown" id="mapDropdown">
+    <button class="map-dropdown-toggle" id="mapToggle">
+      <span>🗺️ World Map</span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="map-dropdown-body" id="mapBody">
+      <div class="type-filter-row" id="typeFilterRow"></div>
+      <div class="world-map-viewport" id="mapViewport">
+        <div class="world-map-inner" id="mapInner">
+          <div class="world-map" id="worldMap"></div>
+        </div>
+        <div class="map-zoom-controls">
+          <button class="map-zoom-btn" id="zoomIn">+</button>
+          <button class="map-zoom-btn" id="zoomOut">−</button>
+        </div>
+        <div class="map-zoom-reset" id="zoomReset">Reset</div>
+      </div>
+      <div class="map-hint">Pinch or scroll to zoom · drag to pan · tap a zone for details</div>
+    </div>
+  </div>
+
+  <div class="zone-list" id="zoneList"></div>
+
+  <div class="ribbon" data-ribbon="zones"></div>
+</div>
+</div>
+<!-- ══ /ZONES SCENE ══ -->
+
+<!-- ══ SHOP SCENE ══ -->
+<div class="scene" id="scene-shop">
+<div class="snow" id="snow-shop"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">POKÉ<span>MART</span></div>
+  </div>
+  <div class="sys-eyebrow" style="padding:0 20px 8px;">OAK TOWN // BASE PRICES</div>
+  <div class="stat-line" style="margin:0 20px 16px; padding:10px 14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between;">
+    <span class="k">Your Coins</span><span class="v" id="shop-coins">—</span>
+  </div>
+  <div id="shop-list" style="padding:0 20px 100px; display:flex; flex-direction:column; gap:10px;"></div>
+</div>
+</div>
+<!-- ══ /SHOP SCENE ══ -->
+
+<!-- ══ POKÉDEX SCENE ══ -->
+<div class="scene" id="scene-pokedex">
+<div class="snow" id="snow-pokedex"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">NIFL<span>HEIM</span></div>
+    <div class="icon-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>
+    </div>
+  </div>
+
+  <div class="lb-page-head">
+    <h1>POKÉDEX</h1>
+    <p>Species encountered across Niflheim — seen and unseen.</p>
+  </div>
+
+  <div class="dex-tabs-wrap" id="dexTabsWrap">
+    <div class="dex-toolbar">
+      <div class="dex-pills" id="dexPills">
+        <button class="active" data-dex-tab="0">Seen</button>
+        <button data-dex-tab="1">Unseen</button>
+      </div>
+      <div class="dex-sort-wrap">
+        <button class="dex-sort-btn" id="dexSortBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          <span id="dexSortLabel">Dex #</span>
+        </button>
+        <div class="dex-sort-menu" id="dexSortMenu">
+          <button class="active" data-sort="dex">Dex #</button>
+          <button data-sort="weight">Weight</button>
+          <button data-sort="height">Height</button>
+          <button data-sort="type">Element / Type</button>
+          <button data-sort="rarity">Rarity / Stars</button>
+          <button data-sort="name">Name (A–Z)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dex-scroll" id="dexScroll">
+    <div class="dex-pane"><div class="dex-grid" id="dexGridSeen"></div></div>
+    <div class="dex-pane"><div class="dex-grid" id="dexGridUnseen"></div></div>
+  </div>
+
+  <div class="ribbon" data-ribbon="pokedex"></div>
+</div>
+</div>
+<!-- ══ /POKÉDEX SCENE ══ -->
+
+<script>
+// snow particles — populate every .snow container present
+function seedSnow(el, count){
+  for(let i=0;i<count;i++){
+    const f = document.createElement('div');
+    f.className='flake';
+    const size = 2 + Math.random()*3;
+    f.style.width = size+'px';
+    f.style.height = size+'px';
+    f.style.left = Math.random()*100+'%';
+    f.style.animationDuration = (8+Math.random()*10)+'s';
+    f.style.animationDelay = (Math.random()*10)+'s';
+    el.appendChild(f);
+  }
+}
+document.querySelectorAll('.snow').forEach(el => seedSnow(el, 24));
+
+// ══════════════════════════════════════════════════════════════
+// LOGIN → INTRO → HOME FLOW
+// ══════════════════════════════════════════════════════════════
+const sceneLogin = document.getElementById('scene-login');
+const sceneTransition = document.getElementById('scene-transition');
+const sceneIntro = document.getElementById('scene-intro');
+const sceneHome = document.getElementById('scene-home');
+const flash = document.getElementById('flash');
+const submitBtn = document.getElementById('submit-btn');
+const submitLabel = document.getElementById('submit-label');
+const tabLogin = document.getElementById('tab-login');
+const tabSignup = document.getElementById('tab-signup');
+const signupOnly = document.getElementById('signup-only');
+const switchLine = document.getElementById('switch-line');
+
+let mode = 'login';
+
+function setMode(m){
+  mode = m;
+  tabLogin.classList.toggle('active', m === 'login');
+  tabSignup.classList.toggle('active', m === 'signup');
+  signupOnly.style.display = m === 'signup' ? 'block' : 'none';
+  submitLabel.textContent = m === 'signup' ? 'Sign Up' : 'Log In';
+  clearErrors();
+  switchLine.innerHTML = m === 'signup'
+    ? 'Already registered? <button id="switch-to-signup">Log in instead</button>'
+    : 'New here? <button id="switch-to-signup">Create an account</button>';
+}
+tabLogin.addEventListener('click', () => setMode('login'));
+tabSignup.addEventListener('click', () => setMode('signup'));
+// event delegation — switch-line is re-rendered on every mode change, so listen on the stable parent
+switchLine.addEventListener('click', (e) => {
+  if(e.target && e.target.id === 'switch-to-signup'){
+    setMode(mode === 'login' ? 'signup' : 'login');
+  }
+});
+
+function clearErrors(){
+  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('.field-input').forEach(e => e.style.borderColor = '');
+}
+function showError(id, inputId){
+  document.getElementById(id).classList.add('show');
+  const input = document.getElementById(inputId);
+  if(input) input.style.borderColor = '#ff8a8a';
+}
+
+// front-end validation — mirrors locked signup rules (username <=50 non-blank, password >=5 chars)
+function validate(){
+  clearErrors();
+  let ok = true;
+  const phone = document.getElementById('input-phone').value.trim();
+  const password = document.getElementById('input-password').value;
+
+  if(mode === 'signup'){
+    const username = document.getElementById('input-username').value.trim();
+    if(!username || username.length > 50){
+      showError('err-username', 'input-username');
+      ok = false;
+    }
+  }
+  if(!phone){
+    showError('err-phone', 'input-phone');
+    ok = false;
+  }
+  if(password.length < 5){
+    showError('err-password', 'input-password');
+    ok = false;
+  }
+  return ok;
+}
+
+// TODO: swap for your real Render URL if it ever changes
+const API_BASE = 'https://ariel-bot-38kh.onrender.com';
+
+document.getElementById('auth-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (submitBtn.classList.contains('loading')) return;
+  if (!validate()) return;
+  submitBtn.classList.add('loading');
+
+  const usernameField = document.getElementById('input-username');
+  const enteredName = usernameField.value.trim();
+
+  if (mode === 'signup') {
+    submitLabel.textContent = 'Creating account…';
+    const country = document.getElementById('input-country').value.replace('+', '');
+    const phone = document.getElementById('input-phone').value.trim();
+    const password = document.getElementById('input-password').value;
+
+    fetch(`${API_BASE}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username: enteredName, countryCode: country, phoneNumber: phone, password }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Signup failed.');
+        submitBtn.classList.remove('loading');
+        submitLabel.textContent = 'Sign Up';
+        showToast();
+        // Don't clear tel/password immediately — Chrome's save-password
+        // prompt needs the submitted form values to still be present.
+        usernameField.value = '';
+        setTimeout(() => {
+          document.querySelectorAll('input[type="tel"], input[type="password"]').forEach(f => f.value = '');
+          setMode('login');
+        }, 1400);
+      })
+      .catch((e) => {
+        submitBtn.classList.remove('loading');
+        submitLabel.textContent = 'Sign Up';
+        showError('err-phone', 'input-phone');
+        document.getElementById('err-phone').textContent = e.message;
+      });
+    return;
+  }
+
+  // ── Log In path ──
+  submitLabel.textContent = 'Authenticating…';
+  const loginCountry = document.getElementById('input-country').value.replace('+', '');
+  const loginPhone = document.getElementById('input-phone').value.trim();
+  const loginPassword = document.getElementById('input-password').value;
+
+  fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ countryCode: loginCountry, phoneNumber: loginPhone, password: loginPassword }),
+  })
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed.');
+      sceneLogin.classList.remove('active');
+      sceneTransition.classList.add('active');
+      runBoot(data.username || 'Trainer');
+    })
+    .catch((e) => {
+      submitBtn.classList.remove('loading');
+      submitLabel.textContent = 'Log In';
+      showError('err-password', 'input-password');
+      document.getElementById('err-password').textContent = e.message;
+    });
+});
+
+function showToast(){
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+function runBoot(name){
+  const lines = [document.getElementById('bl1'), document.getElementById('bl2'), document.getElementById('bl3')];
+  const fill = document.getElementById('boot-fill');
+  lines.forEach(l => l.classList.remove('show'));
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  void fill.offsetWidth;
+  fill.style.transition = 'width 1.4s cubic-bezier(0.3,0.7,0.3,1)';
+  fill.style.width = '100%';
+
+  lines[0].classList.add('show');
+  setTimeout(() => lines[1].classList.add('show'), 380);
+  setTimeout(() => lines[2].classList.add('show'), 780);
+
+  setTimeout(() => {
+    flash.style.transition = 'opacity 0.08s ease';
+    flash.style.opacity = '0.9';
+    setTimeout(() => {
+      flash.style.transition = 'opacity 0.5s ease';
+      flash.style.opacity = '0';
+    }, 90);
+
+    sceneTransition.classList.remove('active');
+    enterIntro(name);
+  }, 1450);
+}
+
+// Intro (lore) screen — plays once after auth, before Home
+function enterIntro(name){
+  window._pendingTrainerName = name;
+  sceneIntro.classList.add('active');
+}
+document.getElementById('intro-enter-btn').addEventListener('click', () => {
+  sceneIntro.classList.remove('active');
+  enterHome(window._pendingTrainerName || 'Trainer');
+});
+
+// Type-name → CSS class helper, e.g. "Fire" -> "type-fire"
+function typeClassOf(t){ return 'type-' + String(t || 'normal').toLowerCase(); }
+
+function hpPercent(mon){
+  const max = mon.max_hp || 1;
+  return Math.max(0, Math.min(100, Math.round((mon.hp / max) * 100)));
+}
+
+function partyCardHTML(mon){
+  const pct = hpPercent(mon);
+  const status = mon.status ? `<span class="stat-pill">${mon.status}</span>` : '';
+  const moves = (mon.moves || []).map(m => (typeof m === 'string' ? m : m.name)).join(' · ');
+  const type = (mon.types && mon.types[0]) || 'Normal';
+  return `<div class="party-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}">
+    <div class="party-top">
+      <div class="party-sprite" style="${mon.sprite ? `background-image:url('${mon.sprite}'); background-size:contain; background-repeat:no-repeat; background-position:center;` : ''}"></div>
+      <div class="party-meta">
+        <div class="party-name">${mon.nickname || mon.name}</div>
+        <div class="party-badges"><span class="lvl-pill">Lv${mon.level}</span><span class="type-pill ${typeClassOf(type)}">${type}</span>${status}</div>
+      </div>
+    </div>
+    <div class="hp-row"><div class="hp-label"><span>HP</span><span>${mon.hp}/${mon.max_hp}</span></div><div class="hp-bar"><div class="hp-fill" style="width:${pct}%"></div></div></div>
+  </div>`;
+}
+
+function pcCardHTML(mon){
+  const pct = hpPercent(mon);
+  const moves = (mon.moves || []).map(m => (typeof m === 'string' ? m : m.name)).join(' · ');
+  const type = (mon.types && mon.types[0]) || 'Normal';
+  return `<div class="pc-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}">
+    <div class="pc-sprite" style="${mon.sprite ? `background-image:url('${mon.sprite}'); background-size:contain; background-repeat:no-repeat; background-position:center;` : ''}"></div>
+    <div class="pc-name">${mon.nickname || mon.name}</div>
+  </div>`;
+}
+
+function renderParty(party, pc){
+  const partyGrid = document.getElementById('party-grid');
+  const pcGrid = document.getElementById('pc-grid');
+
+  let html = (party || []).map(partyCardHTML).join('');
+  for(let i = (party || []).length; i < 6; i++){
+    html += `<div class="party-card empty"><div class="plus">+</div><div class="lbl">No Data / Empty Slot</div></div>`;
+  }
+  partyGrid.innerHTML = html;
+  pcGrid.innerHTML = (pc || []).map(pcCardHTML).join('') || `<div class="lbl" style="opacity:0.6; padding:12px 4px;">PC is empty.</div>`;
+
+  wirePokemonCards('#party-grid .party-card:not(.empty)');
+  wirePokemonCards('#pc-grid .pc-card');
+}
+
+function renderInventory(inventory){
+  const invList = document.getElementById('invList');
+  const entries = Object.entries(inventory || {}).filter(([, qty]) => qty > 0);
+  if(!entries.length){
+    invList.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No items yet.</div>`;
+    return;
+  }
+  invList.innerHTML = entries.map(([name, qty]) => `
+    <div class="inv-row" data-name="${name}" data-qty="${qty}" data-type="Item" data-desc="" data-effect="">
+      <div class="inv-icon">🎒</div>
+      <div class="inv-namewrap"><div class="inv-name">${name}</div><div class="inv-qty">Qty ${qty}</div></div>
+    </div>`).join('');
+  wireInventoryRows();
+
+  // re-measure marquee overflow now that rows exist
+  document.querySelectorAll('.inv-name.marquee').forEach(el=>{
+    const span = el.querySelector('span');
+    const overflow = span.scrollWidth - el.clientWidth;
+    if(overflow > 0) el.style.setProperty('--marquee-shift', `-${overflow + 4}px`);
+  });
+}
+
+function renderBadges(badges){
+  const grid = document.getElementById('badge-grid');
+  if(!badges || !badges.length){
+    grid.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No badges yet.</div>`;
+    return;
+  }
+  grid.innerHTML = badges.map(b => `<div class="badge-tile"><div class="badge-icon"></div><div class="badge-name">${typeof b === 'string' ? b : b.name}</div></div>`).join('');
+}
+
+async function enterHome(name){
+  sceneHome.classList.add('active');
+  document.getElementById('profileCard').classList.add('glitch-in');
+  document.body.classList.add('past-intro'); // corner brackets are login/intro-only framing
+
+  // Immediate name paint so it never looks blank while the fetch is in flight
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('stat-name').textContent = name;
+
+  try{
+    const res = await fetch(`${API_BASE}/api/player/me`, { credentials: 'include' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Failed to load trainer data.');
+
+    if(!data.registered){
+      // Signed in on the site but hasn't played on WhatsApp yet
+      document.getElementById('card-region').textContent = 'Not registered';
+      document.getElementById('stat-region').textContent = 'Message the bot with .start to begin';
+      renderParty([], []);
+      renderInventory({});
+      renderBadges([]);
+      return;
+    }
+
+    const s = data.stats || {};
+    document.getElementById('card-name').textContent = s.name || name;
+    document.getElementById('card-level').textContent = s.level ?? '—';
+    document.getElementById('card-rank').textContent = s.rank != null ? `#${s.rank}` : '—';
+    document.getElementById('card-region').textContent = s.region || '—';
+    document.getElementById('card-guild').textContent = s.guild || '—';
+    document.getElementById('card-bio').textContent = s.bio || 'No bio set yet.';
+    document.getElementById('card-pvp').textContent = `${s.pvp_wins ?? 0} W – ${s.pvp_losses ?? 0} L`;
+    document.getElementById('card-badges-count').textContent = s.badges_count ?? 0;
+    document.getElementById('card-caught').textContent = s.pokedex_caught ?? 0;
+
+    document.getElementById('stat-name').textContent = s.name || name;
+    document.getElementById('stat-level').textContent = s.level ?? '—';
+    document.getElementById('stat-rank').textContent = s.rank != null ? `#${s.rank}` : '—';
+    document.getElementById('stat-region').textContent = s.region || '—';
+    document.getElementById('stat-guild').textContent = s.guild || '—';
+    document.getElementById('stat-caught').textContent = s.pokedex_caught ?? 0;
+    document.getElementById('stat-wins').textContent = s.pvp_wins ?? 0;
+    document.getElementById('stat-losses').textContent = s.pvp_losses ?? 0;
+    document.getElementById('stat-badges').textContent = s.badges_count ?? 0;
+    document.getElementById('stat-coins').textContent = s.coins != null ? `₽${s.coins}` : '—';
+    document.getElementById('stat-bio').textContent = s.bio || 'No bio set yet.';
+
+    renderParty(data.party, data.pc);
+    renderInventory(data.inventory);
+    renderBadges(data.badges);
+  }catch(e){
+    console.error('Failed to load player data:', e);
+    document.getElementById('stat-region').textContent = 'Could not load trainer data — try refreshing.';
+  }
+}
+
+// Reset shortcut for demo purposes
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') location.reload();
+});
+
+
+// tab switching — scoped per .tab-rect-wrap so Home's tabs and Leaderboard's
+// tabs (etc) never collide with each other
+document.querySelectorAll('.tab-rect-wrap').forEach(wrap=>{
+  const btns = wrap.querySelectorAll('.tab-btn');
+  const scroll = wrap.querySelector('.tab-scroll');
+  if(!btns.length || !scroll) return;
+  btns.forEach((btn,i)=>{
+    btn.addEventListener('click',()=>{
+      btns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      scroll.scrollTo({left: i*scroll.clientWidth, behavior:'smooth'});
+    });
+  });
+  scroll.addEventListener('scroll',()=>{
+    const idx = Math.round(scroll.scrollLeft / scroll.clientWidth);
+    btns.forEach((b,i)=>b.classList.toggle('active', i===idx));
+  });
+});
+
+// profile card flip
+function flipCard(){
+  document.getElementById('profileCard').classList.toggle('flipped');
+}
+
+// shared: build a compact modal panel with rubber-band scroll, given inner HTML for head + body
+function openDetailPanel(headHTML, bodyHTML){
+  const overlay = document.createElement('div');
+  overlay.className='item-overlay';
+  overlay.innerHTML = `
+    <div class="item-panel glitch-in">
+      <button class="close-x">✕</button>
+      <div class="item-panel-head">${headHTML}</div>
+      <div class="item-panel-scroll-clip">
+        <div class="item-panel-scroll">${bodyHTML}</div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.close-x').addEventListener('click', ()=> overlay.remove());
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.remove(); });
+
+  // rubber-band overscroll: stretch past the end, then snap back
+  const scrollEl = overlay.querySelector('.item-panel-scroll');
+  let startY = 0, pulling = false, pullDist = 0;
+  scrollEl.addEventListener('touchstart', (e)=>{ startY = e.touches[0].clientY; }, {passive:true});
+  scrollEl.addEventListener('touchmove', (e)=>{
+    const atTop = scrollEl.scrollTop <= 0;
+    const atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 1;
+    const dy = e.touches[0].clientY - startY;
+    if((atTop && dy > 0) || (atBottom && dy < 0)){
+      pulling = true;
+      pullDist = dy * 0.35; // resistance
+      scrollEl.style.transform = `translateY(${pullDist}px)`;
+    }
+  }, {passive:true});
+  scrollEl.addEventListener('touchend', ()=>{
+    if(pulling){
+      scrollEl.style.transition = 'transform 0.3s cubic-bezier(.2,.8,.2,1)';
+      scrollEl.style.transform = 'translateY(0)';
+      setTimeout(()=>{ scrollEl.style.transition=''; }, 300);
+      pulling = false; pullDist = 0;
+    }
+  });
+  // mouse wheel rubber-band (desktop preview)
+  scrollEl.addEventListener('wheel', (e)=>{
+    const atTop = scrollEl.scrollTop <= 0;
+    const atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 1;
+    if((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)){
+      e.preventDefault();
+      const stretch = Math.max(Math.min(-e.deltaY * 0.3, 24), -24);
+      scrollEl.style.transform = `translateY(${stretch}px)`;
+      clearTimeout(scrollEl._snapBack);
+      scrollEl._snapBack = setTimeout(()=>{
+        scrollEl.style.transition = 'transform 0.3s cubic-bezier(.2,.8,.2,1)';
+        scrollEl.style.transform = 'translateY(0)';
+        setTimeout(()=>{ scrollEl.style.transition=''; }, 300);
+      }, 80);
+    }
+  }, {passive:false});
+}
+
+// inventory item detail — called after each renderInventory() since rows are rebuilt from live data
+function wireInventoryRows(){
+  document.querySelectorAll('.inv-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const name = row.dataset.name, qty = row.dataset.qty, type = row.dataset.type;
+      const desc = row.dataset.desc, effect = row.dataset.effect;
+      const icon = row.querySelector('.inv-icon').textContent;
+      openDetailPanel(
+        `<div class="inv-icon">${icon}</div>
+         <div class="item-panel-meta">
+           <div class="name">${name}</div>
+           <div class="sub">Qty ${qty} · ${type}</div>
+         </div>`,
+        `<div class="desc"><b>Description</b>${desc || 'A trainer item.'}</div>
+         <div class="desc"><b>Effect</b>${effect || 'See the shop for details.'}</div>`
+      );
+    });
+  });
+}
+
+// Pokémon detail — party (active) and PC (storage), same modal style
+function wirePokemonCards(selector){
+  document.querySelectorAll(selector).forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const { mon, lvl, type, hp, hppct, status, desc, moves } = card.dataset;
+      const typeClass = 'type-' + type.toLowerCase();
+      const statusBadge = status ? `<span class="stat-pill">${status}</span>` : '';
+      openDetailPanel(
+        `<div class="party-sprite" style="width:44px;height:44px;flex-shrink:0;"></div>
+         <div class="item-panel-meta">
+           <div class="name">${mon}</div>
+           <div class="sub" style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+             <span class="lvl-pill">Lv${lvl}</span><span class="type-pill ${typeClass}">${type}</span>${statusBadge}
+           </div>
+         </div>`,
+        `<div class="hp-row" style="margin-top:0;">
+           <div class="hp-label"><span>HP</span><span>${hp}</span></div>
+           <div class="hp-bar"><div class="hp-fill" style="width:${hppct}%"></div></div>
+         </div>
+         <div class="desc"><b>Description</b>${desc}</div>
+         <div class="desc"><b>Moves</b>${moves}</div>`
+      );
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCENE ROUTER — Home / Leaderboard / Zones / Pokédex
+// ══════════════════════════════════════════════════════════════
+const RIBBON_ITEMS = [
+  { key:'home',       label:'Home',    scene:'scene-home',
+    icon:'<path d="M3 11L12 4l9 7"/><path d="M5 10v9h14v-9"/>' },
+  { key:'pokedex',    label:'Pokédex', scene:'scene-pokedex',
+    icon:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18"/>' },
+  { key:'leaderboard',label:'Leaders', scene:'scene-leaderboard',
+    icon:'<path d="M8 20V10M14 20V4M20 20v-6M4 20v-3"/>' },
+  { key:'zones',      label:'Zones',   scene:'scene-zones',
+    icon:'<path d="M12 2l3 7h7l-5.5 4.3L18 21l-6-4.5L6 21l1.5-7.7L2 9h7z"/>' },
+  { key:'shop',       label:'Shop',    scene:'scene-shop',
+    icon:'<path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 13a3 3 0 006 0"/>' },
+];
+
+function renderRibbons(){
+  document.querySelectorAll('[data-ribbon]').forEach(slot=>{
+    const activeKey = slot.dataset.ribbon;
+    slot.innerHTML = RIBBON_ITEMS.map(item => `
+      <button class="item${item.key===activeKey ? ' active':''}" data-nav="${item.key}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${item.icon}</svg>
+        ${item.label}
+      </button>`).join('');
+  });
+  document.querySelectorAll('[data-nav]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const item = RIBBON_ITEMS.find(r => r.key === btn.dataset.nav);
+      if(!item || !item.scene) return;
+      switchScene(item.scene);
+    });
+  });
+}
+
+function switchScene(sceneId){
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(sceneId);
+  if(target){
+    target.classList.add('active');
+    target.scrollTop = 0;
+  }
+  if(sceneId === 'scene-shop') loadShop();
+}
+renderRibbons();
+
+// ══════════════════════════════════════════════════════════════
+// SHOP — Oak Town Pokémart, real catalog + live coin balance
+// ══════════════════════════════════════════════════════════════
+let _shopCatalog = null; // cached after first load
+
+function shopRowHTML(item, coins){
+  const affordable = coins >= item.price;
+  return `<div class="stat-line" data-item="${item.name}" style="padding:12px 14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; align-items:center;">
+    <span class="k" style="flex:1; min-width:0;">
+      <div style="color:var(--text); font-weight:600; font-size:12.5px;">${item.name}</div>
+      <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">${item.category}</div>
+    </span>
+    <span class="v" style="margin-right:10px;">₽${item.price}</span>
+    <button class="submit-btn shop-buy-btn" data-name="${item.name}" data-price="${item.price}" style="width:auto; padding:8px 16px; font-size:11px; ${affordable ? '' : 'opacity:0.4; pointer-events:none;'}">
+      <span id="buy-label-${item.name.replace(/\s+/g,'-')}">Buy</span>
+    </button>
+  </div>`;
+}
+
+async function loadShop(){
+  const listEl = document.getElementById('shop-list');
+  const coinsEl = document.getElementById('shop-coins');
+
+  try{
+    if(!_shopCatalog){
+      const res = await fetch(`${API_BASE}/api/shop`);
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Failed to load shop.');
+      _shopCatalog = data.items;
+    }
+
+    const meRes = await fetch(`${API_BASE}/api/player/me`, { credentials: 'include' });
+    const me = await meRes.json();
+    const coins = (me.registered && me.stats) ? (me.stats.coins ?? 0) : 0;
+
+    coinsEl.textContent = `₽${coins}`;
+    listEl.innerHTML = _shopCatalog.map(item => shopRowHTML(item, coins)).join('');
+    wireShopButtons();
+  }catch(e){
+    console.error('Failed to load shop:', e);
+    listEl.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">Could not load the shop — try refreshing.</div>`;
+  }
+}
+
+function wireShopButtons(){
+  document.querySelectorAll('.shop-buy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(btn.classList.contains('loading')) return;
+      const name = btn.dataset.name;
+      const labelEl = btn.querySelector('span');
+      const prevLabel = labelEl.textContent;
+      btn.classList.add('loading');
+      labelEl.textContent = '…';
+
+      try{
+        const res = await fetch(`${API_BASE}/api/player/buy`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name }),
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Purchase failed.');
+
+        document.getElementById('shop-coins').textContent = `₽${data.coins}`;
+        // Re-render rows so affordability greys out correctly with new balance
+        listEl_refresh(data.coins);
+        labelEl.textContent = 'Bought!';
+        setTimeout(()=>{ labelEl.textContent = prevLabel; btn.classList.remove('loading'); }, 900);
+
+        // Keep the Home inventory tab in sync if the player revisits it
+        renderInventory(data.inventory);
+      }catch(e){
+        labelEl.textContent = prevLabel;
+        btn.classList.remove('loading');
+        alert(e.message); // shop has no dedicated error slot yet — simplest honest feedback
+      }
+    });
+  });
+}
+
+function listEl_refresh(coins){
+  const listEl = document.getElementById('shop-list');
+  if(_shopCatalog) listEl.innerHTML = _shopCatalog.map(item => shopRowHTML(item, coins)).join('');
+  wireShopButtons();
+}
+
+// ══════════════════════════════════════════════════════════════
+// LEADERBOARD DATA — placeholder rows; swap for a real API call
+// once the backend exists.
+// ══════════════════════════════════════════════════════════════
+const LB_DATA = {
+  level: [
+    { name: 'Kagenou',  value: 34 }, { name: 'Ashen',    value: 31 },
+    { name: 'Vesper',   value: 29 }, { name: 'Rowan',    value: 24 },
+    { name: 'Snowfell', value: 22 }, { name: 'Talon',    value: 19 },
+    { name: 'Mira',     value: 17 },
+  ],
+  pvp: [
+    { name: 'Vesper',   value: 41 }, { name: 'Kagenou',  value: 34 },
+    { name: 'Talon',    value: 28 }, { name: 'Ashen',    value: 22 },
+    { name: 'Rowan',    value: 19 }, { name: 'Mira',     value: 14 },
+    { name: 'Snowfell', value: 9  },
+  ],
+  caught: [
+    { name: 'Ashen',    value: 58 }, { name: 'Snowfell', value: 51 },
+    { name: 'Kagenou',  value: 44 }, { name: 'Mira',     value: 39 },
+    { name: 'Rowan',    value: 33 }, { name: 'Vesper',   value: 27 },
+    { name: 'Talon',    value: 21 },
+  ],
+  badges: [
+    { name: 'Kagenou',  value: 6 }, { name: 'Vesper',   value: 5 },
+    { name: 'Ashen',    value: 5 }, { name: 'Talon',    value: 4 },
+    { name: 'Rowan',    value: 3 }, { name: 'Snowfell', value: 2 },
+    { name: 'Mira',     value: 1 },
+  ],
+};
+
+function renderLeaderboard(containerId, rows, unit){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = rows.map((r, i) => {
+    const rank = i + 1;
+    const topClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+    return `
+      <div class="lb-row ${topClass}">
+        <div class="lb-rank">${rank}</div>
+        <div class="lb-avatar"></div>
+        <div class="lb-name">${r.name}</div>
+        <div class="lb-stat">${r.value}<span class="unit">${unit}</span></div>
+      </div>`;
+  }).join('');
+}
+renderLeaderboard('lb-level',  LB_DATA.level,  'LV');
+renderLeaderboard('lb-pvp',    LB_DATA.pvp,    'W');
+renderLeaderboard('lb-caught', LB_DATA.caught, 'CAUGHT');
+renderLeaderboard('lb-badges', LB_DATA.badges, 'BADGES');
+
+// ══════════════════════════════════════════════════════════════
+// ZONES DATA — grounded against the bot's real zone files (danger
+// tiers, gym leaders, connections) and encounter tables.
+// ══════════════════════════════════════════════════════════════
+const ZN_TYPES = {
+  grass:    { label: 'Grass',    color: '#4ADE80' },
+  water:    { label: 'Water',    color: '#60A5FA' },
+  bug:      { label: 'Bug',      color: '#A3E635' },
+  normal:   { label: 'Normal',   color: '#C9D6E3' },
+  ground:   { label: 'Ground',   color: '#D8935A' },
+  electric: { label: 'Electric', color: '#FBD34D' },
+  poison:   { label: 'Poison',   color: '#C084FC' },
+  ice:      { label: 'Ice',      color: '#8FE3FF' },
+  fire:     { label: 'Fire',     color: '#FB923C' },
+};
+
+const ZONES = [
+  { id: 'oak_town', name: 'Oak Town', kind: 'Town (Start)', danger: 'Safe', dangerColor: '#4ADE80',
+    x: 50, y: 32, types: [],
+    desc: 'The starter town. Home to the Pokélab where every trainer\'s journey through Niflheim begins. No wild encounters here.',
+    connects: 'Route 1 (west)' },
+  { id: 'greenwood_town', name: 'Greenwood Town', kind: 'Town · Gym', danger: 'Safe', dangerColor: '#4ADE80',
+    x: 24, y: 32, types: [],
+    desc: 'West of Route 1. Home to Gym Leader Levin — Nature type, calm demeanor.',
+    connects: 'Route 1 (east) · Fauna (west) · Route 3 (south)' },
+  { id: 'fauna', name: 'Fauna', kind: 'Wild Zone', danger: 'Moderate', dangerColor: '#FBD34D',
+    x: 8, y: 14, types: ['grass', 'bug', 'poison'],
+    desc: 'Wild zone west of Greenwood Town. Dense grass and bug encounters.',
+    connects: 'Greenwood Town (east)', levelRange: '8–20' },
+  { id: 'route_1', name: 'Route 1', kind: 'Route', danger: 'Mild', dangerColor: '#8FE3FF',
+    x: 37, y: 32, types: ['normal', 'bug', 'water'],
+    desc: 'Connects Oak Town to Greenwood Town. Gentle early-game encounters.',
+    connects: 'Oak Town (east) · Greenwood Town (west)', levelRange: '1–8' },
+  { id: 'route_3', name: 'Route 3', kind: 'Route', danger: 'Mild', dangerColor: '#8FE3FF',
+    x: 24, y: 50, types: ['normal', 'ground'],
+    desc: 'South of Greenwood Town, leading toward Thunderplains.',
+    connects: 'Greenwood Town (north) · Thunderplains (south)', levelRange: '6–14' },
+  { id: 'thunderplains', name: 'Thunderplains', kind: 'Wild Zone', danger: 'Moderate', dangerColor: '#FBD34D',
+    x: 24, y: 68, types: ['electric', 'normal'],
+    desc: 'Electric/mixed wild route south of Route 3, leading to Hydro Town.',
+    connects: 'Route 3 (north) · Hydro Town (south)', levelRange: '12–24' },
+  { id: 'hydro_town', name: 'Hydro Town', kind: 'Town · Gym', danger: 'Safe', dangerColor: '#4ADE80',
+    x: 24, y: 84, types: [],
+    desc: 'Home to Gym Leader Eren — Water type.',
+    connects: 'Thunderplains (north) · Oceana (further out)' },
+  { id: 'oceana', name: 'Oceana', kind: 'Wild Zone · Spiral Maze', danger: 'Extreme', dangerColor: '#ff8a8a',
+    x: 40, y: 92, types: ['water'],
+    desc: 'A tiered, spiral maze water zone off Hydro Town. Danger scales the deeper you go.',
+    connects: 'Hydro Town', levelRange: '20+' },
+];
+
+const ROUTES = [
+  ['oak_town','route_1'], ['route_1','greenwood_town'], ['greenwood_town','fauna'],
+  ['greenwood_town','route_3'], ['route_3','thunderplains'], ['thunderplains','hydro_town'],
+  ['hydro_town','oceana'],
+];
+
+let znActiveType = null;
+
+function renderTypeFilterRow(){
+  const row = document.getElementById('typeFilterRow');
+  if(!row) return;
+  const usedTypes = [...new Set(ZONES.flatMap(z=>z.types))];
+  row.innerHTML = usedTypes.map(key => {
+    const t = ZN_TYPES[key];
+    return `<div class="type-chip" data-type="${key}" style="border-color:${t.color}55;">${t.label}</div>`;
+  }).join('');
+  row.querySelectorAll('.type-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const key = chip.dataset.type;
+      znActiveType = (znActiveType === key) ? null : key;
+      row.querySelectorAll('.type-chip').forEach(c=>c.classList.toggle('active', c.dataset.type===znActiveType));
+      renderWorldMap();
+    });
+  });
+}
+
+function renderWorldMap(){
+  const map = document.getElementById('worldMap');
+  if(!map) return;
+  const W = 900, H = 640;
+  let html = '';
+  ROUTES.forEach(([aId,bId])=>{
+    const a = ZONES.find(z=>z.id===aId), b = ZONES.find(z=>z.id===bId);
+    if(!a || !b) return;
+    const x1=a.x/100*W, y1=a.y/100*H, x2=b.x/100*W, y2=b.y/100*H;
+    const len = Math.hypot(x2-x1, y2-y1);
+    const angle = Math.atan2(y2-y1, x2-x1) * 180/Math.PI;
+    html += `<div class="map-route" style="left:${x1}px; top:${y1}px; width:${len}px; transform:rotate(${angle}deg);"></div>`;
+  });
+  ZONES.forEach(z=>{
+    const dim = znActiveType && !z.types.includes(znActiveType);
+    html += `
+      <div class="map-node${dim?' dim':''}" data-zone="${z.id}" style="left:${z.x/100*W}px; top:${z.y/100*H}px;">
+        <div class="zn-name">${z.name}</div>
+        <div class="zn-danger" style="color:${z.dangerColor}">${z.danger}</div>
+      </div>`;
+  });
+  map.innerHTML = html;
+  map.querySelectorAll('.map-node').forEach(node=>{
+    node.addEventListener('click', ()=>{
+      const row = document.querySelector(`.zone-row[data-zone="${node.dataset.zone}"]`);
+      if(row){
+        row.classList.add('open');
+        row.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    });
+  });
+}
+
+function renderZoneList(){
+  const list = document.getElementById('zoneList');
+  if(!list) return;
+  list.innerHTML = ZONES.map(z=>{
+    const typeChips = z.types.map(t => `<span class="type-pill" style="background:${ZN_TYPES[t].color}22; color:${ZN_TYPES[t].color}; border:1px solid ${ZN_TYPES[t].color}55;">${ZN_TYPES[t].label}</span>`).join('');
+    return `
+      <div class="zone-row" data-zone="${z.id}">
+        <div class="zone-row-head">
+          <div class="zn-title"><span class="zn-name">${z.name}</span></div>
+          <span class="zone-danger-badge" style="background:${z.dangerColor}22; color:${z.dangerColor};">${z.danger}</span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="zone-row-body">
+          <div class="zone-row-body-inner">
+            <div class="zone-meta-row">
+              <span style="font-size:11px; color:var(--text-muted);">${z.kind}${z.levelRange ? ' · Lv '+z.levelRange : ''}</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin:0 0 10px;">${z.desc}</p>
+            ${typeChips ? `<div class="zone-types">${typeChips}</div>` : ''}
+            <p style="font-size:11px; color:var(--text-muted); margin:10px 0 0;">Connects: ${z.connects}</p>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  list.querySelectorAll('.zone-row-head').forEach(head=>{
+    head.addEventListener('click', ()=> head.closest('.zone-row').classList.toggle('open'));
+  });
+}
+
+const mapDropdown = document.getElementById('mapDropdown');
+const mapToggleBtn = document.getElementById('mapToggle');
+if(mapToggleBtn){
+  mapToggleBtn.addEventListener('click', ()=> mapDropdown.classList.toggle('open'));
+}
+
+(function(){
+  const viewport = document.getElementById('mapViewport');
+  const inner = document.getElementById('mapInner');
+  if(!viewport || !inner) return;
+  let scale = 0.5, panX = 0, panY = 0;
+  const MIN_SCALE = 0.4, MAX_SCALE = 2.2;
+
+  function apply(){ inner.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
+  function clampPan(){
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const w = 900*scale, h = 640*scale;
+    panX = Math.min(20, Math.max(vw-w-20, panX));
+    panY = Math.min(20, Math.max(vh-h-20, panY));
+  }
+  apply();
+
+  document.getElementById('zoomIn').addEventListener('click', ()=>{ scale=Math.min(MAX_SCALE, scale+0.2); clampPan(); apply(); });
+  document.getElementById('zoomOut').addEventListener('click', ()=>{ scale=Math.max(MIN_SCALE, scale-0.2); clampPan(); apply(); });
+  document.getElementById('zoomReset').addEventListener('click', ()=>{ scale=0.5; panX=0; panY=0; apply(); });
+
+  let dragging = false, lastX=0, lastY=0;
+  viewport.addEventListener('pointerdown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; viewport.setPointerCapture(e.pointerId); });
+  viewport.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    panX += e.clientX-lastX; panY += e.clientY-lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    clampPan(); apply();
+  });
+  viewport.addEventListener('pointerup', ()=> dragging=false);
+  viewport.addEventListener('pointercancel', ()=> dragging=false);
+  viewport.addEventListener('wheel', e=>{
+    e.preventDefault();
+    scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale - e.deltaY*0.001));
+    clampPan(); apply();
+  }, {passive:false});
+})();
+
+renderTypeFilterRow();
+renderWorldMap();
+renderZoneList();
+
+// ══════════════════════════════════════════════════════════════
+// POKÉDEX DATA — placeholder species set (mix of caught/seen/unseen),
+// modeled on real PokéAPI fields so it drops in cleanly once wired
+// to a real endpoint. Rarity reuses the bot's existing star system.
+// ══════════════════════════════════════════════════════════════
+const DEX_DATA = [
+  { id:1,   name:'Bulbasaur',  type:'grass',  weight:6.9,  height:0.7, stars:2, status:'caught', genus:'Seed Pokémon',   sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png',   desc:'A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.', moves:'Tackle · Growl · Vine Whip · Leech Seed' },
+  { id:4,   name:'Charmander', type:'fire',   weight:8.5,  height:0.6, stars:3, status:'caught', genus:'Lizard Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png',   desc:'Obviously prefers hot places. When it rains, steam is said to spout from the tip of its tail.', moves:'Scratch · Growl · Ember · Smokescreen' },
+  { id:7,   name:'Squirtle',   type:'water',  weight:9.0,  height:0.5, stars:5, status:'caught', genus:'Tiny Turtle Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png', desc:'After birth, its back swells and hardens into a shell. Powerfully sprays foam from its mouth.', moves:'Tackle · Tail Whip · Water Gun · Withdraw' },
+  { id:16,  name:'Pidgey',     type:'normal', weight:1.8,  height:0.3, stars:1, status:'caught', genus:'Tiny Bird Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/16.png', desc:'Very docile. If attacked, it flaps its wings at ground level to kick up blinding sand.', moves:'Tackle · Sand Attack · Gust' },
+  { id:19,  name:'Rattata',    type:'normal', weight:3.5,  height:0.3, stars:1, status:'seen',   genus:'Mouse Pokémon',   sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/19.png', desc:'Bites anything when it attacks. Small and very quick, it is a common sight in many places.', moves:'Tackle · Quick Attack · Tail Whip' },
+  { id:129, name:'Magikarp',   type:'water',  weight:10.0, height:0.9, stars:1, status:'caught', genus:'Fish Pokémon',    sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png', desc:'Weak and helpless, it mostly just flops and splashes around at the water surface.', moves:'Splash · Tackle' },
+  { id:220, name:'Swinub',     type:'ground', weight:6.5,  height:0.4, stars:2, status:'seen',   genus:'Pig Pokémon',     sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/220.png', desc:'Its sense of smell is highly developed. Able to determine what is buried under snow.', moves:'Tackle · Odor Sleuth · Mud-Slap' },
+  { id:238, name:'Smoochum',   type:'ice',    weight:6.0,  height:0.4, stars:3, status:'seen',   genus:'Star Shape Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/238.png', desc:'Every time this Pokémon senses a chilly aroma, it flails its arms and legs about wildly.', moves:'Pound · Lick · Sweet Kiss' },
+  { id:361, name:'Snorunt',    type:'ice',    weight:16.8, height:0.7, stars:4, status:'caught', genus:'Snow Hat Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/361.png', desc:'Lives in areas buried in snow. Folklore says that a house that shelters this Pokémon prospers.', moves:'Powder Snow · Leer · Headbutt' },
+  { id:225, name:'Delibird',   type:'ice',    weight:16.0, height:0.9, stars:3, status:'caught', genus:'Delivery Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/225.png', desc:'Known to distribute food to other Pokémon during harsh winters. Its cries sound like ringing bells.', moves:'Present · Peck · Rapid Spin' },
+  { id:144, name:'Articuno',   type:'ice',    weight:55.4, height:1.7, stars:9, status:'seen',   genus:'Freeze Pokémon',  sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/144.png', desc:'A legendary bird Pokémon said to appear to doomed people who are lost in icy mountains.', moves:'Powder Snow · Mist · Ancient Power' },
+  { id:6,   name:'Charizard',  type:'fire',   weight:90.5, height:1.7, stars:8, status:'unseen', genus:'Flame Pokémon',   sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png', desc:'', moves:'' },
+  { id:9,   name:'Blastoise',  type:'water',  weight:85.5, height:1.6, stars:7, status:'unseen', genus:'Shellfish Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png', desc:'', moves:'' },
+  { id:130, name:'Gyarados',   type:'water',  weight:235.0,height:6.5, stars:6, status:'unseen', genus:'Atrocious Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png', desc:'', moves:'' },
+  { id:243, name:'Raikou',     type:'electric', weight:178.0, height:1.9, stars:9, status:'unseen', genus:'Thunder Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/243.png', desc:'', moves:'' },
+  { id:250, name:'Ho-Oh',      type:'fire',   weight:199.0,height:3.8, stars:10,status:'unseen', genus:'Rainbow Pokémon', sprite:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/250.png', desc:'', moves:'' },
+];
+
+let dexSort = 'dex';
+
+function dexSorted(rows){
+  const sorters = {
+    dex:    (a,b)=> a.id-b.id,
+    weight: (a,b)=> b.weight-a.weight,
+    height: (a,b)=> b.height-a.height,
+    type:   (a,b)=> a.type.localeCompare(b.type) || a.id-b.id,
+    rarity: (a,b)=> b.stars-a.stars,
+    name:   (a,b)=> a.name.localeCompare(b.name),
+  };
+  return rows.slice().sort(sorters[dexSort] || sorters.dex);
+}
+
+function dexCardHTML(p){
+  const numStr = '#' + String(p.id).padStart(3,'0');
+  if(p.status === 'unseen'){
+    return `
+      <div class="dex-card unseen">
+        <div class="dex-sprite"><span class="num">${numStr}</span><img src="${p.sprite}" alt=""></div>
+        <div class="dex-name">???</div>
+      </div>`;
+  }
+  return `
+    <div class="dex-card${p.status==='caught' ? ' caught':''}" data-id="${p.id}">
+      <div class="dex-sprite">
+        <span class="num">${numStr}</span>
+        ${p.status==='caught' ? '<span class="dex-caught-dot"></span>' : ''}
+        <img src="${p.sprite}" alt="${p.name}">
+      </div>
+      <div class="dex-name">${p.name}</div>
+    </div>`;
+}
+
+function wireDexCards(grid){
+  grid.querySelectorAll('.dex-card[data-id]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const p = DEX_DATA.find(d => d.id === Number(card.dataset.id));
+      if(!p) return;
+      const typeInfo = ZN_TYPES[p.type] || { label: p.type, color: '#8FE3FF' };
+      openDetailPanel(
+        `<div class="party-sprite" style="width:44px;height:44px;flex-shrink:0; background:url('${p.sprite}') center/contain no-repeat;"></div>
+         <div class="item-panel-meta">
+           <div class="name">${p.name}</div>
+           <div class="sub" style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+             <span class="type-pill" style="background:${typeInfo.color}22; color:${typeInfo.color}; border:1px solid ${typeInfo.color}55;">${typeInfo.label}</span>
+             ${p.status==='caught' ? '<span class="stat-pill">CAUGHT</span>' : '<span class="stat-pill">SEEN</span>'}
+           </div>
+         </div>`,
+        `<div class="desc"><b>Genus</b>${p.genus}</div>
+         <div class="desc"><b>Description</b>${p.desc || 'No data recorded yet.'}</div>
+         <div class="desc"><b>Weight / Height</b>${p.weight} kg · ${p.height} m</div>
+         <div class="desc"><b>Rarity</b>${'✧'.repeat(p.stars)}${'-'.repeat(10-p.stars)} (${p.stars}★)</div>
+         ${p.moves ? `<div class="desc"><b>Moves</b>${p.moves}</div>` : ''}`
+      );
+    });
+  });
+}
+
+function renderDexGrids(){
+  const seenEl = document.getElementById('dexGridSeen');
+  const unseenEl = document.getElementById('dexGridUnseen');
+  if(!seenEl || !unseenEl) return;
+  const seenRows = dexSorted(DEX_DATA.filter(p => p.status !== 'unseen'));
+  const unseenRows = dexSorted(DEX_DATA.filter(p => p.status === 'unseen'));
+  seenEl.innerHTML = seenRows.map(dexCardHTML).join('');
+  unseenEl.innerHTML = unseenRows.map(dexCardHTML).join('');
+  wireDexCards(seenEl);
+  wireDexCards(unseenEl);
+}
+
+// Seen/Unseen — swipeable pane, same pattern as Home's tab-rect-wrap,
+// pills and swipe stay in sync in both directions.
+(function(){
+  const pills = document.querySelectorAll('#dexPills button');
+  const scroll = document.getElementById('dexScroll');
+  if(!pills.length || !scroll) return;
+  pills.forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>{
+      pills.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      scroll.scrollTo({left: i*scroll.clientWidth, behavior:'smooth'});
+    });
+  });
+  scroll.addEventListener('scroll', ()=>{
+    const idx = Math.round(scroll.scrollLeft / scroll.clientWidth);
+    pills.forEach((b,i)=>b.classList.toggle('active', i===idx));
+  });
+})();
+
+const dexSortBtn = document.getElementById('dexSortBtn');
+const dexSortMenu = document.getElementById('dexSortMenu');
+const dexSortLabel = document.getElementById('dexSortLabel');
+if(dexSortBtn){
+  dexSortBtn.addEventListener('click', (e)=>{ e.stopPropagation(); dexSortMenu.classList.toggle('open'); });
+  document.addEventListener('click', ()=> dexSortMenu.classList.remove('open'));
+  dexSortMenu.querySelectorAll('button').forEach(opt=>{
+    opt.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      dexSort = opt.dataset.sort;
+      dexSortLabel.textContent = opt.textContent;
+      dexSortMenu.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===opt));
+      dexSortMenu.classList.remove('open');
+      renderDexGrids();
+    });
+  });
+}
+
+// Sticky reveal for the Seen/Unseen pill bar — hides on scroll-down,
+// reappears the moment you scroll up, without disrupting scroll position.
+(function(){
+  const dexScene = document.getElementById('scene-pokedex');
+  const tabsWrap = document.getElementById('dexTabsWrap');
+  if(!dexScene || !tabsWrap) return;
+  let lastY = 0;
+  dexScene.addEventListener('scroll', ()=>{
+    const y = dexScene.scrollTop;
+    if(y > lastY && y > 40){
+      tabsWrap.classList.add('hidden');
+    } else if(y < lastY){
+      tabsWrap.classList.remove('hidden');
+    }
+    lastY = y;
+  }, {passive:true});
+})();
+
+renderDexGrids();
+</script>
+
+
+</body>
 </html>
