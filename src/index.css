@@ -1,18 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  color-scheme: dark;
-}
-
-body {
-  margin: 0;
-  background: #04101c;
-  color: #e6faff;
-  font-family: 'Rajdhani', sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-}
