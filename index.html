@@ -446,7 +446,9 @@
     background: linear-gradient(160deg,#2C5F73,#0D1F30);
     border:1px solid var(--ice-dim);
     display:flex;align-items:center;justify-content:center;font-size:16px;
+    overflow:hidden;
   }
+  .inv-icon img{ width:100%; height:100%; object-fit:contain; padding:4px; }
   .inv-namewrap{ flex:1; min-width:0; overflow:hidden; }
   .inv-name{ font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .inv-name.marquee span{
@@ -494,6 +496,7 @@
     overflow:hidden;
   }
   .item-panel .inv-icon{ width:44px;height:44px;font-size:20px; flex-shrink:0; }
+  .item-panel .inv-icon img{ padding:5px; }
   .item-panel-meta .name{ font-family:'Cinzel',serif; font-size:14.5px; font-weight:700; }
   .item-panel-meta .sub{ font-size:10.5px; color:var(--text-muted); margin-top:4px; }
 
@@ -780,12 +783,24 @@
   .ftray-dock svg{ width:24px; height:24px; position:relative; z-index:2; }
   .ftray-dock .ftray-icon-wrap{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 
-  /* inventory cube — slow spin + orbiting sparkles */
-  .ftray-cube{ animation: ftray-cube-spin 7s linear infinite; transform-style:preserve-3d; }
+  /* inventory/shop cube — ethereal treatment: blown-out white-cyan core
+     radiating light (Gojo-eyes reference) rather than a flat gold/ice fill.
+     Slow tumble + orbiting motes that read as light, not sparkle-dust. */
+  .ftray-cube{ animation: ftray-cube-spin 7s linear infinite; transform-style:preserve-3d;
+    filter: drop-shadow(0 0 5px rgba(124,233,255,0.75)) drop-shadow(0 0 11px rgba(124,233,255,0.4)); }
+  .ftray-cube path{ stroke: #EAFBFF; }
   @keyframes ftray-cube-spin{ from{ transform:rotate(0deg) scale(1);} 50%{ transform:rotate(180deg) scale(1.06);} to{ transform:rotate(360deg) scale(1);} }
+  .ftray-icon-wrap::before{
+    content:''; position:absolute; inset:-8px; border-radius:50%;
+    background: radial-gradient(circle, rgba(124,233,255,0.34), rgba(124,233,255,0.06) 55%, transparent 75%);
+    filter: blur(3px); z-index:0;
+    animation: ftray-ether-pulse 2.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes ftray-ether-pulse{ 0%,100%{ opacity:0.65; } 50%{ opacity:1; } }
   .ftray-sparkle{
     position:absolute; width:3px; height:3px; border-radius:50%;
-    background: var(--frost); box-shadow:0 0 6px 1px var(--frost);
+    background: #EAFBFF; box-shadow:0 0 7px 2px rgba(124,233,255,0.9);
     animation: ftray-sparkle-orbit 3.2s linear infinite;
   }
   .ftray-sparkle:nth-child(2){ animation-delay:-1.1s; width:2px; height:2px; }
@@ -889,7 +904,7 @@
     cursor:pointer; flex-shrink:0; font-size:14px;
     transition: border-color 0.2s ease, background 0.2s ease;
   }
-  .ftray-vchip.active{ border-color:var(--ice); background:rgba(143,227,255,0.12); }
+  .ftray-vchip.active{ border-color:#EAFBFF; background:rgba(124,233,255,0.14); box-shadow:0 0 10px rgba(124,233,255,0.35); }
   .ftray-vchip .vlabel{
     position:absolute; top:50%; transform:translateY(-50%);
     font-size:9.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
@@ -1310,8 +1325,8 @@
     <div class="joined-line">Trainer since June 2026</div>
   </div>
 
-  <!-- STATS / INVENTORY / BADGES TABS -->
-  <div class="tab-rect-wrap">
+  <!-- STATS / POKÉMON / INVENTORY / BADGES TABS -->
+  <div class="tab-rect-wrap" data-tabgroup="home">
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="0">Stats</button>
       <button class="tab-btn" data-tab="1">Pokémon</button>
@@ -1462,6 +1477,8 @@
     <span class="k">Your Coins</span><span class="v" id="shop-coins">—</span>
   </div>
   <div id="shop-list" style="padding:0 20px 100px; display:flex; flex-direction:column; gap:10px;"></div>
+
+  <div class="ribbon" data-ribbon="shop"></div>
 </div>
 </div>
 <!-- ══ /SHOP SCENE ══ -->
@@ -1524,6 +1541,9 @@
 
 <div class="ftray-dock" id="ftrayDock-inv" style="display:none;"></div>
 <div class="ftray-panel vert dock-right" id="ftrayPanel-inv"><div class="ftray-vtrack" id="ftrayTrack-invv"></div></div>
+
+<div class="ftray-dock" id="ftrayDock-shop" style="display:none;"></div>
+<div class="ftray-panel vert dock-right" id="ftrayPanel-shop"><div class="ftray-vtrack" id="ftrayTrack-shopv"></div></div>
 
 <script>
 // snow particles — populate every .snow container present
@@ -1619,6 +1639,55 @@ function validate(){
 // TODO: swap for your real Render URL if it ever changes
 const API_BASE = 'https://ariel-bot-38kh.onrender.com';
 
+// Item image lookup — mirrors ITEM_IMAGES in data_items.py exactly, so the
+// site and the bot always show the same picture for the same item. Standard
+// Pokémon items point at PokéAPI's public sprite mirror; Niflheim-original
+// items point at our own hosted assets.
+// NOTE: keep this in sync by hand if data_items.py's ITEM_IMAGES changes —
+// there's no shared build step between the two repos yet.
+const _POKEAPI_ITEM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items';
+const _SITE_ITEM_BASE = 'https://niflheim-online.vercel.app/assets/items'; // TODO: confirm real domain
+const ITEM_IMAGES = {
+  'Potion':          `${_POKEAPI_ITEM_BASE}/potion.png`,
+  'Super Potion':    `${_POKEAPI_ITEM_BASE}/super-potion.png`,
+  'Hyper Potion':    `${_POKEAPI_ITEM_BASE}/hyper-potion.png`,
+  'Max Potion':      `${_POKEAPI_ITEM_BASE}/max-potion.png`,
+  'Full Restore':    `${_POKEAPI_ITEM_BASE}/full-restore.png`,
+  'Revive':          `${_POKEAPI_ITEM_BASE}/revive.png`,
+  'Max Revive':      `${_POKEAPI_ITEM_BASE}/max-revive.png`,
+  'Fresh Water':     `${_POKEAPI_ITEM_BASE}/fresh-water.png`,
+  'Soda Pop':        `${_POKEAPI_ITEM_BASE}/soda-pop.png`,
+  'Ice Heal':        `${_POKEAPI_ITEM_BASE}/ice-heal.png`,
+  'Paralyze Heal':   `${_POKEAPI_ITEM_BASE}/paralyze-heal.png`,
+  'Antidote':        `${_POKEAPI_ITEM_BASE}/antidote.png`,
+  'Awakening':       `${_POKEAPI_ITEM_BASE}/awakening.png`,
+  'Full Heal':       `${_POKEAPI_ITEM_BASE}/full-heal.png`,
+  'Poké Ball':       `${_POKEAPI_ITEM_BASE}/poke-ball.png`,
+  'Great Ball':      `${_POKEAPI_ITEM_BASE}/great-ball.png`,
+  'Ultra Ball':      `${_POKEAPI_ITEM_BASE}/ultra-ball.png`,
+  'Master Ball':     `${_POKEAPI_ITEM_BASE}/master-ball.png`,
+
+  'Pyro Ball':        `${_SITE_ITEM_BASE}/pyro_ball.png`,
+  'Cryo Ball':        `${_SITE_ITEM_BASE}/cryo_ball.png`,
+  'Atmo Ball':        `${_SITE_ITEM_BASE}/atmo_ball.png`,
+  'Floro Ball':       `${_SITE_ITEM_BASE}/floro_ball.png`,
+  'Floro-Ball':       `${_SITE_ITEM_BASE}/floro_ball.png`,
+  'Volt Ball':        `${_SITE_ITEM_BASE}/volt_ball.png`,
+  'Breadcrumbs':      `${_SITE_ITEM_BASE}/breadcrumbs.png`,
+  'Essence':          `${_SITE_ITEM_BASE}/essence.png`,
+  'Random Poké Egg':  `${_SITE_ITEM_BASE}/random_poke_egg.png`,
+};
+
+/** Returns an <img> tag if the item has a mapped picture, otherwise falls
+ *  back to the old backpack glyph so unmapped items never show broken art. */
+function itemIconHTML(name, sizeClass = 'inv-icon'){
+  const url = ITEM_IMAGES[name];
+  if(url){
+    return `<div class="${sizeClass}"><img src="${url}" alt="${name}" loading="lazy" onerror="this.parentElement.textContent='🎒';"/></div>`;
+  }
+  return `<div class="${sizeClass}">🎒</div>`;
+}
+
 // Declared early (not down near their FilterTray instances) so that
 // renderParty/renderInventory/renderDexGrids never hit a temporal-dead-zone
 // ReferenceError if they run before the trays are constructed later in
@@ -1626,6 +1695,7 @@ const API_BASE = 'https://ariel-bot-38kh.onrender.com';
 let dexTypeFilter = null;   // Pokédex type filter — null = "None"/no filter
 let pcTypeFilter = null;    // PC/Storage type filter — null = "None"/no filter
 let invCategoryFilter = null; // Inventory category filter — null = "None"/no filter
+let shopCategoryFilter = null; // Shop category filter — null = "None"/show all sections
 let _shopCatalog = null; // shop item catalog, cached after first load — also used by renderInventory's category lookup
 
 document.getElementById('auth-form').addEventListener('submit', (e) => {
@@ -2123,7 +2193,7 @@ function renderInventory(inventory){
   }
   invList.innerHTML = entries.map(([name, qty]) => `
     <div class="inv-row" data-name="${name}" data-qty="${qty}" data-type="Item" data-desc="" data-effect="">
-      <div class="inv-icon">🎒</div>
+      ${itemIconHTML(name)}
       <div class="inv-namewrap"><div class="inv-name">${name}</div><div class="inv-qty">Qty ${qty}</div></div>
     </div>`).join('');
   wireInventoryRows();
@@ -2166,6 +2236,7 @@ async function enterHome(name){
       renderParty([], []);
       renderInventory({});
       renderBadges([]);
+      applyDeepLinkScene(); // still worth honoring — e.g. a bare Shop link
       return;
     }
 
@@ -2196,6 +2267,7 @@ async function enterHome(name){
     renderParty(data.party, data.pc);
     renderInventory(data.inventory);
     renderBadges(data.badges);
+    applyDeepLinkScene();
   }catch(e){
     console.error('Failed to load player data:', e);
     document.getElementById('stat-region').textContent = 'Could not load trainer data — try refreshing.';
@@ -2210,20 +2282,52 @@ document.addEventListener('keydown', (e) => {
 
 // tab switching — scoped per .tab-rect-wrap so Home's tabs and Leaderboard's
 // tabs (etc) never collide with each other
+//
+// Home's tab group additionally drives which floating filter tray (if any)
+// is alive on screen: the Pokémon tab (index 1) owns the Pokémon tray
+// (party/PC elemental filter, formerly "PC tray"), the Inventory tab
+// (index 2) owns the Inventory tray (category cube). Switching to Stats
+// or Badges collapses whichever tray was open back to nothing — the tray
+// only "sprouts to life" while its owning tab is the one on screen.
+const HOME_TAB_TRAY = { 1: 'pc', 2: 'inv' }; // tab index -> tray id
+
+function applyHomeTabTray(activeIdx){
+  if(!window._traysReady) return;
+  // only matters while Home itself is the active scene; switchScene()
+  // already hides both trays entirely when Home isn't active, so this
+  // just narrows further, within Home, to the one matching tab.
+  const homeActive = document.getElementById('scene-home')?.classList.contains('active');
+  if(!homeActive) return;
+
+  const showPc = activeIdx === 1;
+  pcTray.dock.style.display = showPc ? 'flex' : 'none';
+  pcTray.panel.style.display = showPc ? '' : 'none';
+  if(!showPc) pcTray.close();
+
+  const showInv = activeIdx === 2;
+  invTray.dock.style.display = showInv ? 'flex' : 'none';
+  invTray.panel.style.display = showInv ? '' : 'none';
+  if(!showInv) invTray.close();
+}
+
 document.querySelectorAll('.tab-rect-wrap').forEach(wrap=>{
   const btns = wrap.querySelectorAll('.tab-btn');
   const scroll = wrap.querySelector('.tab-scroll');
   if(!btns.length || !scroll) return;
+  const isHomeGroup = wrap.dataset.tabgroup === 'home';
+
   btns.forEach((btn,i)=>{
     btn.addEventListener('click',()=>{
       btns.forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       scroll.scrollTo({left: i*scroll.clientWidth, behavior:'smooth'});
+      if(isHomeGroup) applyHomeTabTray(i);
     });
   });
   scroll.addEventListener('scroll',()=>{
     const idx = Math.round(scroll.scrollLeft / scroll.clientWidth);
     btns.forEach((b,i)=>b.classList.toggle('active', i===idx));
+    if(isHomeGroup) applyHomeTabTray(idx);
   });
 });
 
@@ -2294,9 +2398,8 @@ function wireInventoryRows(){
     row.addEventListener('click', ()=>{
       const name = row.dataset.name, qty = row.dataset.qty, type = row.dataset.type;
       const desc = row.dataset.desc, effect = row.dataset.effect;
-      const icon = row.querySelector('.inv-icon').textContent;
       openDetailPanel(
-        `<div class="inv-icon">${icon}</div>
+        `${itemIconHTML(name, 'inv-icon')}
          <div class="item-panel-meta">
            <div class="name">${name}</div>
            <div class="sub">Qty ${qty} · ${type}</div>
@@ -2350,6 +2453,22 @@ const RIBBON_ITEMS = [
     icon:'<path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 13a3 3 0 006 0"/>' },
 ];
 
+// Deep-link support — lets other surfaces (the WhatsApp bot's .shop reply,
+// a bookmark, a share link) send the player straight to a specific scene
+// via ?scene=shop instead of always landing on Home. Only ever fires once
+// per page load (right after the player's first successful auth resolves,
+// from inside enterHome) — after that, normal ribbon-tap navigation takes
+// over and we don't want every re-render yanking the player back.
+let _deepLinkApplied = false;
+function applyDeepLinkScene(){
+  if(_deepLinkApplied) return;
+  _deepLinkApplied = true;
+  const requested = new URLSearchParams(window.location.search).get('scene');
+  if(!requested) return;
+  const match = RIBBON_ITEMS.find(r => r.key === requested.toLowerCase());
+  if(match) switchScene(match.scene);
+}
+
 function renderRibbons(){
   document.querySelectorAll('[data-ribbon]').forEach(slot=>{
     const activeKey = slot.dataset.ribbon;
@@ -2390,17 +2509,29 @@ function switchScene(sceneId){
     if(!showDex) dexTray.close();
     if(showDex) dexTray.armPeek(); else dexTray.clearPeek();
 
-    // PC tray only matters on the Home scene's Pokémon tab — the tray
-    // stays available whenever Home is open since PC/party sit inside it.
-    const showPc = sceneId === 'scene-home';
-    pcTray.dock.style.display = showPc ? 'flex' : 'none';
-    pcTray.panel.style.display = showPc ? '' : 'none';
-    if(!showPc) pcTray.close();
+    // Pokémon tray (party/PC) and Inventory tray only ever show while
+    // Home is the active scene, AND only for whichever of Home's own
+    // tabs currently owns them (see applyHomeTabTray). Leaving Home
+    // collapses both back to nothing regardless of which tab was open.
+    if(sceneId === 'scene-home'){
+      const activeBtn = document.querySelector('.tab-rect-wrap[data-tabgroup="home"] .tab-btn.active');
+      const activeIdx = activeBtn ? Number(activeBtn.dataset.tab) : 0;
+      applyHomeTabTray(activeIdx);
+    } else {
+      pcTray.dock.style.display = 'none';
+      pcTray.panel.style.display = 'none';
+      pcTray.close();
+      invTray.dock.style.display = 'none';
+      invTray.panel.style.display = 'none';
+      invTray.close();
+    }
 
-    const showInv = sceneId === 'scene-home';
-    invTray.dock.style.display = showInv ? 'flex' : 'none';
-    invTray.panel.style.display = showInv ? '' : 'none';
-    if(!showInv) invTray.close();
+    // Shop tray (category cube, reusing the same ftray engine) only
+    // shows while the Shop scene is active.
+    const showShop = sceneId === 'scene-shop';
+    shopTray.dock.style.display = showShop ? 'flex' : 'none';
+    shopTray.panel.style.display = showShop ? '' : 'none';
+    if(!showShop) shopTray.close();
   }
 }
 renderRibbons();
@@ -2417,8 +2548,9 @@ const SHOP_CATEGORY_ORDER = ['ball', 'heal', 'status', 'field', 'evolution', 'eg
 
 function shopRowHTML(item, coins){
   const affordable = coins >= item.price;
-  return `<div class="stat-line" data-item="${item.name}" style="padding:12px 14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; align-items:center;">
-    <span class="k" style="flex:1; min-width:0;">
+  return `<div class="stat-line shop-row" data-item="${item.name}" data-price="${item.price}" data-category="${item.category || 'field'}" style="padding:12px 14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; align-items:center; cursor:pointer;">
+    ${itemIconHTML(item.name, 'inv-icon')}
+    <span class="k" style="flex:1; min-width:0; margin-left:12px;">
       <div style="color:var(--text); font-weight:600; font-size:12.5px;">${item.name}</div>
     </span>
     <span class="v" style="margin-right:10px;">₽${item.price}</span>
@@ -2434,7 +2566,11 @@ function shopSectionsHTML(catalog, coins){
     const cat = item.category || 'field';
     (byCategory[cat] = byCategory[cat] || []).push(item);
   });
-  const orderedCats = SHOP_CATEGORY_ORDER.filter(c => byCategory[c]);
+  let orderedCats = SHOP_CATEGORY_ORDER.filter(c => byCategory[c]);
+  if(shopCategoryFilter) orderedCats = orderedCats.filter(c => c === shopCategoryFilter);
+  if(!orderedCats.length){
+    return `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No items in this category.</div>`;
+  }
   return orderedCats.map(cat => `
     <div class="shop-section">
       <div class="section-head" style="margin:18px 0 10px; border-bottom:1px dashed var(--border); padding-bottom:8px;">
@@ -2473,7 +2609,8 @@ async function loadShop(){
 
 function wireShopButtons(){
   document.querySelectorAll('.shop-buy-btn').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
+    btn.addEventListener('click', async (e)=>{
+      e.stopPropagation(); // don't also trigger the row's detail-panel tap
       if(btn.classList.contains('loading')) return;
       const name = btn.dataset.name;
       const labelEl = btn.querySelector('span');
@@ -2506,6 +2643,30 @@ function wireShopButtons(){
       }
     });
   });
+
+  // Tapping anywhere else on the row (not the Buy button) opens a bigger
+  // detail view of the item — same modal used by Inventory/Party/PC.
+  document.querySelectorAll('.shop-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const name = row.dataset.item, price = row.dataset.price, category = row.dataset.category;
+      const catLabel = SHOP_CATEGORY_LABELS[category] || category;
+      openDetailPanel(
+        `${itemIconHTML(name, 'inv-icon')}
+         <div class="item-panel-meta">
+           <div class="name">${name}</div>
+           <div class="sub">₽${price} · ${catLabel}</div>
+         </div>`,
+        `<div class="desc"><b>Description</b>${item_description_fallback(name)}</div>`
+      );
+    });
+  });
+}
+
+/** Shop has no per-item description field from the API yet — placeholder
+ *  copy until the backend catalog includes one. Kept as its own function
+ *  so swapping in real descriptions later is a one-line change. */
+function item_description_fallback(name){
+  return `A ${name.toLowerCase()} available at Oak Town Pokémart.`;
 }
 
 function listEl_refresh(coins){
@@ -3160,6 +3321,38 @@ const invTray = new FilterTray({
   autoPeek: null,
 });
 invTray.show();
+
+// ── Shop tray: same cube, same engine, filters the shop's own catalog
+// categories (ball/heal/status/field/evolution/egg) instead of whatever
+// the player happens to be carrying. ──
+const SHOP_CATEGORY_CHIPS = [
+  { key:'none',      label:'None',                 icon:'✦' },
+  { key:'ball',      label:'Poké Balls',            icon:'⬤' },
+  { key:'heal',      label:'Potions & Healing',     icon:'✚' },
+  { key:'status',    label:'Status Cures',          icon:'☆' },
+  { key:'field',     label:'Field Items',           icon:'❖' },
+  { key:'evolution', label:'Evolution Items',       icon:'◈' },
+  { key:'egg',       label:'Eggs',                  icon:'⬮' },
+];
+const shopTray = new FilterTray({
+  id: 'shop',
+  orientation: 'vert',
+  chips: SHOP_CATEGORY_CHIPS,
+  defaultSide: 'right',
+  iconFor: () => CUBE_ICON_HTML,
+  onSelect: (key) => {
+    shopCategoryFilter = key;
+    if(_shopCatalog){
+      const listEl = document.getElementById('shop-list');
+      const coins = Number((document.getElementById('shop-coins').textContent || '').replace(/[^\d]/g,'')) || 0;
+      listEl.innerHTML = shopSectionsHTML(_shopCatalog, coins);
+      wireShopButtons();
+    }
+  },
+  autoPeek: null,
+});
+shopTray.show();
+shopTray.dock.style.display = 'none'; // hidden until scene-shop is active — see switchScene()
 
 // From here on, switchScene() is allowed to touch dexTray/pcTray/invTray.
 window._traysReady = true;
