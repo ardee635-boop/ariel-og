@@ -1843,6 +1843,7 @@ let pcTypeFilter = null;    // PC/Storage type filter — null = "None"/no filte
 let invCategoryFilter = null; // Inventory category filter — null = "None"/no filter
 let shopCategoryFilter = null; // Shop category filter — null = "None"/show all sections
 let _shopCatalog = null; // shop item catalog, cached after first load — also used by renderInventory's category lookup
+let _questMine = { registered: false, story: [], board: [] }; // quest data — same TDZ hazard as above; _activeQuestCount() runs during renderRibbons() on initial load, before this line used to be reached
 
 document.getElementById('auth-form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -2936,7 +2937,7 @@ const RANK_META = {
   B: 'Platinum', A: 'Orichalcum', S: 'Adamantine',
 };
 let _questBoard = [];
-let _questMine  = { registered: false, story: [], board: [] };
+// _questMine is declared earlier (near dexTypeFilter etc.) to avoid the TDZ crash — not redeclared here.
 
 function questTypeInfo(q){
   const typeClass = q.type === 'defeat_wild' ? 'subjugation'
