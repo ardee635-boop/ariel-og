@@ -6,7 +6,7 @@
 <title>Niflheim — Home Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Pirata+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #050a12;
@@ -645,6 +645,53 @@
   .lb-name{ flex:1; min-width:0; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .lb-stat{ font-size:13px; font-weight:700; color:var(--ice); flex-shrink:0; }
   .lb-stat .unit{ font-size:10px; font-weight:500; color:var(--text-muted); margin-left:2px; }
+
+  /* ============ QUESTS ============ */
+  .quest-list{ display:flex; flex-direction:column; gap:8px; }
+  .quest-card{
+    display:flex; gap:12px; align-items:flex-start; cursor:pointer;
+    padding:12px; border-radius:9px;
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  }
+  .quest-card.done{ border-color:#4ADE80; box-shadow:0 0 10px rgba(74,222,128,0.12); }
+  .quest-body{ flex:1; min-width:0; }
+  .quest-top-row{ display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  .quest-title{ font-size:13px; font-weight:600; color:var(--text); }
+  .quest-meta{ display:flex; align-items:center; gap:10px; font-size:11px; color:var(--text-muted); margin-top:6px; }
+  .quest-meta .reward{ color:#FBD34D; }
+  .quest-meta .penalty{ color:#e07a7a; }
+  .quest-bar-track{ margin-top:7px; height:5px; border-radius:3px; background:var(--panel); overflow:hidden; border:1px solid var(--border); }
+  .quest-bar-fill{ height:100%; background:linear-gradient(90deg, var(--ice-dim), var(--ice)); border-radius:3px; }
+
+  .type-tag{
+    font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    padding:2px 7px; border-radius:4px; color:var(--bg);
+  }
+  .type-tag.catch{ background:#8FE3FF; }
+  .type-tag.subjugation{ background:#e07a7a; }
+  .type-tag.exploration{ background:#B7A6F2; }
+  .type-tag.protect{ background:#4ADE80; }
+  .type-tag.story{ background:#FBD34D; }
+
+  /* Rank badge — material-tier skin over the underlying F/E/D/C/B/A/S
+     values. Colors match QUEST_RANK_CHIPS so the filter tray and the
+     cards themselves always agree on what each tier looks like. */
+  .rank-badge{
+    font-family:'Pirata One', serif; font-weight:400; flex-shrink:0;
+    font-size:20px; width:34px; height:38px; display:flex; align-items:center; justify-content:center;
+    border-radius:5px; border:1.5px solid var(--ice-dim);
+    color:var(--frost);
+    background: linear-gradient(160deg, rgba(111,184,212,0.1), rgba(10,22,34,0.7));
+    text-shadow: 0 0 8px rgba(143,227,255,0.6);
+  }
+  .rank-badge.rank-F{ border-color:#C08552; color:#E8B98A; text-shadow:0 0 8px rgba(192,133,82,0.6); }
+  .rank-badge.rank-E{ border-color:#8C8C8C; color:#C9C9C9; text-shadow:0 0 8px rgba(140,140,140,0.5); }
+  .rank-badge.rank-D{ border-color:#A8B2BD; color:#E3E8EC; text-shadow:0 0 8px rgba(168,178,189,0.6); }
+  .rank-badge.rank-C{ border-color:#FBD34D; color:#FFE9A8; text-shadow:0 0 10px rgba(251,211,77,0.8); }
+  .rank-badge.rank-B{ border-color:#D8E2E8; color:#F3F7F9; text-shadow:0 0 10px rgba(216,226,232,0.7); }
+  .rank-badge.rank-A{ border-color:#7FE8C8; color:#C6FBEB; text-shadow:0 0 10px rgba(127,232,200,0.8); }
+  .rank-badge.rank-S{ border-color:#8FE3FF; color:#DFF7FF; text-shadow:0 0 12px rgba(143,227,255,0.9); }
 
   /* ============ ZONES ============ */
   .map-dropdown{ position:relative; z-index:1; margin: 16px 20px 0; border:1px solid var(--border); border-radius:10px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); overflow:hidden; }
@@ -1421,6 +1468,40 @@
 </div>
 <!-- ══ /LEADERBOARD SCENE ══ -->
 
+<!-- ══ QUESTS SCENE ══ -->
+<div class="scene" id="scene-quests">
+<div class="snow" id="snow-quests"></div>
+<div class="screen">
+  <div class="home-header">
+    <div class="home-title">NIFL<span>HEIM</span></div>
+    <div class="icon-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>
+    </div>
+  </div>
+
+  <div class="lb-page-head">
+    <h1>QUESTS</h1>
+    <p>Global board · refreshes every 30 minutes</p>
+  </div>
+
+  <div class="tab-rect-wrap">
+    <div class="tab-bar" data-tabgroup="quests">
+      <button class="tab-btn active" data-tab="0">Board</button>
+      <button class="tab-btn" data-tab="1">Story</button>
+      <button class="tab-btn" data-tab="2">Side</button>
+    </div>
+    <div class="tab-scroll" id="tabScroll-quests" data-tabgroup-scroll="quests">
+      <div class="tab-pane"><div class="quest-list" id="quest-board"></div></div>
+      <div class="tab-pane"><div class="quest-list" id="quest-story"></div></div>
+      <div class="tab-pane"><div class="quest-list" id="quest-side"></div></div>
+    </div>
+  </div>
+
+  <div class="ribbon" data-ribbon="quests"></div>
+</div>
+</div>
+<!-- ══ /QUESTS SCENE ══ -->
+
 <!-- ══ ZONES SCENE ══ -->
 <div class="scene" id="scene-zones">
 <div class="snow" id="snow-zones"></div>
@@ -1544,6 +1625,9 @@
 
 <div class="ftray-dock" id="ftrayDock-shop" style="display:none;"></div>
 <div class="ftray-panel vert dock-right" id="ftrayPanel-shop"><div class="ftray-vtrack" id="ftrayTrack-shopv"></div></div>
+
+<div class="ftray-dock" id="ftrayDock-quests" style="display:none;"></div>
+<div class="ftray-panel vert dock-right" id="ftrayPanel-quests"><div class="ftray-vtrack" id="ftrayTrack-questsv"></div></div>
 
 <script>
 // snow particles — populate every .snow container present
@@ -2268,10 +2352,36 @@ async function enterHome(name){
     renderInventory(data.inventory);
     renderBadges(data.badges);
     applyDeepLinkScene();
+
+    if(data.quest_notice){
+      showQuestNoticeToast(data.quest_notice);
+    }
   }catch(e){
     console.error('Failed to load player data:', e);
     document.getElementById('stat-region').textContent = 'Could not load trainer data — try refreshing.';
   }
+}
+
+// "You have gained the quest..." notification — reuses the same
+// center-screen panel component as item/Pokémon details (openDetailPanel),
+// just with notification-flavored content instead of a stat breakdown.
+// Marks itself seen on close so it never shows again for this quest.
+function showQuestNoticeToast(notice){
+  openDetailPanel(
+    `<div class="item-panel-meta">
+       <div class="name">Quest Gained</div>
+       <div class="sub">${notice.title}</div>
+     </div>`,
+    `<div class="desc">You have gained the quest, <b>"${notice.title}"</b></div>
+     <div class="desc">Check <b>Quests</b> for more info.</div>`
+  );
+
+  fetch(`${API_BASE}/api/player/ack-quest-notice`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ quest_id: notice.id }),
+  }).catch(()=>{}); // best-effort — worst case the toast just shows again next visit
 }
 
 // Reset shortcut for demo purposes
@@ -2445,6 +2555,8 @@ const RIBBON_ITEMS = [
     icon:'<path d="M3 11L12 4l9 7"/><path d="M5 10v9h14v-9"/>' },
   { key:'pokedex',    label:'Pokédex', scene:'scene-pokedex',
     icon:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18"/>' },
+  { key:'quests',     label:'Quests',  scene:'scene-quests',
+    icon:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>' },
   { key:'leaderboard',label:'Leaders', scene:'scene-leaderboard',
     icon:'<path d="M8 20V10M14 20V4M20 20v-6M4 20v-3"/>' },
   { key:'zones',      label:'Zones',   scene:'scene-zones',
@@ -2532,7 +2644,14 @@ function switchScene(sceneId){
     shopTray.dock.style.display = showShop ? 'flex' : 'none';
     shopTray.panel.style.display = showShop ? '' : 'none';
     if(!showShop) shopTray.close();
+
+    // Quests rank-filter tray only shows while the Quests scene is active.
+    const showQuests = sceneId === 'scene-quests';
+    questsTray.dock.style.display = showQuests ? 'flex' : 'none';
+    questsTray.panel.style.display = showQuests ? '' : 'none';
+    if(!showQuests) questsTray.close();
   }
+  if(sceneId === 'scene-quests') loadQuests();
 }
 renderRibbons();
 
@@ -2676,39 +2795,16 @@ function listEl_refresh(coins){
 }
 
 // ══════════════════════════════════════════════════════════════
-// LEADERBOARD DATA — placeholder rows; swap for a real API call
-// once the backend exists.
+// LEADERBOARD DATA — live from /api/leaderboard (backed by the
+// same players table the bot writes to).
 // ══════════════════════════════════════════════════════════════
-const LB_DATA = {
-  level: [
-    { name: 'Kagenou',  value: 34 }, { name: 'Ashen',    value: 31 },
-    { name: 'Vesper',   value: 29 }, { name: 'Rowan',    value: 24 },
-    { name: 'Snowfell', value: 22 }, { name: 'Talon',    value: 19 },
-    { name: 'Mira',     value: 17 },
-  ],
-  pvp: [
-    { name: 'Vesper',   value: 41 }, { name: 'Kagenou',  value: 34 },
-    { name: 'Talon',    value: 28 }, { name: 'Ashen',    value: 22 },
-    { name: 'Rowan',    value: 19 }, { name: 'Mira',     value: 14 },
-    { name: 'Snowfell', value: 9  },
-  ],
-  caught: [
-    { name: 'Ashen',    value: 58 }, { name: 'Snowfell', value: 51 },
-    { name: 'Kagenou',  value: 44 }, { name: 'Mira',     value: 39 },
-    { name: 'Rowan',    value: 33 }, { name: 'Vesper',   value: 27 },
-    { name: 'Talon',    value: 21 },
-  ],
-  badges: [
-    { name: 'Kagenou',  value: 6 }, { name: 'Vesper',   value: 5 },
-    { name: 'Ashen',    value: 5 }, { name: 'Talon',    value: 4 },
-    { name: 'Rowan',    value: 3 }, { name: 'Snowfell', value: 2 },
-    { name: 'Mira',     value: 1 },
-  ],
-};
-
 function renderLeaderboard(containerId, rows, unit){
   const el = document.getElementById(containerId);
   if(!el) return;
+  if(!rows || rows.length === 0){
+    el.innerHTML = `<div class="lb-empty">No trainers yet.</div>`;
+    return;
+  }
   el.innerHTML = rows.map((r, i) => {
     const rank = i + 1;
     const topClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
@@ -2721,10 +2817,199 @@ function renderLeaderboard(containerId, rows, unit){
       </div>`;
   }).join('');
 }
-renderLeaderboard('lb-level',  LB_DATA.level,  'LV');
-renderLeaderboard('lb-pvp',    LB_DATA.pvp,    'W');
-renderLeaderboard('lb-caught', LB_DATA.caught, 'CAUGHT');
-renderLeaderboard('lb-badges', LB_DATA.badges, 'BADGES');
+
+async function loadLeaderboard(){
+  try {
+    const res = await fetch(`${API_BASE}/api/leaderboard`);
+    const data = await res.json();
+    renderLeaderboard('lb-level',  data.level  || [], 'LV');
+    renderLeaderboard('lb-pvp',    data.pvp    || [], 'W');
+    renderLeaderboard('lb-caught', data.caught || [], 'CAUGHT');
+    renderLeaderboard('lb-badges', data.badges || [], 'BADGES');
+  } catch (e) {
+    ['lb-level','lb-pvp','lb-caught','lb-badges'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = `<div class="lb-empty">Couldn't load leaderboard.</div>`;
+    });
+  }
+}
+loadLeaderboard();
+
+// ══════════════════════════════════════════════════════════════
+// QUESTS — global board (public, shared, claimable) + this trainer's
+// own quests split into Story vs Side. Rank letters (F/E/D/C/B/A/S)
+// come straight from the API; the material name/color skin is
+// applied here via RANK_META, and by the questRankFilter chips (see
+// QUEST_RANK_CHIPS near the tray init).
+// ══════════════════════════════════════════════════════════════
+const RANK_META = {
+  F: 'Bronze', E: 'Iron', D: 'Steel', C: 'Gold',
+  B: 'Platinum', A: 'Orichalcum', S: 'Adamantine',
+};
+let _questBoard = [];
+let _questMine  = { registered: false, story: [], board: [] };
+
+function questTypeInfo(q){
+  const typeClass = q.type === 'defeat_wild' ? 'subjugation'
+                   : q.type === 'catch_species' ? 'catch'
+                   : q.type === 'reach_location' ? 'exploration'
+                   : (q.source && q.source !== 'board') ? 'story' : 'protect';
+  const typeLabel = typeClass.charAt(0).toUpperCase() + typeClass.slice(1);
+  return { typeClass, typeLabel };
+}
+
+function questCardHTML(q, opts){
+  opts = opts || {};
+  const progress = q.progress || 0;
+  const required = q.required || 1;
+  const pct = Math.min(100, Math.round((progress / required) * 100));
+  const done = progress >= required;
+  const rank = q.rank || 'F';
+  const rankName = RANK_META[rank] || rank;
+  const { typeClass, typeLabel } = questTypeInfo(q);
+  const claimedTag = (opts.showClaimed && q.claimed)
+    ? `<span class="type-tag" style="background:var(--text-muted);">${q.claimed_by_me ? 'Yours' : 'Claimed'}</span>`
+    : '';
+  return `
+    <div class="quest-card${done ? ' done' : ''}" data-qid="${q.id || ''}" data-pane="${opts.pane || 'board'}">
+      <div class="rank-badge rank-${rank}" title="${rankName}">${rank}</div>
+      <div class="quest-body">
+        <div class="quest-top-row"><span class="type-tag ${typeClass}">${typeLabel}</span>${claimedTag}</div>
+        <div class="quest-title">${q.title}</div>
+        <div class="quest-meta">
+          <span class="reward">💰 ${q.reward}₡</span>
+          <span class="penalty">⚠️ -${q.penalty}₡</span>
+          <span>${progress}/${required}</span>
+        </div>
+        <div class="quest-bar-track"><div class="quest-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+function questDetailHTML(q, pane){
+  const { typeLabel } = questTypeInfo(q);
+  const rank = q.rank || 'F';
+  const rankName = RANK_META[rank] || rank;
+  const desc = q.description ? `<div class="desc"><b>Description</b>${q.description}</div>` : '';
+
+  let actions = '';
+  if(pane === 'board'){
+    actions = q.claimed
+      ? `<div class="desc"><b>Status</b>${q.claimed_by_me ? 'Already claimed by you — check the Side tab.' : 'This quest has already been claimed.'}</div>`
+      : `<button class="submit-btn" id="questActionBtn" data-action="accept" data-qid="${q.id}" style="margin-top:10px;">Accept</button>`;
+  } else if(pane === 'side' || pane === 'story'){
+    actions = `<button class="submit-btn" id="questActionBtn" data-action="decline" data-qid="${q.id}" style="margin-top:10px; background:linear-gradient(180deg,#3a2020,#2a1616); border-color:#e07a7a;">Decline</button>`;
+  }
+
+  return {
+    head: `
+      <div class="rank-badge rank-${rank}" title="${rankName}">${rank}</div>
+      <div class="item-panel-meta">
+        <div class="name">${q.title}</div>
+        <div class="sub">${typeLabel} · ${rankName} rank</div>
+      </div>`,
+    body: `
+      ${desc}
+      <div class="desc"><b>Reward</b>💰 ${q.reward}₡ on completion${q.penalty ? ` · ⚠️ -${q.penalty}₡ if returned incomplete` : ''}</div>
+      <div class="desc"><b>Progress</b>${q.progress || 0}/${q.required || 1}</div>
+      ${actions}`,
+  };
+}
+
+function wireQuestCards(container, pane){
+  container.querySelectorAll('.quest-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const qid = card.dataset.qid;
+      const pool = pane === 'board' ? _questBoard
+                 : pane === 'story' ? _questMine.story
+                 : _questMine.board;
+      const q = pool.find(x => x.id === qid);
+      if(!q) return;
+
+      const { head, body } = questDetailHTML(q, pane);
+      openDetailPanel(head, body);
+
+      const btn = document.getElementById('questActionBtn');
+      if(btn){
+        btn.addEventListener('click', async (e)=>{
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          const prevLabel = btn.textContent;
+          btn.textContent = '…';
+          btn.disabled = true;
+          try{
+            const res = await fetch(`${API_BASE}/api/quests/${action}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ quest_id: qid }),
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error || `Could not ${action} that quest.`);
+
+            document.querySelector('.item-overlay')?.remove();
+            await loadQuests(); // refresh board + mine so claim state is accurate everywhere
+          }catch(err){
+            btn.textContent = prevLabel;
+            btn.disabled = false;
+            alert(err.message);
+          }
+        });
+      }
+    });
+  });
+}
+
+function renderQuestLists(){
+  const boardEl = document.getElementById('quest-board');
+  const storyEl = document.getElementById('quest-story');
+  const sideEl  = document.getElementById('quest-side');
+  if(!boardEl || !storyEl || !sideEl) return;
+
+  const filterBoard = questRankFilter === 'none'
+    ? _questBoard
+    : _questBoard.filter(q => q.rank === questRankFilter);
+
+  boardEl.innerHTML = filterBoard.length
+    ? filterBoard.map(q => questCardHTML(q, {pane:'board', showClaimed:true})).join('')
+    : `<div class="lb-empty">No quests match this rank right now.</div>`;
+  wireQuestCards(boardEl, 'board');
+
+  if(!_questMine.registered){
+    storyEl.innerHTML = `<div class="lb-empty">Log in and register to track your quests here.</div>`;
+    sideEl.innerHTML  = `<div class="lb-empty">Log in and register to track your quests here.</div>`;
+    return;
+  }
+
+  const filterStory = questRankFilter === 'none' ? _questMine.story : _questMine.story.filter(q => q.rank === questRankFilter);
+  storyEl.innerHTML = filterStory.length
+    ? filterStory.map(q => questCardHTML(q, {pane:'story'})).join('')
+    : `<div class="lb-empty">No story quests match this rank.</div>`;
+  wireQuestCards(storyEl, 'story');
+
+  const filterSide = questRankFilter === 'none' ? _questMine.board : _questMine.board.filter(q => q.rank === questRankFilter);
+  sideEl.innerHTML = filterSide.length
+    ? filterSide.map(q => questCardHTML(q, {pane:'side'})).join('')
+    : `<div class="lb-empty">No active side quests. Accept one from the Board tab.</div>`;
+  wireQuestCards(sideEl, 'side');
+}
+
+async function loadQuests(){
+  try {
+    const res = await fetch(`${API_BASE}/api/quests`, { credentials: 'include' });
+    const data = await res.json();
+    _questBoard = data.board || [];
+    _questMine  = data.mine  || { registered: false, story: [], board: [] };
+    renderQuestLists();
+  } catch (e) {
+    const boardEl = document.getElementById('quest-board');
+    const storyEl = document.getElementById('quest-story');
+    const sideEl  = document.getElementById('quest-side');
+    if(boardEl) boardEl.innerHTML = `<div class="lb-empty">Couldn't load the quest board.</div>`;
+    if(storyEl) storyEl.innerHTML = `<div class="lb-empty">Couldn't load your quests.</div>`;
+    if(sideEl)  sideEl.innerHTML  = `<div class="lb-empty">Couldn't load your quests.</div>`;
+  }
+}
 
 // ══════════════════════════════════════════════════════════════
 // ZONES DATA — grounded against the bot's real zone files (danger
@@ -3353,6 +3638,35 @@ const shopTray = new FilterTray({
 });
 shopTray.show();
 shopTray.dock.style.display = 'none'; // hidden until scene-shop is active — see switchScene()
+
+// ── Quests tray: vertical, filters the board by rank tier. Rank values
+// stored in the data are still the underlying letters (F/E/D/C/B/A/S);
+// these chips are just the material-name/color skin over them. ──
+const QUEST_RANK_CHIPS = [
+  { key:'none', label:'All Ranks',   icon:'✦', color:null },
+  { key:'F',    label:'Bronze',      icon:'⬤', color:'#C08552' },
+  { key:'E',    label:'Iron',        icon:'⬤', color:'#8C8C8C' },
+  { key:'D',    label:'Steel',       icon:'⬤', color:'#A8B2BD' },
+  { key:'C',    label:'Gold',        icon:'⬤', color:'#FBD34D' },
+  { key:'B',    label:'Platinum',    icon:'⬤', color:'#D8E2E8' },
+  { key:'A',    label:'Orichalcum',  icon:'⬤', color:'#7FE8C8' },
+  { key:'S',    label:'Adamantine',  icon:'⬤', color:'#8FE3FF' },
+];
+let questRankFilter = 'none';
+const questsTray = new FilterTray({
+  id: 'quests',
+  orientation: 'vert',
+  chips: QUEST_RANK_CHIPS,
+  defaultSide: 'right',
+  iconFor: () => CUBE_ICON_HTML,
+  onSelect: (key) => {
+    questRankFilter = key;
+    renderQuestLists();
+  },
+  autoPeek: null,
+});
+questsTray.show();
+questsTray.dock.style.display = 'none'; // hidden until scene-quests is active — see switchScene()
 
 // From here on, switchScene() is allowed to touch dexTray/pcTray/invTray.
 window._traysReady = true;
