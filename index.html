@@ -153,12 +153,34 @@
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
   .field-select{ flex:0 0 88px; font-size:13px; }
+  .field-code-wrap{
+    flex:0 0 78px; position:relative; display:flex; align-items:center;
+  }
+  .field-code-prefix{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    font-family:'Inter',sans-serif; font-size:14px; color:var(--text-muted);
+    pointer-events:none; z-index:1;
+  }
+  .field-code-input{
+    padding-left:24px !important; text-align:left; font-variant-numeric:tabular-nums;
+  }
+  .field-code-input::placeholder{ color:var(--text-muted); opacity:0.45; }
   .field-input:focus, .field-select:focus{
     border-color:var(--ice);
     box-shadow: 0 0 0 1px rgba(143,227,255,0.3), 0 0 16px rgba(143,227,255,0.12);
     background: rgba(143,227,255,0.05);
   }
   .field-input::placeholder{ color:var(--text-muted); opacity:0.6; }
+  .field-pw-wrap{ position:relative; display:flex; align-items:center; }
+  .field-pw-input{ padding-right:42px !important; }
+  .field-pw-toggle{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    background:none; border:none; padding:8px; margin:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-muted); transition:color 0.2s;
+  }
+  .field-pw-toggle:hover{ color:var(--ice); }
+  .field-pw-toggle svg{ width:17px; height:17px; }
   .field-hint{
     font-family:'Inter',sans-serif; font-size:10px; color:var(--text-muted);
     margin-top:6px; opacity:0.75;
@@ -620,6 +642,15 @@
   .ribbon .item.active{ color:var(--ice); }
   .ribbon .item svg{ width:20px;height:20px; }
   .ribbon .item.active svg{ filter:drop-shadow(0 0 6px rgba(143,227,255,0.7)); }
+  .ribbon .item{ position:relative; }
+  .ribbon .item .nav-badge{
+    position:absolute; top:-4px; right:calc(50% - 16px);
+    min-width:15px; height:15px; padding:0 3px; border-radius:8px;
+    background:linear-gradient(135deg,#ff8a8a,#e05a5a);
+    color:#1a0d0d; font-family:'Inter',sans-serif; font-weight:700; font-size:9.5px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 6px rgba(224,90,90,0.6); line-height:1;
+  }
 
   /* ============ SHARED: PAGE HEAD (Leaderboard / Zones / Pokédex) ============ */
   .lb-page-head{ position:relative; z-index:1; padding: 20px 20px 0; }
@@ -1218,16 +1249,26 @@
     <div class="field-group">
       <label class="field-label">Phone Number</label>
       <div class="field-row">
-        <select class="field-select" id="input-country"><option>+234</option><option>+1</option><option>+44</option></select>
+        <div class="field-code-wrap">
+          <span class="field-code-prefix">+</span>
+          <input class="field-input field-code-input" id="input-country" type="tel" inputmode="numeric" pattern="[0-9]*" name="countryCode" placeholder="234" maxlength="4" autocomplete="off">
+        </div>
         <input class="field-input" id="input-phone" type="tel" name="tel" placeholder="8031234567" autocomplete="tel-national">
       </div>
-      <div class="field-hint">leading 0 is stripped automatically</div>
+      <div class="field-hint">country code (e.g. 234), then number — leading 0 is stripped automatically</div>
+      <div class="field-error" id="err-country">Enter a valid country code.</div>
       <div class="field-error" id="err-phone">Enter a valid phone number.</div>
     </div>
 
     <div class="field-group">
       <label class="field-label">Password</label>
-      <input class="field-input" id="input-password" type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="field-pw-wrap">
+        <input class="field-input field-pw-input" id="input-password" type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="field-pw-toggle" id="pw-toggle" aria-label="Show password" tabindex="-1">
+          <svg class="pw-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="pw-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 4.06-5.06M9.9 4.24A10.4 10.4 0 0 1 12 5c7 0 11 7 11 7a20.5 20.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+        </button>
+      </div>
       <div class="field-hint" id="pw-hint">min. 5 characters</div>
       <div class="field-error" id="err-password">Password must be at least 5 characters.</div>
     </div>
@@ -1685,6 +1726,22 @@ switchLine.addEventListener('click', (e) => {
   }
 });
 
+document.getElementById('input-country').addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+});
+
+// Password show/hide — single toggle button, works for both Log In and Sign Up
+// since they share the same #input-password field.
+const pwToggleBtn = document.getElementById('pw-toggle');
+const pwInputEl = document.getElementById('input-password');
+pwToggleBtn.addEventListener('click', () => {
+  const showing = pwInputEl.type === 'text';
+  pwInputEl.type = showing ? 'password' : 'text';
+  pwToggleBtn.querySelector('.pw-eye-open').style.display = showing ? '' : 'none';
+  pwToggleBtn.querySelector('.pw-eye-closed').style.display = showing ? 'none' : '';
+  pwToggleBtn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+});
+
 function clearErrors(){
   document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
   document.querySelectorAll('.field-input').forEach(e => e.style.borderColor = '');
@@ -1699,6 +1756,7 @@ function showError(id, inputId){
 function validate(){
   clearErrors();
   let ok = true;
+  const countryCode = document.getElementById('input-country').value.trim();
   const phone = document.getElementById('input-phone').value.trim();
   const password = document.getElementById('input-password').value;
 
@@ -1708,6 +1766,10 @@ function validate(){
       showError('err-username', 'input-username');
       ok = false;
     }
+  }
+  if(!/^[0-9]{1,4}$/.test(countryCode)){
+    showError('err-country', 'input-country');
+    ok = false;
   }
   if(!phone){
     showError('err-phone', 'input-phone');
@@ -1793,7 +1855,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
   if (mode === 'signup') {
     submitLabel.textContent = 'Creating account…';
-    const country = document.getElementById('input-country').value.replace('+', '');
+    const country = document.getElementById('input-country').value.trim();
     const phone = document.getElementById('input-phone').value.trim();
     const password = document.getElementById('input-password').value;
 
@@ -1828,7 +1890,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
   // ── Log In path ──
   submitLabel.textContent = 'Authenticating…';
-  const loginCountry = document.getElementById('input-country').value.replace('+', '');
+  const loginCountry = document.getElementById('input-country').value.trim();
   const loginPhone = document.getElementById('input-phone').value.trim();
   const loginPassword = document.getElementById('input-password').value;
 
@@ -2353,6 +2415,11 @@ async function enterHome(name){
     renderBadges(data.badges);
     applyDeepLinkScene();
 
+    // Pre-load quest data now so the nav badge count is accurate the
+    // moment Home renders, instead of staying at 0 until the player
+    // manually opens the Quests scene for the first time.
+    loadQuests();
+
     if(data.quest_notice){
       showQuestNoticeToast(data.quest_notice);
     }
@@ -2581,6 +2648,11 @@ function applyDeepLinkScene(){
   if(match) switchScene(match.scene);
 }
 
+function _activeQuestCount(){
+  if(!_questMine || !_questMine.registered) return 0;
+  return (_questMine.story?.length || 0) + (_questMine.board?.length || 0);
+}
+
 function renderRibbons(){
   document.querySelectorAll('[data-ribbon]').forEach(slot=>{
     const activeKey = slot.dataset.ribbon;
@@ -2588,6 +2660,7 @@ function renderRibbons(){
       <button class="item${item.key===activeKey ? ' active':''}" data-nav="${item.key}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${item.icon}</svg>
         ${item.label}
+        ${item.key==='quests' ? '<span class="nav-badge" data-quest-badge style="display:none;"></span>' : ''}
       </button>`).join('');
   });
   document.querySelectorAll('[data-nav]').forEach(btn=>{
@@ -2596,6 +2669,22 @@ function renderRibbons(){
       if(!item || !item.scene) return;
       switchScene(item.scene);
     });
+  });
+  updateQuestBadge();
+}
+
+// Updates just the badge count on every rendered ribbon, without rebuilding
+// the whole nav (renderRibbons() wipes+rewires listeners every call, which
+// we don't want firing every 30s poll tick).
+function updateQuestBadge(){
+  const count = _activeQuestCount();
+  document.querySelectorAll('[data-quest-badge]').forEach(el=>{
+    if(count > 0){
+      el.textContent = count > 9 ? '9+' : String(count);
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+    }
   });
 }
 
@@ -3001,6 +3090,7 @@ async function loadQuests(){
     _questBoard = data.board || [];
     _questMine  = data.mine  || { registered: false, story: [], board: [] };
     renderQuestLists();
+    updateQuestBadge();
   } catch (e) {
     const boardEl = document.getElementById('quest-board');
     const storyEl = document.getElementById('quest-story');
@@ -3010,6 +3100,23 @@ async function loadQuests(){
     if(sideEl)  sideEl.innerHTML  = `<div class="lb-empty">Couldn't load your quests.</div>`;
   }
 }
+
+// Quest board rotates every 30 min on the server (see BOARD_RESET_SECS in
+// router/quests.py). Without polling, a player sitting on the Quests scene
+// wouldn't see the board change until they manually navigated away and back.
+// Polling only the board+mine data (not the whole page) keeps this cheap.
+// Also drives the nav badge count, so it stays accurate even when the
+// player is on a different scene entirely (e.g. accepted a quest from
+// another tab/device, or a side quest auto-completed).
+const QUEST_POLL_MS = 30_000;
+setInterval(() => {
+  // Skip polling on the login/intro/transition scenes — no session yet,
+  // and we don't want a stray 401 fetch racing the auth flow.
+  const loginActive = document.getElementById('scene-login')?.classList.contains('active');
+  const introActive  = document.getElementById('scene-intro')?.classList.contains('active');
+  if(loginActive || introActive) return;
+  loadQuests();
+}, QUEST_POLL_MS);
 
 // ══════════════════════════════════════════════════════════════
 // ZONES DATA — grounded against the bot's real zone files (danger
