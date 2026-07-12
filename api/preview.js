@@ -49,10 +49,9 @@ module.exports = (req, res) => {
 ${safeImg ? `<meta property="og:image" content="${safeImg}">` : ''}
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="refresh" content="0; url=https://ariel-og.vercel.app/">
 </head>
 <body>
-<p>Redirecting to <a href="https://ariel-og.vercel.app/">Niflheim Online</a>…</p>
+<p><a href="https://ariel-og.vercel.app/">Open Niflheim Online</a></p>
 </body>
 </html>`;
 
