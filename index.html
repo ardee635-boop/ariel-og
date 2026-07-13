@@ -868,6 +868,13 @@
     filter: drop-shadow(0 0 5px rgba(124,233,255,0.75)) drop-shadow(0 0 11px rgba(124,233,255,0.4)); }
   .ftray-cube path{ stroke: #EAFBFF; }
   @keyframes ftray-cube-spin{ from{ transform:rotate(0deg) scale(1);} 50%{ transform:rotate(180deg) scale(1.06);} to{ transform:rotate(360deg) scale(1);} }
+
+  /* quests dock — flat 2D scroll, same ethereal glow language as the cube
+     but a gentle sway instead of a tumble (reads as parchment, not a die) */
+  .ftray-scroll{ animation: ftray-scroll-sway 3.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 5px rgba(124,233,255,0.75)) drop-shadow(0 0 11px rgba(124,233,255,0.4)); }
+  .ftray-scroll path, .ftray-scroll line{ stroke: #EAFBFF; }
+  @keyframes ftray-scroll-sway{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(-4deg) translateY(-1px);} }
   .ftray-icon-wrap::before{
     content:''; position:absolute; inset:-8px; border-radius:50%;
     background: radial-gradient(circle, rgba(124,233,255,0.34), rgba(124,233,255,0.06) 55%, transparent 75%);
@@ -949,13 +956,15 @@
   }
   .ftray-chip{
     display:flex; align-items:center; gap:10px;
-    padding:9px 12px; border-radius:10px;
-    background: rgba(143,227,255,0.04); border:1px solid var(--border);
+    padding:9px 12px;
+    background:none; border:none;
     font-size:11.5px; font-weight:600; color:var(--text-muted);
-    cursor:pointer; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);
+    cursor:pointer; transition: color 0.2s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);
     flex-shrink:0;
   }
-  .ftray-chip.active{ color:var(--text); border-color: var(--ice); background: rgba(143,227,255,0.1); }
+  .ftray-chip:active{ transform: scale(0.94); }
+  .ftray-chip.active{ color:var(--text); text-shadow: 0 0 10px rgba(124,233,255,0.6), 0 1px 3px rgba(0,0,0,0.9); }
   .ftray-chip .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
 
   /* Vertical variant (Inventory) — docks to the side, opens downward
@@ -983,19 +992,36 @@
     transition: border-color 0.2s ease, background 0.2s ease;
   }
   .ftray-vchip.active{ border-color:#EAFBFF; background:rgba(124,233,255,0.14); box-shadow:0 0 10px rgba(124,233,255,0.35); }
-  .ftray-vchip .vlabel{
-    position:absolute; top:50%; transform:translateY(-50%);
-    font-size:9.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    background:#0A1420; border:1px solid var(--border); border-radius:6px;
-    padding:4px 8px; white-space:nowrap; color:var(--text);
-    opacity:0; pointer-events:none; transition: opacity 0.18s ease, transform 0.18s ease;
+
+  /* Quest rank chips — glow/shimmer intensity rises with material tier.
+     tier-1 (Bronze/Iron): flat, no glow. tier-2 (Steel): faint glow.
+     tier-3 (Gold/Platinum): brighter glow. tier-4 (Orichalcum/Adamantine):
+     shimmering pulse, reads as top-tier/legendary. */
+  .ftray-vchip.tier-2{ box-shadow: 0 0 5px var(--tier-color, transparent); }
+  .ftray-vchip.tier-3{ box-shadow: 0 0 9px var(--tier-color, transparent); }
+  .ftray-vchip.tier-4{
+    box-shadow: 0 0 8px var(--tier-color, transparent), 0 0 16px color-mix(in srgb, var(--tier-color, transparent) 50%, transparent);
+    animation: ftray-rank-shimmer 2.4s ease-in-out infinite;
   }
-  .ftray-panel.vert.dock-left .ftray-vchip .vlabel{ left:calc(100% + 8px); transform:translateY(-50%) translateX(-4px); }
+  @keyframes ftray-rank-shimmer{
+    0%,100%{ box-shadow: 0 0 8px var(--tier-color, transparent), 0 0 16px color-mix(in srgb, var(--tier-color, transparent) 50%, transparent); }
+    50%{ box-shadow: 0 0 14px var(--tier-color, transparent), 0 0 26px color-mix(in srgb, var(--tier-color, transparent) 65%, transparent); }
+  }
+  .ftray-vchip.tier-4 .vlabel{ text-shadow: 0 0 8px var(--tier-color, transparent), 0 1px 3px rgba(0,0,0,0.9); }
+  .ftray-vchip .vlabel{
+    position:absolute; top:50%; transform:translateY(-50%) scale(0.4);
+    font-size:9.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    white-space:nowrap; color:var(--text);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);
+    opacity:0; pointer-events:none;
+    transition: opacity 0.2s ease, transform 0.45s cubic-bezier(.34,1.56,.64,1);
+  }
+  .ftray-panel.vert.dock-left .ftray-vchip .vlabel{ left:calc(100% + 8px); transform:translateY(-50%) translateX(-6px) scale(0.4); }
   .ftray-panel.vert.dock-left .ftray-vchip:hover .vlabel,
-  .ftray-panel.vert.dock-left .ftray-vchip.touched .vlabel{ opacity:1; transform:translateY(-50%) translateX(0); }
-  .ftray-panel.vert.dock-right .ftray-vchip .vlabel{ right:calc(100% + 8px); transform:translateY(-50%) translateX(4px); }
+  .ftray-panel.vert.dock-left .ftray-vchip.touched .vlabel{ opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
+  .ftray-panel.vert.dock-right .ftray-vchip .vlabel{ right:calc(100% + 8px); transform:translateY(-50%) translateX(6px) scale(0.4); }
   .ftray-panel.vert.dock-right .ftray-vchip:hover .vlabel,
-  .ftray-panel.vert.dock-right .ftray-vchip.touched .vlabel{ opacity:1; transform:translateY(-50%) translateX(0); }
+  .ftray-panel.vert.dock-right .ftray-vchip.touched .vlabel{ opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
 
   /* ══════════════════════════════════════════════════════════
      STARTER REVEAL — 3 glowing pokéballs → light-flash open →
@@ -3489,6 +3515,24 @@ const CUBE_ICON_HTML = `
     <div class="ftray-sparkle" style="top:20px; left:38px;"></div>
   </div>`;
 
+// Flat 2D scroll icon — same wireframe/sparkle treatment as the cube,
+// just a scroll silhouette instead of a hexagon. Quests dock only.
+const SCROLL_ICON_HTML = `
+  <div class="ftray-icon-wrap">
+    <svg class="ftray-scroll" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ice)" stroke-width="1.6">
+      <path d="M6 3 C4.6 3 3.5 4.1 3.5 5.5 C3.5 6.9 4.6 8 6 8 L6 3 Z"/>
+      <path d="M18 21 C19.4 21 20.5 19.9 20.5 18.5 C20.5 17.1 19.4 16 18 16 L18 21 Z"/>
+      <path d="M6 3 L18 3 L18 16 L6 16 Z" stroke-linejoin="round"/>
+      <path d="M6 8 L6 21 L18 21" stroke-linejoin="round"/>
+      <line x1="9" y1="7" x2="15" y2="7" stroke-width="1.2"/>
+      <line x1="9" y1="10.5" x2="15" y2="10.5" stroke-width="1.2"/>
+      <line x1="9" y1="14" x2="13" y2="14" stroke-width="1.2"/>
+    </svg>
+    <div class="ftray-sparkle" style="top:6px; left:2px;"></div>
+    <div class="ftray-sparkle" style="top:30px; left:34px;"></div>
+    <div class="ftray-sparkle" style="top:20px; left:38px;"></div>
+  </div>`;
+
 function elemIconHTML(typeKey){
   const cls = typeKey && typeKey !== 'none' ? `type-${typeKey}` : 'type-none';
   return `<div class="ftray-icon-wrap"><div class="ftray-elem ${cls}"><div class="ring"></div><div class="core"></div></div></div>`;
@@ -3541,7 +3585,7 @@ class FilterTray{
       });
     } else {
       this.track.innerHTML = this.chips.map(c => `
-        <div class="ftray-vchip${c.key===this.activeKey ? ' active':''}" data-key="${c.key}" style="${c.color ? `border-color:${c.color}55;` : ''}">
+        <div class="ftray-vchip${c.key===this.activeKey ? ' active':''}${c.tier ? ` tier-${c.tier}` : ''}" data-key="${c.key}" style="${c.color ? `border-color:${c.color}55; --tier-color:${c.color};` : ''}">
           <span>${c.icon || '•'}</span>
           <span class="vlabel">${c.label}</span>
         </div>`).join('');
@@ -3749,16 +3793,17 @@ shopTray.dock.style.display = 'none'; // hidden until scene-shop is active — s
 
 // ── Quests tray: vertical, filters the board by rank tier. Rank values
 // stored in the data are still the underlying letters (F/E/D/C/B/A/S);
-// these chips are just the material-name/color skin over them. ──
+// these chips are the material-name/color skin over them, with glow
+// intensity ("tier") rising toward the top ranks. ──
 const QUEST_RANK_CHIPS = [
-  { key:'none', label:'All Ranks',   icon:'✦', color:null },
-  { key:'F',    label:'Bronze',      icon:'⬤', color:'#C08552' },
-  { key:'E',    label:'Iron',        icon:'⬤', color:'#8C8C8C' },
-  { key:'D',    label:'Steel',       icon:'⬤', color:'#A8B2BD' },
-  { key:'C',    label:'Gold',        icon:'⬤', color:'#FBD34D' },
-  { key:'B',    label:'Platinum',    icon:'⬤', color:'#D8E2E8' },
-  { key:'A',    label:'Orichalcum',  icon:'⬤', color:'#7FE8C8' },
-  { key:'S',    label:'Adamantine',  icon:'⬤', color:'#8FE3FF' },
+  { key:'none', label:'All Ranks',        icon:'✦', color:null,      tier:0 },
+  { key:'F',    label:'F · Bronze',       icon:'⬤', color:'#C08552', tier:1 },
+  { key:'E',    label:'E · Iron',         icon:'⬤', color:'#8C8C8C', tier:1 },
+  { key:'D',    label:'D · Steel',        icon:'⬤', color:'#A8B2BD', tier:2 },
+  { key:'C',    label:'C · Gold',         icon:'⬤', color:'#FBD34D', tier:3 },
+  { key:'B',    label:'B · Platinum',     icon:'⬤', color:'#D8E2E8', tier:3 },
+  { key:'A',    label:'A · Orichalcum',   icon:'⬤', color:'#7FE8C8', tier:4 },
+  { key:'S',    label:'S · Adamantine',   icon:'⬤', color:'#8FE3FF', tier:4 },
 ];
 let questRankFilter = 'none';
 const questsTray = new FilterTray({
@@ -3766,7 +3811,7 @@ const questsTray = new FilterTray({
   orientation: 'vert',
   chips: QUEST_RANK_CHIPS,
   defaultSide: 'right',
-  iconFor: () => CUBE_ICON_HTML,
+  iconFor: () => SCROLL_ICON_HTML,
   onSelect: (key) => {
     questRankFilter = key;
     renderQuestLists();
