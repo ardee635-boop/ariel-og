@@ -2507,13 +2507,31 @@ function renderInventory(inventory){
   });
 }
 
-function renderBadges(badges){
+async function renderBadges(){
   const grid = document.getElementById('badge-grid');
-  if(!badges || !badges.length){
-    grid.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No badges yet.</div>`;
-    return;
+  try{
+    const res = await fetch(`${API_BASE}/api/badges`, { credentials: 'include' });
+    const data = await res.json();
+    const badges = (data && data.badges) || [];
+
+    if(!badges.length){
+      grid.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No gyms exist yet.</div>`;
+      return;
+    }
+
+    grid.innerHTML = badges.map(b => {
+      const iconStyle = b.earned && b.image
+        ? ` style="background-image:url('${b.image}'); background-size:cover;"`
+        : '';
+      return `
+        <div class="badge-tile${b.earned ? '' : ' locked'}" title="${b.town_name} Gym · ${b.leader}">
+          <div class="badge-icon"${iconStyle}></div>
+          <div class="badge-name">${b.badge_name}</div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">Couldn't load badges.</div>`;
   }
-  grid.innerHTML = badges.map(b => `<div class="badge-tile"><div class="badge-icon"></div><div class="badge-name">${typeof b === 'string' ? b : b.name}</div></div>`).join('');
 }
 
 async function enterHome(name){
@@ -2536,7 +2554,7 @@ async function enterHome(name){
       document.getElementById('stat-region').textContent = 'Message the bot with .start to begin';
       renderParty([], []);
       renderInventory({});
-      renderBadges([]);
+      renderBadges();
       applyDeepLinkScene(); // still worth honoring — e.g. a bare Shop link
       return;
     }
@@ -2567,7 +2585,7 @@ async function enterHome(name){
 
     renderParty(data.party, data.pc);
     renderInventory(data.inventory);
-    renderBadges(data.badges);
+    renderBadges();
     applyDeepLinkScene();
 
     // Pre-load quest data now so the nav badge count is accurate the
