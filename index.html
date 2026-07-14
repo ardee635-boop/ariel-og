@@ -887,15 +887,15 @@
   .pball-dock:has(.fx-none) .pball-frost-sheen{ opacity:1; animation: frostSheen 4.5s ease-in-out infinite; }
   @keyframes frostSheen{ 0%{ background-position: 120% 120%; } 50%{ background-position: -20% -20%; } 100%{ background-position: 120% 120%; } }
 
-  .pball-fx{ position:absolute; inset:-22px; pointer-events:none; z-index:1; }
+  .pball-fx{ position:absolute; inset:-10px; pointer-events:none; z-index:1; }
   .fx-blob{
-    position:absolute; top:50%; left:50%; width:34px; height:34px; margin:-17px 0 0 -17px;
+    position:absolute; top:50%; left:50%; width:26px; height:26px; margin:-13px 0 0 -13px;
     background: radial-gradient(circle at 40% 35%, var(--el-light,#8fe3ff), var(--el-mid,#1a6fa8) 55%, transparent 78%);
     filter: blur(3px); opacity:0.75; mix-blend-mode: screen;
     border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%;
     animation: blobFlow1 5.5s ease-in-out infinite, blobMorph1 3.8s ease-in-out infinite;
   }
-  .fx-blob.b2{ width:26px; height:26px; margin:-13px 0 0 -13px; animation: blobFlow2 4.2s ease-in-out infinite, blobMorph2 3.1s ease-in-out infinite; opacity:0.55; }
+  .fx-blob.b2{ width:19px; height:19px; margin:-9.5px 0 0 -9.5px; animation: blobFlow2 4.2s ease-in-out infinite, blobMorph2 3.1s ease-in-out infinite; opacity:0.55; }
   @keyframes blobFlow1{ 0%{ transform: translate(-6px,3px) rotate(0deg); } 25%{ transform: translate(5px,-6px) rotate(90deg); } 50%{ transform: translate(7px,5px) rotate(180deg); } 75%{ transform: translate(-5px,6px) rotate(270deg); } 100%{ transform: translate(-6px,3px) rotate(360deg); } }
   @keyframes blobFlow2{ 0%{ transform: translate(6px,-4px) rotate(0deg); } 30%{ transform: translate(-7px,-2px) rotate(-120deg); } 60%{ transform: translate(-3px,7px) rotate(-220deg); } 100%{ transform: translate(6px,-4px) rotate(-360deg); } }
   @keyframes blobMorph1{ 0%,100%{ border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%; } 33%{ border-radius: 60% 40% 35% 65% / 55% 60% 40% 45%; } 66%{ border-radius: 35% 65% 55% 45% / 40% 50% 50% 60%; } }
@@ -1009,15 +1009,15 @@
 
   /* ---------- Horizontal pill drawer (Dex / PC) ---------- */
   .fdrawer.horiz{
-    position:fixed; z-index:59; height:48px;
-    display:flex; align-items:center;
+    position:fixed; z-index:59; height:66px;
+    display:flex; align-items:flex-start;
     width:0; opacity:0; overflow:hidden;
     transition: width 0.34s cubic-bezier(.22,.9,.3,1.15), opacity 0.18s ease;
     pointer-events:none;
   }
   .fdrawer.horiz.open{ width: var(--drawer-w, 260px); opacity:1; pointer-events:auto; }
   .fdrawer.horiz .drawer-scroll{
-    display:flex; gap:10px; align-items:center; padding: 0 14px;
+    display:flex; gap:10px; align-items:flex-start; padding: 8px 14px 0;
     overflow-x:auto; overflow-y:hidden;
     scrollbar-width:none; height:100%; width:100%;
     mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
@@ -1033,7 +1033,7 @@
   }
   .echip.active{ border-color:var(--ice); box-shadow:0 0 8px rgba(143,227,255,0.4); transform:scale(1.08); }
   .echip svg{ width:18px; height:18px; }
-  .echip-label{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.04em; color:var(--text-muted); white-space:nowrap; }
+  .echip-label{ position:absolute; top:40px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.04em; color:var(--text-muted); white-space:nowrap; }
 
   /* ---------- Vertical pill drawer (Inventory / Shop / Quests) ---------- */
   .fdrawer.vert{
@@ -3907,7 +3907,10 @@ class PokeballDock{
   }
   _positionPanel(){
     const r = this.dock.getBoundingClientRect();
-    this.panel.style.top = (r.top + r.height/2 - 24)+'px';
+    const panelH = 66;
+    let top = r.top + r.height/2 - panelH/2;
+    top = Math.max(8, Math.min(window.innerHeight - panelH - 8, top));
+    this.panel.style.top = top + 'px';
     this.panel.style.setProperty('--drawer-w', this.size+'px');
     if(this.side==='right'){
       this.panel.style.right = (window.innerWidth - r.left + 8)+'px';
