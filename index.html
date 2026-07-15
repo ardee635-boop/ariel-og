@@ -542,6 +542,7 @@
   /* --- badges pane --- */
   .badge-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .badge-tile{
+    position:relative;
     border:1px solid var(--border); border-radius:8px;
     background: linear-gradient(180deg,var(--panel-2),var(--panel));
     padding:14px; display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -555,6 +556,13 @@
   }
   .badge-tile.locked .badge-icon{ background:none; border:1px dashed var(--border); box-shadow:none; }
   .badge-name{ font-size:11px; font-weight:600; }
+  .badge-tag{
+    position:absolute; top:6px; right:6px;
+    font-size:8px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--yellow); background:rgba(251,211,77,0.12);
+    border:1px solid rgba(251,211,77,0.4); border-radius:4px;
+    padding:2px 5px;
+  }
 
   /* ============ PARTY / PC ============ */
   .section-block{ position:relative; z-index:1; margin: 30px 20px 0; }
@@ -2523,8 +2531,14 @@ async function renderBadges(){
       const iconStyle = b.earned && b.image
         ? ` style="background-image:url('${b.image}'); background-size:cover;"`
         : '';
+      const tooltip = b.zone_id
+        ? `${b.town_name} Gym · ${b.leader}`
+        : (b.source_label || 'Special');
+      const tag = !b.zone_id && b.source_label
+        ? `<div class="badge-tag">${b.source_label}</div>` : '';
       return `
-        <div class="badge-tile${b.earned ? '' : ' locked'}" data-badge-idx="${i}" title="${b.town_name} Gym · ${b.leader}">
+        <div class="badge-tile${b.earned ? '' : ' locked'}" data-badge-idx="${i}" title="${tooltip}">
+          ${tag}
           <div class="badge-icon"${iconStyle}></div>
           <div class="badge-name">${b.badge_name}</div>
         </div>`;
@@ -2553,12 +2567,15 @@ function openBadgeDetail(b){
   const condLine = b.condition
     ? `<div class="desc"><b>Condition</b>${b.condition}</div>` : '';
   const effectLine = `<div class="desc"><b>Effect</b>${b.effect ? b.effect : 'None'}</div>`;
+  const subtitle = b.zone_id
+    ? `${b.town_name} Gym · ${b.leader}${b.leader_type ? ' · ' + b.leader_type : ''}`
+    : (b.source_label || 'Special badge');
 
   openDetailPanel(
     `<div class="badge-icon" style="width:56px;height:56px;${b.earned && b.image ? `background-image:url('${b.image}');background-size:cover;` : ''}"></div>
      <div class="item-panel-meta">
        <div class="name">${b.badge_name}</div>
-       <div class="sub">${b.town_name} Gym · ${b.leader}${b.leader_type ? ' · ' + b.leader_type : ''}</div>
+       <div class="sub">${subtitle}</div>
      </div>`,
     `${statusLine}${descLine}${condLine}${effectLine}`
   );
