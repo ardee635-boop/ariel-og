@@ -2519,19 +2519,49 @@ async function renderBadges(){
       return;
     }
 
-    grid.innerHTML = badges.map(b => {
+    grid.innerHTML = badges.map((b, i) => {
       const iconStyle = b.earned && b.image
         ? ` style="background-image:url('${b.image}'); background-size:cover;"`
         : '';
       return `
-        <div class="badge-tile${b.earned ? '' : ' locked'}" title="${b.town_name} Gym · ${b.leader}">
+        <div class="badge-tile${b.earned ? '' : ' locked'}" data-badge-idx="${i}" title="${b.town_name} Gym · ${b.leader}">
           <div class="badge-icon"${iconStyle}></div>
           <div class="badge-name">${b.badge_name}</div>
         </div>`;
     }).join('');
+
+    grid.querySelectorAll('[data-badge-idx]').forEach(tile => {
+      tile.addEventListener('click', () => {
+        const b = badges[Number(tile.dataset.badgeIdx)];
+        if(b) openBadgeDetail(b);
+      });
+    });
   } catch(e) {
     grid.innerHTML = `<div class="lbl" style="opacity:0.6; padding:12px 4px;">Couldn't load badges.</div>`;
   }
+}
+
+function openBadgeDetail(b){
+  const iconStyle = b.earned && b.image
+    ? ` style="background-image:url('${b.image}'); background-size:cover;"`
+    : '';
+  const statusLine = b.earned
+    ? `<div class="desc"><b>Status</b>✅ Earned</div>`
+    : `<div class="desc"><b>Status</b>🔒 Not yet earned</div>`;
+  const descLine = b.description
+    ? `<div class="desc"><b>Description</b>${b.description}</div>` : '';
+  const condLine = b.condition
+    ? `<div class="desc"><b>Condition</b>${b.condition}</div>` : '';
+  const effectLine = `<div class="desc"><b>Effect</b>${b.effect ? b.effect : 'None'}</div>`;
+
+  openDetailPanel(
+    `<div class="badge-icon" style="width:56px;height:56px;${b.earned && b.image ? `background-image:url('${b.image}');background-size:cover;` : ''}"></div>
+     <div class="item-panel-meta">
+       <div class="name">${b.badge_name}</div>
+       <div class="sub">${b.town_name} Gym · ${b.leader}${b.leader_type ? ' · ' + b.leader_type : ''}</div>
+     </div>`,
+    `${statusLine}${descLine}${condLine}${effectLine}`
+  );
 }
 
 async function enterHome(name){
@@ -3926,12 +3956,20 @@ class PokeballDock{
       dragging=true; moved=false; startX=x; startY=y;
       const r=this.dock.getBoundingClientRect(); origX=r.left; origY=r.top;
       this.dock.classList.add('dragging');
-      if(this.isOpen) this.close();
+      // Panel close now happens in onMove, only once a real drag is
+      // detected — closing unconditionally here on every pointerdown
+      // meant a plain tap-to-close always looked like close-then-
+      // reopen, since _wireOpen's click handler would immediately
+      // toggle() it back open right after this ran.
     };
     const onMove=(x,y)=>{
       if(!dragging) return;
       const dx=x-startX, dy=y-startY;
-      if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
+      if(!moved && (Math.abs(dx)>4||Math.abs(dy)>4)){
+        moved=true;
+        if(this.isOpen) this.close();
+      }
+      if(!moved) return;
       let nx=origX+dx, ny=origY+dy;
       nx=Math.max(4,Math.min(window.innerWidth-56,nx));
       ny=Math.max(60,Math.min(window.innerHeight-100,ny));
@@ -3953,9 +3991,16 @@ class PokeballDock{
     this.dock.addEventListener('pointercancel',onUp);
   }
   _wireOpen(){
-    this.dock.addEventListener('click', ()=>{
+    this.dock.addEventListener('click', (e)=>{
       if(this._suppressClick){ this._suppressClick=false; return; }
+      e.stopPropagation();
       this.toggle();
+    });
+    // Tap anywhere outside the dock/panel closes it.
+    document.addEventListener('click', (e)=>{
+      if(!this.isOpen) return;
+      if(this.dock.contains(e.target) || this.panel.contains(e.target)) return;
+      this.close();
     });
   }
   toggle(){ this.isOpen ? this.close() : this.open(); }
@@ -4061,12 +4106,15 @@ class CubeDock{
       dragging=true; moved=false; startX=x; startY=y;
       const r=this.dock.getBoundingClientRect(); origX=r.left; origY=r.top;
       this.dock.classList.add('dragging');
-      if(this.isOpen) this.close();
     };
     const onMove=(x,y)=>{
       if(!dragging) return;
       const dx=x-startX, dy=y-startY;
-      if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
+      if(!moved && (Math.abs(dx)>4||Math.abs(dy)>4)){
+        moved=true;
+        if(this.isOpen) this.close();
+      }
+      if(!moved) return;
       let nx=origX+dx, ny=origY+dy;
       nx=Math.max(4,Math.min(window.innerWidth-56,nx));
       ny=Math.max(60,Math.min(window.innerHeight-100,ny));
@@ -4088,9 +4136,15 @@ class CubeDock{
     this.dock.addEventListener('pointercancel',onUp);
   }
   _wireOpen(){
-    this.dock.addEventListener('click', ()=>{
+    this.dock.addEventListener('click', (e)=>{
       if(this._suppressClick){ this._suppressClick=false; return; }
+      e.stopPropagation();
       this.toggle();
+    });
+    document.addEventListener('click', (e)=>{
+      if(!this.isOpen) return;
+      if(this.dock.contains(e.target) || this.panel.contains(e.target)) return;
+      this.close();
     });
   }
   toggle(){ this.isOpen ? this.close() : this.open(); }
@@ -4165,12 +4219,15 @@ class ScrollDock{
       dragging=true; moved=false; startX=x; startY=y;
       const r=this.dock.getBoundingClientRect(); origX=r.left; origY=r.top;
       this.dock.classList.add('dragging');
-      if(this.isOpen) this.close();
     };
     const onMove=(x,y)=>{
       if(!dragging) return;
       const dx=x-startX, dy=y-startY;
-      if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
+      if(!moved && (Math.abs(dx)>4||Math.abs(dy)>4)){
+        moved=true;
+        if(this.isOpen) this.close();
+      }
+      if(!moved) return;
       let nx=origX+dx, ny=origY+dy;
       nx=Math.max(4,Math.min(window.innerWidth-56,nx));
       ny=Math.max(60,Math.min(window.innerHeight-100,ny));
@@ -4192,9 +4249,15 @@ class ScrollDock{
     this.dock.addEventListener('pointercancel',onUp);
   }
   _wireOpen(){
-    this.dock.addEventListener('click', ()=>{
+    this.dock.addEventListener('click', (e)=>{
       if(this._suppressClick){ this._suppressClick=false; return; }
+      e.stopPropagation();
       this.toggle();
+    });
+    document.addEventListener('click', (e)=>{
+      if(!this.isOpen) return;
+      if(this.dock.contains(e.target) || this.panel.contains(e.target)) return;
+      this.close();
     });
   }
   /* elastic (rubber-band) overscroll — ported from openDetailPanel() */
