@@ -493,6 +493,22 @@
     display:flex; align-items:center; justify-content:center;
     padding: 24px;
   }
+  .image-lightbox-overlay{
+    position:fixed; inset:0; z-index:30;
+    background: rgba(2,6,12,0.85);
+    backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 32px;
+  }
+  .lightbox-img{
+    max-width:100%; max-height:100%;
+    object-fit:contain;
+    filter: drop-shadow(0 0 40px rgba(143,227,255,0.15));
+  }
+  .lightbox-close{
+    position:fixed; top:18px; right:18px; z-index:31;
+    background: rgba(2,6,12,0.6);
+  }
   .item-panel{
     position:relative;
     width:100%; max-width:340px;
@@ -2060,6 +2076,29 @@ const ITEM_IMAGES = {
   'Breadcrumbs':      `${_SITE_ITEM_BASE}/breadcrumbs.png`,
   'Essence':          `${_SITE_ITEM_BASE}/essence.png`,
   'Random Poké Egg':  `${_SITE_ITEM_BASE}/random_poke_egg.png`,
+
+  // Type-themed balls (18 types + 1 Random) — one shop item per type.
+  'Normal Ball':      `${_SITE_ITEM_BASE}/normal_ball.png`,
+  'Fire Ball':        `${_SITE_ITEM_BASE}/fire_ball.png`,
+  'Water Ball':       `${_SITE_ITEM_BASE}/water_ball.png`,
+  'Grass Ball':       `${_SITE_ITEM_BASE}/grass_ball.png`,
+  'Electric Ball':    `${_SITE_ITEM_BASE}/electric_ball.png`,
+  'Ice Ball':         `${_SITE_ITEM_BASE}/ice_ball.png`,
+  'Ground Ball':      `${_SITE_ITEM_BASE}/ground_ball.png`,
+  'Poison Ball':      `${_SITE_ITEM_BASE}/poison_ball.png`,
+  'Rock Ball':        `${_SITE_ITEM_BASE}/rock_ball.png`,
+  'Flying Ball':      `${_SITE_ITEM_BASE}/flying_ball.png`,
+  'Psychic Ball':     `${_SITE_ITEM_BASE}/psychic_ball.png`,
+  'Bug Ball':         `${_SITE_ITEM_BASE}/bug_ball.png`,
+  'Fighting Ball':    `${_SITE_ITEM_BASE}/fighting_ball.png`,
+  'Ghost Ball':       `${_SITE_ITEM_BASE}/ghost_ball.png`,
+  'Dragon Ball':      `${_SITE_ITEM_BASE}/dragon_ball.png`,
+  'Steel Ball':       `${_SITE_ITEM_BASE}/steel_ball.png`,
+  'Dark Ball':        `${_SITE_ITEM_BASE}/dark_ball.png`,
+  'Fairy Ball':       `${_SITE_ITEM_BASE}/fairy_ball.png`,
+  'Random Ball':      `${_SITE_ITEM_BASE}/random_ball.png`,
+
+  'Fishing Rod':      `${_SITE_ITEM_BASE}/fishing_rod.png`,
 };
 
 /** Returns an <img> tag if the item has a mapped picture, otherwise falls
@@ -2524,7 +2563,7 @@ function partyCardHTML(mon){
   const status = mon.status ? `<span class="stat-pill">${mon.status}</span>` : '';
   const moves = (mon.moves || []).map(m => (typeof m === 'string' ? m : m.name)).join(' · ');
   const type = (mon.types && mon.types[0]) || 'Normal';
-  return `<div class="party-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}">
+  return `<div class="party-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}" data-sprite="${mon.sprite || ''}">
     <div class="party-top">
       <div class="party-sprite" style="${mon.sprite ? `background-image:url('${mon.sprite}'); background-size:contain; background-repeat:no-repeat; background-position:center;` : ''}"></div>
       <div class="party-meta">
@@ -2540,7 +2579,7 @@ function pcCardHTML(mon){
   const pct = hpPercent(mon);
   const moves = (mon.moves || []).map(m => (typeof m === 'string' ? m : m.name)).join(' · ');
   const type = (mon.types && mon.types[0]) || 'Normal';
-  return `<div class="pc-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}">
+  return `<div class="pc-card" data-mon="${mon.nickname || mon.name}" data-lvl="${mon.level}" data-type="${type}" data-hp="${mon.hp}/${mon.max_hp}" data-hppct="${pct}" data-status="${mon.status || ''}" data-desc="${mon.flavor_text || ''}" data-moves="${moves}" data-sprite="${mon.sprite || ''}">
     <div class="pc-sprite" style="${mon.sprite ? `background-image:url('${mon.sprite}'); background-size:contain; background-repeat:no-repeat; background-position:center;` : ''}"></div>
     <div class="pc-name">${mon.nickname || mon.name}</div>
   </div>`;
@@ -2792,6 +2831,20 @@ function flipCard(){
 }
 
 // shared: build a compact modal panel with rubber-band scroll, given inner HTML for head + body
+// Fullscreen image-only view — tap a sprite inside a detail panel to
+// zoom it with no name/HP/description chrome, just the artwork.
+function openImageLightbox(url){
+  if(!url) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'image-lightbox-overlay';
+  overlay.innerHTML = `
+    <button class="close-x lightbox-close">✕</button>
+    <img src="${url}" class="lightbox-img" alt="">`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.lightbox-close').addEventListener('click', ()=> overlay.remove());
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.remove(); });
+}
+
 function openDetailPanel(headHTML, bodyHTML){
   const overlay = document.createElement('div');
   overlay.className='item-overlay';
@@ -2845,6 +2898,7 @@ function openDetailPanel(headHTML, bodyHTML){
       }, 80);
     }
   }, {passive:false});
+  return overlay;
 }
 
 // inventory item detail — called after each renderInventory() since rows are rebuilt from live data
@@ -2870,11 +2924,11 @@ function wireInventoryRows(){
 function wirePokemonCards(selector){
   document.querySelectorAll(selector).forEach(card=>{
     card.addEventListener('click', ()=>{
-      const { mon, lvl, type, hp, hppct, status, desc, moves } = card.dataset;
+      const { mon, lvl, type, hp, hppct, status, desc, moves, sprite } = card.dataset;
       const typeClass = 'type-' + type.toLowerCase();
       const statusBadge = status ? `<span class="stat-pill">${status}</span>` : '';
-      openDetailPanel(
-        `<div class="party-sprite" style="width:44px;height:44px;flex-shrink:0;"></div>
+      const panelOverlay = openDetailPanel(
+        `<div class="party-sprite sprite-zoomable" style="width:44px;height:44px;flex-shrink:0;cursor:zoom-in;${sprite ? `background-image:url('${sprite}');background-size:contain;background-repeat:no-repeat;background-position:center;` : ''}"></div>
          <div class="item-panel-meta">
            <div class="name">${mon}</div>
            <div class="sub" style="display:flex; gap:6px; align-items:center; margin-top:6px;">
@@ -2888,6 +2942,14 @@ function wirePokemonCards(selector){
          <div class="desc"><b>Description</b>${desc}</div>
          <div class="desc"><b>Moves</b>${moves}</div>`
       );
+      // Tapping the sprite inside the just-opened panel zooms it.
+      const spriteEl = panelOverlay.querySelector('.sprite-zoomable');
+      if(spriteEl && sprite){
+        spriteEl.addEventListener('click', (e)=>{
+          e.stopPropagation(); // don't also close the detail panel underneath
+          openImageLightbox(sprite);
+        });
+      }
     });
   });
 }
