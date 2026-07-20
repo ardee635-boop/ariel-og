@@ -2046,7 +2046,7 @@ const API_BASE = 'https://ariel-bot-38kh.onrender.com';
 // NOTE: keep this in sync by hand if data_items.py's ITEM_IMAGES changes —
 // there's no shared build step between the two repos yet.
 const _POKEAPI_ITEM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items';
-const _SITE_ITEM_BASE = 'https://niflheim-online.vercel.app/assets/items'; // TODO: confirm real domain
+const _SITE_ITEM_BASE = '/assets/items'; // relative path — works on whatever domain the site is actually deployed at
 const ITEM_IMAGES = {
   'Potion':          `${_POKEAPI_ITEM_BASE}/potion.png`,
   'Super Potion':    `${_POKEAPI_ITEM_BASE}/super-potion.png`,
