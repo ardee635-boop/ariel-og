@@ -365,6 +365,17 @@
     filter: blur(0.5px);
     box-shadow: 0 0 18px rgba(143,227,255,0.5) inset;
   }
+  .avatar-edit-btn{
+    position:absolute; bottom:-6px; right:-6px;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--accent, #5fb3ff); color:#081018;
+    border:2px solid var(--bg, #0b0f14);
+    font-size:12px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .avatar-edit-btn:active{ transform:scale(0.92); }
 
   .card-fields{ flex:1; display:flex; flex-direction:column; gap:7px; padding-top:2px; }
   .field-row{ display:flex; gap:14px; font-size:12.5px; }
@@ -533,8 +544,8 @@
     flex:1;
     overflow:hidden;
   }
-  .item-panel .inv-icon{ width:44px;height:44px;font-size:20px; flex-shrink:0; }
-  .item-panel .inv-icon img{ padding:5px; }
+  .item-panel .inv-icon{ width:72px;height:72px;font-size:32px; flex-shrink:0; }
+  .item-panel .inv-icon img{ padding:6px; }
   .item-panel-meta .name{ font-family:'Cinzel',serif; font-size:14.5px; font-weight:700; }
   .item-panel-meta .sub{ font-size:10.5px; color:var(--text-muted); margin-top:4px; }
 
@@ -1546,7 +1557,12 @@
   <div class="profile-wrap">
     <div class="profile-card glitch-in" id="profileCard" onclick="flipCard()">
       <div class="card-face card-front">
-        <div class="avatar-frame"><div class="swirl"></div></div>
+        <div class="avatar-frame" id="avatar-frame">
+          <div class="swirl" id="avatar-swirl"></div>
+          <img id="avatar-img" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:8px;">
+          <button class="avatar-edit-btn" id="avatar-edit-btn" title="Change picture">✎</button>
+          <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
+        </div>
         <div class="card-fields">
           <div class="field-row"><span class="k">Name:</span><span class="v" id="card-name">—</span></div>
           <div class="field-row"><span class="k">Level:</span><span class="v" id="card-level">—</span><span class="k" style="margin-left:auto">Rank:</span><span class="v" id="card-rank">—</span></div>
@@ -2072,9 +2088,28 @@ const ITEM_IMAGES = {
   'Atmo Ball':        `${_SITE_ITEM_BASE}/flying_ball.png`,
   'Floro Ball':       `${_SITE_ITEM_BASE}/grass_ball.png`,
   'Volt Ball':        `${_SITE_ITEM_BASE}/electric_ball.png`,
+  'Aether Ball':      `${_SITE_ITEM_BASE}/normal_ball.png`,
+  'Aqua Ball':        `${_SITE_ITEM_BASE}/water_ball.png`,
+  'Brawn Ball':       `${_SITE_ITEM_BASE}/fighting_ball.png`,
+  'Toxic Ball':       `${_SITE_ITEM_BASE}/poison_ball.png`,
+  'Terra Ball':       `${_SITE_ITEM_BASE}/ground_ball.png`,
+  'Psy Ball':         `${_SITE_ITEM_BASE}/psychic_ball.png`,
+  'Swarm Ball':       `${_SITE_ITEM_BASE}/bug_ball.png`,
+  'Crag Ball':        `${_SITE_ITEM_BASE}/rock_ball.png`,
+  'Phantom Ball':     `${_SITE_ITEM_BASE}/ghost_ball.png`,
+  'Wyrm Ball':        `${_SITE_ITEM_BASE}/dragon_ball.png`,
+  'Umbra Ball':       `${_SITE_ITEM_BASE}/dark_ball.png`,
+  'Alloy Ball':       `${_SITE_ITEM_BASE}/steel_ball.png`,
+  'Fae Ball':         `${_SITE_ITEM_BASE}/fairy_ball.png`,
   'Breadcrumbs':      `${_SITE_ITEM_BASE}/breadcrumbs.png`,
   'Essence':          `${_SITE_ITEM_BASE}/essence.png`,
   'Random Poké Egg':  `${_SITE_ITEM_BASE}/random_poke_egg.png`,
+  'Random Floro Egg': `${_SITE_ITEM_BASE}/random_floro_egg.png`,
+  'Small Experience Stone':  `${_SITE_ITEM_BASE}/exp_stone_small.png`,
+  'Mid Experience Stone':    `${_SITE_ITEM_BASE}/exp_stone_mid.png`,
+  'Big Experience Stone':    `${_SITE_ITEM_BASE}/exp_stone_big.png`,
+  'Large Experience Stone':  `${_SITE_ITEM_BASE}/exp_stone_large.png`,
+  'Great Experience Stone':  `${_SITE_ITEM_BASE}/exp_stone_great.png`,
 
   // Type-themed balls (18 types + 1 Random) — one shop item per type.
   'Normal Ball':      `${_SITE_ITEM_BASE}/normal_ball.png`,
@@ -2105,7 +2140,7 @@ const ITEM_IMAGES = {
 function itemIconHTML(name, sizeClass = 'inv-icon'){
   const url = ITEM_IMAGES[name];
   if(url){
-    return `<div class="${sizeClass}"><img src="${url}" alt="${name}" loading="lazy" onerror="this.parentElement.textContent='🎒';"/></div>`;
+    return `<div class="${sizeClass}"><img src="${url}" alt="${name}" loading="lazy" onerror="this.parentElement.textContent='🎒';" onclick="event.stopPropagation(); openImageLightbox('${url}');" style="cursor:pointer;"/></div>`;
   }
   return `<div class="${sizeClass}">🎒</div>`;
 }
@@ -2145,6 +2180,16 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Signup failed.');
+        if (window.PasswordCredential) {
+          try {
+            const cred = new PasswordCredential({
+              id: `${country}${phone}`,
+              password: password,
+              name: enteredName || `${country}${phone}`,
+            });
+            await navigator.credentials.store(cred);
+          } catch (_) { /* non-fatal — save prompt is a nice-to-have */ }
+        }
         submitBtn.classList.remove('loading');
         submitLabel.textContent = 'Sign Up';
         showToast();
@@ -2180,6 +2225,19 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     .then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed.');
+      // Explicitly tell the browser a login just succeeded so it can offer
+      // to save the password. A JS fetch() submit doesn't reliably trigger
+      // Chrome's save prompt on its own the way a native form POST does.
+      if (window.PasswordCredential) {
+        try {
+          const cred = new PasswordCredential({
+            id: `${loginCountry}${loginPhone}`,
+            password: loginPassword,
+            name: data.username || `${loginCountry}${loginPhone}`,
+          });
+          await navigator.credentials.store(cred);
+        } catch (_) { /* non-fatal — save prompt is a nice-to-have */ }
+      }
       sceneLogin.classList.remove('active');
       sceneTransition.classList.add('active');
       runBoot(data.username || 'Trainer');
@@ -2710,6 +2768,7 @@ async function enterHome(name){
     document.getElementById('card-guild').textContent = s.guild || '—';
     document.getElementById('card-coins').textContent = s.coins != null ? `₽${s.coins}` : '—';
     document.getElementById('card-bio').textContent = s.bio || 'No bio set yet.';
+    setAvatarImage(s.avatar_url || null);
     document.getElementById('card-pvp').textContent = `${s.pvp_wins ?? 0} W – ${s.pvp_losses ?? 0} L`;
     document.getElementById('card-badges-count').textContent = s.badges_count ?? 0;
     document.getElementById('card-caught').textContent = s.pokedex_caught ?? 0;
@@ -2828,6 +2887,50 @@ document.querySelectorAll('.tab-rect-wrap').forEach(wrap=>{
 function flipCard(){
   document.getElementById('profileCard').classList.toggle('flipped');
 }
+
+// Shows the player's picture in the profile card avatar frame if one is
+// set; otherwise falls back to the original decorative swirl so the card
+// never looks broken while the upload feature is still being rolled out.
+function setAvatarImage(url){
+  const img = document.getElementById('avatar-img');
+  const swirl = document.getElementById('avatar-swirl');
+  if(url){
+    img.src = url;
+    img.style.display = 'block';
+    swirl.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    swirl.style.display = 'block';
+  }
+}
+
+// Avatar upload wiring. Tapping the pencil opens the file picker; picking a
+// file shows an instant local preview so the UI feels responsive right away.
+// TODO(backend): once POST /api/player/avatar exists, replace the preview-only
+// block below with an actual upload — send the file, get back the stored
+// URL, then call setAvatarImage(returnedUrl) so the card reflects what's
+// actually saved (not just the local blob preview, which won't survive reload).
+(function initAvatarUpload(){
+  const editBtn = document.getElementById('avatar-edit-btn');
+  const fileInput = document.getElementById('avatar-file-input');
+  if(!editBtn || !fileInput) return;
+
+  editBtn.addEventListener('click', (e)=>{
+    e.stopPropagation(); // don't also flip the profile card
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('click', (e)=> e.stopPropagation());
+
+  fileInput.addEventListener('change', ()=>{
+    const file = fileInput.files && fileInput.files[0];
+    if(!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarImage(previewUrl);
+    // Upload call goes here once the endpoint exists — see TODO above.
+  });
+})();
 
 // shared: build a compact modal panel with rubber-band scroll, given inner HTML for head + body
 // Fullscreen image-only view — tap a sprite inside a detail panel to
