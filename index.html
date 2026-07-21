@@ -841,6 +841,15 @@
   /* ============ POKÉDEX ============ */
   .dex-tabs-wrap{ position:sticky; top:0; z-index:4; background:var(--bg); padding-top:4px; transition: transform 0.3s ease, opacity 0.3s ease; }
   .dex-tabs-wrap.hidden{ transform: translateY(-120%); opacity:0; }
+  .dex-search-wrap{ padding: 10px 20px 0; }
+  .dex-search-input{
+    width:100%; box-sizing:border-box;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    color:var(--text); font-size:13px; padding:9px 12px;
+    font-family:inherit; outline:none;
+  }
+  .dex-search-input::placeholder{ color:var(--text-muted); }
+  .dex-search-input:focus{ border-color:var(--accent, #5fb3ff); }
   .dex-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 0 20px 10px; }
   .dex-pills{ display:flex; gap:6px; border:1px solid var(--border); padding:3px; border-radius:8px; width:fit-content; }
   .dex-pills button{
@@ -1812,6 +1821,9 @@
   </div>
 
   <div class="dex-tabs-wrap" id="dexTabsWrap">
+    <div class="dex-search-wrap">
+      <input type="text" id="dexSearchInput" class="dex-search-input" placeholder="Search Pokémon…" autocomplete="off">
+    </div>
     <div class="dex-toolbar">
       <div class="dex-pills" id="dexPills">
         <button class="active" data-dex-tab="0">Seen</button>
@@ -3973,12 +3985,28 @@ function renderDexGrids(){
   if(typeof dexTypeFilter !== 'undefined' && dexTypeFilter){
     pool = pool.filter(p => (p.type || '').toLowerCase() === dexTypeFilter);
   }
+  if(typeof dexSearchQuery !== 'undefined' && dexSearchQuery){
+    const q = dexSearchQuery.toLowerCase();
+    // Matches on the real species name even for unseen entries (which
+    // display as "???") — the point of search is finding a species you
+    // know the name of, not being blocked by the mystery display.
+    pool = pool.filter(p => (p.name || '').toLowerCase().includes(q));
+  }
   const seenRows = dexSorted(pool.filter(p => p.status !== 'unseen'));
   const unseenRows = dexSorted(pool.filter(p => p.status === 'unseen'));
-  seenEl.innerHTML = seenRows.map(dexCardHTML).join('') || `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No matches for this type.</div>`;
-  unseenEl.innerHTML = unseenRows.map(dexCardHTML).join('') || `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No matches for this type.</div>`;
+  seenEl.innerHTML = seenRows.map(dexCardHTML).join('') || `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No matches.</div>`;
+  unseenEl.innerHTML = unseenRows.map(dexCardHTML).join('') || `<div class="lbl" style="opacity:0.6; padding:12px 4px;">No matches.</div>`;
   wireDexCards(seenEl);
   wireDexCards(unseenEl);
+}
+
+let dexSearchQuery = '';
+const dexSearchInput = document.getElementById('dexSearchInput');
+if(dexSearchInput){
+  dexSearchInput.addEventListener('input', ()=>{
+    dexSearchQuery = dexSearchInput.value.trim();
+    renderDexGrids();
+  });
 }
 
 // Seen/Unseen — swipeable pane, same pattern as Home's tab-rect-wrap,
