@@ -811,6 +811,21 @@
   .map-node .zn-danger{ font-size:9px; color:var(--text-muted); margin-top:3px; }
   .map-node.dim{ opacity:0.25; }
   .map-node.hl{ border-color:var(--ice); box-shadow: 0 0 18px rgba(143,227,255,0.35); }
+
+  /* zone-kind shapes */
+  .map-node.zn-town{ border-radius:8px; border:1.5px solid var(--zn-accent); }
+  .map-node.zn-city{
+    width:94px; border-radius:10px; border:2px solid var(--zn-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--zn-accent) 18%, transparent);
+  }
+  .map-node.zn-route{
+    border-radius:999px; border:1px dashed var(--zn-accent); padding:8px 10px;
+  }
+  .map-node.zn-wild{
+    border-radius:6px; border:1.5px solid var(--zn-accent);
+    transform:translate(-50%,-50%) rotate(45deg); width:64px; height:64px; justify-content:center;
+  }
+  .map-node.zn-wild > *{ transform:rotate(-45deg); }
   .map-zoom-controls{ position:absolute; right:10px; bottom:10px; display:flex; flex-direction:column; gap:6px; z-index:2; }
   .map-zoom-btn{
     width:28px;height:28px; border-radius:6px; border:1px solid var(--border);
@@ -823,6 +838,57 @@
     background:rgba(5,10,18,0.85); z-index:2;
   }
   .map-hint{ font-size:10px; color:var(--text-muted); text-align:center; padding: 2px 14px 14px; opacity:0.7; }
+
+  /* Scene-entry darkness: zooms focus onto the legend icon on first visit,
+     clears on any interaction elsewhere in the map body. */
+  .map-dropdown-body{ position:relative; }
+  .zn-entry-veil{
+    position:absolute; inset:0; z-index:10; pointer-events:none;
+    background: radial-gradient(circle at 30px 34px, rgba(8,12,20,0) 0px, rgba(8,12,20,0) 16px, rgba(8,12,20,0.97) 40px, rgba(8,12,20,0.97) 100%);
+    opacity:0;
+  }
+  .zn-entry-veil.enter{
+    opacity:1; pointer-events:auto;
+    animation: znEntryZoom 0.9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .zn-entry-veil.leave{ animation: znEntryClear 0.5s ease forwards; }
+  @keyframes znEntryZoom{
+    0%{ background: radial-gradient(circle at 30px 34px, rgba(8,12,20,0) 0px, rgba(8,12,20,0) 400px, rgba(8,12,20,0.97) 401px, rgba(8,12,20,0.97) 100%); }
+    100%{ background: radial-gradient(circle at 30px 34px, rgba(8,12,20,0) 0px, rgba(8,12,20,0) 16px, rgba(8,12,20,0.97) 40px, rgba(8,12,20,0.97) 100%); }
+  }
+  @keyframes znEntryClear{ 0%{ opacity:1; } 100%{ opacity:0; } }
+
+  /* Legend icon + reveal: icon is always tappable; tapping toggles the
+     legend content open, independent of the scene-entry veil above. */
+  .zn-legend-wrap{ position:relative; z-index:11; margin:14px 20px 4px; min-height:24px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .zn-legend-icon{
+    width:24px; height:24px; border-radius:50%; flex-shrink:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ice); font-size:12px; opacity:0.85;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel)); border:1px solid var(--border);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .zn-legend-icon:active{ transform:scale(0.9); }
+  .zn-legend-wrap.legend-open .zn-legend-icon{ box-shadow: 0 0 12px rgba(143,227,255,0.4); border-color:var(--ice); }
+  .zn-legend-reveal{
+    display:flex; flex-wrap:wrap; gap:10px 16px; opacity:0; max-width:0; overflow:hidden;
+    transition: opacity 0.3s ease;
+  }
+  .zn-legend-wrap.legend-open .zn-legend-reveal{
+    opacity:1; max-width:none; overflow:visible;
+    animation: znLegendFadeIn 0.5s ease both;
+  }
+  @keyframes znLegendFadeIn{
+    0%{ opacity:0; transform:translateY(4px) scale(0.9); filter: brightness(2.2); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:none; }
+  }
+  .zn-legend-item{ display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-muted); }
+  .zn-legend-shape{ display:inline-block; width:14px; height:14px; border:1.5px solid var(--zn-accent); flex-shrink:0; }
+  .zn-legend-shape.zn-town{ border-radius:3px; }
+  .zn-legend-shape.zn-city{ border-radius:4px; border-width:2px; box-shadow:0 0 0 2px color-mix(in srgb, var(--zn-accent) 18%, transparent); }
+  .zn-legend-shape.zn-route{ border-radius:999px; border-style:dashed; }
+  .zn-legend-shape.zn-wild{ border-radius:2px; transform:rotate(45deg); }
+
 
   .zone-list{ position:relative; z-index:1; margin: 18px 20px 0; display:flex; flex-direction:column; gap:8px; }
   .zone-row{ border:1px solid var(--border); border-radius:8px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); overflow:hidden; }
@@ -1747,6 +1813,16 @@
       <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="map-dropdown-body" id="mapBody">
+      <div class="zn-entry-veil" id="znEntryVeil"></div>
+      <div class="zn-legend-wrap" id="znLegendWrap">
+        <div class="zn-legend-icon" id="znLegendIcon">◆</div>
+        <div class="zn-legend-reveal" id="znLegendReveal">
+          <div class="zn-legend-item"><span class="zn-legend-shape zn-town" style="--zn-accent:#8FE3FF"></span>Town</div>
+          <div class="zn-legend-item"><span class="zn-legend-shape zn-city" style="--zn-accent:#C9A8FF"></span>City</div>
+          <div class="zn-legend-item"><span class="zn-legend-shape zn-route" style="--zn-accent:#7C8AA0"></span>Route</div>
+          <div class="zn-legend-item"><span class="zn-legend-shape zn-wild" style="--zn-accent:#FBD34D"></span>Wild Zone</div>
+        </div>
+      </div>
       <div class="type-filter-row" id="typeFilterRow"></div>
       <div class="world-map-viewport" id="mapViewport">
         <div class="world-map-inner" id="mapInner">
@@ -3080,7 +3156,7 @@ const RIBBON_ITEMS = [
     icon:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>' },
   { key:'leaderboard',label:'Leaders', scene:'scene-leaderboard',
     icon:'<path d="M8 20V10M14 20V4M20 20v-6M4 20v-3"/>' },
-  { key:'zones',      label:'Zones',   scene:'scene-zones',
+  { key:'zones',      label:'Map',   scene:'scene-zones',
     icon:'<path d="M12 2l3 7h7l-5.5 4.3L18 21l-6-4.5L6 21l1.5-7.7L2 9h7z"/>' },
   { key:'shop',       label:'Shop',    scene:'scene-shop',
     icon:'<path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 13a3 3 0 006 0"/>' },
@@ -3725,36 +3801,43 @@ const ZN_TYPES = {
   fairy:    { label: 'Fairy',    color: '#F0ABD1' },
 };
 
+const ZONE_KIND = {
+  town:  { label: 'Town',  shape: 'square',   accent: '#8FE3FF' },
+  city:  { label: 'City',  shape: 'square-lg',accent: '#C9A8FF' },
+  route: { label: 'Route', shape: 'pill',     accent: '#7C8AA0' },
+  wild:  { label: 'Wild Zone', shape: 'diamond', accent: '#FBD34D' },
+};
+
 const ZONES = [
-  { id: 'oak_town', name: 'Oak Town', kind: 'Town (Start)', danger: 'Safe', dangerColor: '#4ADE80',
+  { id: 'oak_town', name: 'Oak Town', kind: 'Town (Start)', zoneKind: 'town', danger: 'Safe', dangerColor: '#4ADE80',
     x: 50, y: 32, types: [],
     desc: 'The starter town. Home to the Pokélab where every trainer\'s journey through Niflheim begins. No wild encounters here.',
     connects: 'Route 1 (west)' },
-  { id: 'greenwood_town', name: 'Greenwood Town', kind: 'Town · Gym', danger: 'Safe', dangerColor: '#4ADE80',
+  { id: 'greenwood_town', name: 'Greenwood Town', kind: 'Town · Gym', zoneKind: 'town', danger: 'Safe', dangerColor: '#4ADE80',
     x: 24, y: 32, types: [],
     desc: 'West of Route 1. Home to Gym Leader Levin — Nature type, calm demeanor.',
     connects: 'Route 1 (east) · Fauna (west) · Route 3 (south)' },
-  { id: 'fauna', name: 'Fauna', kind: 'Wild Zone', danger: 'Moderate', dangerColor: '#FBD34D',
+  { id: 'fauna', name: 'Fauna', kind: 'Wild Zone', zoneKind: 'wild', danger: 'Moderate', dangerColor: '#FBD34D',
     x: 8, y: 14, types: ['grass', 'bug', 'poison'],
     desc: 'Wild zone west of Greenwood Town. Dense grass and bug encounters.',
     connects: 'Greenwood Town (east)', levelRange: '8–20' },
-  { id: 'route_1', name: 'Route 1', kind: 'Route', danger: 'Mild', dangerColor: '#8FE3FF',
+  { id: 'route_1', name: 'Route 1', kind: 'Route', zoneKind: 'route', danger: 'Mild', dangerColor: '#8FE3FF',
     x: 37, y: 32, types: ['normal', 'bug', 'water'],
     desc: 'Connects Oak Town to Greenwood Town. Gentle early-game encounters.',
     connects: 'Oak Town (east) · Greenwood Town (west)', levelRange: '1–8' },
-  { id: 'route_3', name: 'Route 3', kind: 'Route', danger: 'Mild', dangerColor: '#8FE3FF',
+  { id: 'route_3', name: 'Route 3', kind: 'Route', zoneKind: 'route', danger: 'Mild', dangerColor: '#8FE3FF',
     x: 24, y: 50, types: ['normal', 'ground'],
     desc: 'South of Greenwood Town, leading toward Thunderplains.',
     connects: 'Greenwood Town (north) · Thunderplains (south)', levelRange: '6–14' },
-  { id: 'thunderplains', name: 'Thunderplains', kind: 'Wild Zone', danger: 'Moderate', dangerColor: '#FBD34D',
+  { id: 'thunderplains', name: 'Thunderplains', kind: 'Wild Zone', zoneKind: 'wild', danger: 'Moderate', dangerColor: '#FBD34D',
     x: 24, y: 68, types: ['electric', 'normal'],
     desc: 'Electric/mixed wild route south of Route 3, leading to Hydro Town.',
     connects: 'Route 3 (north) · Hydro Town (south)', levelRange: '12–24' },
-  { id: 'hydro_town', name: 'Hydro Town', kind: 'Town · Gym', danger: 'Safe', dangerColor: '#4ADE80',
+  { id: 'hydro_town', name: 'Hydro Town', kind: 'City · Gym', zoneKind: 'city', danger: 'Safe', dangerColor: '#4ADE80',
     x: 24, y: 84, types: [],
-    desc: 'Home to Gym Leader Eren — Water type.',
+    desc: 'A bustling hub city. Home to Gym Leader Eren — Water type.',
     connects: 'Thunderplains (north) · Oceana (further out)' },
-  { id: 'oceana', name: 'Oceana', kind: 'Wild Zone · Spiral Maze', danger: 'Extreme', dangerColor: '#ff8a8a',
+  { id: 'oceana', name: 'Oceana', kind: 'Wild Zone · Spiral Maze', zoneKind: 'wild', danger: 'Extreme', dangerColor: '#ff8a8a',
     x: 40, y: 92, types: ['water'],
     desc: 'A tiered, spiral maze water zone off Hydro Town. Danger scales the deeper you go.',
     connects: 'Hydro Town', levelRange: '20+' },
@@ -3802,7 +3885,7 @@ function renderWorldMap(){
   ZONES.forEach(z=>{
     const dim = znActiveType && !z.types.includes(znActiveType);
     html += `
-      <div class="map-node${dim?' dim':''}" data-zone="${z.id}" style="left:${z.x/100*W}px; top:${z.y/100*H}px;">
+      <div class="map-node zn-${z.zoneKind}${dim?' dim':''}" data-zone="${z.id}" style="left:${z.x/100*W}px; top:${z.y/100*H}px; --zn-accent:${ZONE_KIND[z.zoneKind].accent};">
         <div class="zn-name">${z.name}</div>
         <div class="zn-danger" style="color:${z.dangerColor}">${z.danger}</div>
       </div>`;
@@ -3851,7 +3934,12 @@ function renderZoneList(){
 const mapDropdown = document.getElementById('mapDropdown');
 const mapToggleBtn = document.getElementById('mapToggle');
 if(mapToggleBtn){
-  mapToggleBtn.addEventListener('click', ()=> mapDropdown.classList.toggle('open'));
+  mapToggleBtn.addEventListener('click', ()=> {
+    mapDropdown.classList.toggle('open');
+    if(mapDropdown.classList.contains('open') && window._triggerZoneEntryVeil){
+      setTimeout(window._triggerZoneEntryVeil, 420);
+    }
+  });
 }
 
 (function(){
@@ -3893,6 +3981,43 @@ if(mapToggleBtn){
 
 renderTypeFilterRow();
 renderWorldMap();
+initZoneLegend();
+initZoneEntryVeil();
+
+function initZoneLegend(){
+  const wrap = document.getElementById('znLegendWrap');
+  const icon = document.getElementById('znLegendIcon');
+  if(!wrap || !icon) return;
+  icon.addEventListener('click', () => {
+    wrap.classList.toggle('legend-open');
+  });
+}
+
+// Scene-entry darkness: the first time the Map scene opens, a radial veil
+// zooms in around the legend icon to draw the eye there. Tapping ANYWHERE
+// else in the map body (the map, filter chips, zoom controls, zone list)
+// clears the veil back to the normal view — it does not require tapping
+// the icon itself, and it only ever plays once per browser.
+const ZN_ENTRY_SEEN_KEY = 'nif_zn_entry_veil_seen';
+function initZoneEntryVeil(){
+  const veil = document.getElementById('znEntryVeil');
+  const body = document.getElementById('mapBody');
+  if(!veil || !body) return;
+  if(localStorage.getItem(ZN_ENTRY_SEEN_KEY) === '1') return;
+
+  const clear = () => {
+    veil.classList.remove('enter');
+    veil.classList.add('leave');
+    localStorage.setItem(ZN_ENTRY_SEEN_KEY, '1');
+    setTimeout(() => veil.remove(), 550);
+    body.removeEventListener('pointerdown', clear);
+  };
+  body.addEventListener('pointerdown', clear);
+  window._triggerZoneEntryVeil = () => {
+    if(localStorage.getItem(ZN_ENTRY_SEEN_KEY) === '1') return;
+    veil.classList.add('enter');
+  };
+}
 renderZoneList();
 
 // ══════════════════════════════════════════════════════════════
