@@ -328,7 +328,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
 setStyle(0);spawn('ai');camD=15;requestAnimationFrame(loop);
 async function boot(){if(!TICKET)return;document.body.classList.add('srv');show('menu',0);
  try{const r=await fetch(API_BASE+'/api/niflheim/battle/'+encodeURIComponent(TICKET),{credentials:'include'}),j=await r.json();
-  if(r.status===401){show('login',1);return}if(!r.ok){toast(j.error||'Battle unavailable');return}DATA=j;start(j.foe.rig)}catch(e){toast('Could not reach the server')}}
+  if(r.status===401){location.replace('index.html?world=niflheim&t='+encodeURIComponent(TICKET));return}if(!r.ok){toast(j.error||'Battle unavailable');return}DATA=j;start(j.foe.rig)}catch(e){toast('Could not reach the server')}}
 $('lgo').onclick=async()=>{try{const r=await fetch(API_BASE+'/api/auth/login',{credentials:'include',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({countryCode:$('lc').value,phoneNumber:$('lp').value,password:$('lw').value})});
  if(r.ok)location.reload();else $('lerr').textContent=(await r.json()).error||'Login failed'}catch(e){$('lerr').textContent='Server unreachable'}};
 boot();
