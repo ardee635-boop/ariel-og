@@ -2244,6 +2244,16 @@ let shopCategoryFilter = null; // Shop category filter — null = "None"/show al
 let _shopCatalog = null; // shop item catalog, cached after first load — also used by renderInventory's category lookup
 let _questMine = { registered: false, story: [], board: [] }; // quest data — same TDZ hazard as above; _activeQuestCount() runs during renderRibbons() on initial load, before this line used to be reached
 
+// ── One login for both worlds ──────────────────────────────────
+// Links arrive as ?world=niflheim&t=<ticket>. Login + boot are shared;
+// the first world-specific screen is where it branches
+// (Pokémon -> lore intro / starter reveal, Niflheim -> arena.html).
+const _WORLD = new URLSearchParams(window.location.search).get('world');
+const _NIF_TICKET = new URLSearchParams(window.location.search).get('t');
+function goNiflheim(){
+  window.location.replace('arena.html' + (_NIF_TICKET ? '?t=' + encodeURIComponent(_NIF_TICKET) : ''));
+}
+
 document.getElementById('auth-form').addEventListener('submit', (e) => {
   e.preventDefault();
   if (submitBtn.classList.contains('loading')) return;
@@ -2373,6 +2383,7 @@ function runBoot(name){
 
 // Intro (lore) screen — plays once after auth, before Home
 function enterIntro(name){
+  if(_WORLD === 'niflheim'){ goNiflheim(); return; }   // shared login done -> Niflheim's own screens
   window._pendingTrainerName = name;
   sceneIntro.classList.add('active');
 }
@@ -4850,6 +4861,7 @@ switchScene(document.querySelector('.scene.active')?.id || 'scene-login');
     if(!meRes.ok) return; // no valid session — normal login screen stays up
     const me = await meRes.json();
     const name = me.username || 'Trainer';
+    if(_WORLD === 'niflheim'){ goNiflheim(); return; }
 
     document.getElementById('scene-login').classList.remove('active');
     window._pendingTrainerName = name;
