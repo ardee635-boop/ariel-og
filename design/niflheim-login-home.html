@@ -153,6 +153,40 @@ body.dr #drawer{transform:none}body.dr #dim{opacity:1;pointer-events:auto}
 .nt.flash{animation:nf .9s ease}@keyframes nf{30%{box-shadow:0 0 0 1px var(--ice),0 0 26px rgba(143,227,255,.5)}}
 .bell{position:relative}.bell:after{content:"";position:absolute;top:4px;right:5px;width:8px;height:8px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff4d5e}.bell.read:after{display:none}
 .rt{display:flex;gap:8px;align-items:center}
+/* explore / duel / friends */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.big{position:relative;display:block;padding:0;overflow:hidden;min-height:196px;cursor:pointer;color:var(--text);font:inherit;text-align:left}
+.big .art{display:block;width:100%;height:132px}
+.big .lb2{position:absolute;left:0;right:0;bottom:0;padding:12px 14px 13px;background:linear-gradient(transparent,rgba(5,10,18,.94) 34%)}
+.big b{font:700 17px 'Cinzel',serif;letter-spacing:.1em;display:flex;align-items:center;justify-content:space-between}
+.big b svg{width:16px;height:16px;color:var(--ice)}
+.big span{font-size:11.5px;color:var(--muted);line-height:1.4;display:block;margin-top:2px}
+.big .pill{position:absolute;top:10px;right:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--ice-dim);border-radius:99px;padding:3px 9px;color:var(--ice);background:rgba(5,10,18,.7)}
+.sech{display:flex;align-items:center;justify-content:space-between;margin:22px 2px 10px}
+.sech h3{font:600 11px 'Inter';letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0}
+.sech em{font-style:normal;font-size:11px;color:var(--ice)}
+.prow{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;margin-bottom:10px;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.prow:before,.prow:after{display:none}
+.ava{width:44px;height:44px;flex:none;border-radius:8px;border:1px solid var(--ice-dim);background:radial-gradient(circle at 50% 40%,#2a6f8c,#0a1622 75%);display:grid;place-items:center;font:600 15px 'Cinzel',serif;color:var(--frost);position:relative}
+.ava.on:after{content:"";position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid #081420}
+.prow .mid{flex:1;min-width:0}.prow b{font:600 14px 'Cinzel',serif;letter-spacing:.05em;display:block}.prow .sm{font-size:11.5px;color:var(--muted)}
+.mini{flex:none;background:rgba(143,227,255,.1);border:1px solid var(--ice-dim);border-radius:6px;color:var(--ice);font:600 11.5px 'Inter';letter-spacing:.06em;padding:8px 12px;cursor:pointer}
+.mini.no{border-color:rgba(255,138,138,.4);color:var(--red);background:none}.mini[disabled]{opacity:.5}
+.rk{width:26px;text-align:center;font:700 14px 'Cinzel',serif;color:var(--muted);flex:none}.rk.t{color:var(--gold)}
+.prow.me{border-color:var(--ice)}
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font:500 12px 'Inter';letter-spacing:.14em;text-transform:uppercase;padding:22px 0 0;cursor:pointer}
+.back svg{width:14px;height:14px}
+.pp{padding:22px 18px;margin-top:14px;text-align:center}
+.pp .av{width:96px;height:96px;margin:0 auto 12px}.pp .av i{width:72%;height:72%}
+.pp h2{font:700 24px 'Cinzel',serif;letter-spacing:.06em;margin:0}.pp .sub2{font-size:12px;color:var(--muted);margin:4px 0 16px}
+.pp .stats{margin:0 0 6px}
+#sheetdim{position:fixed;inset:0;background:rgba(2,6,12,.72);opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.7,.2,1);max-width:520px;margin:0 auto;padding:22px 20px calc(24px + env(safe-area-inset-bottom,0px));background:linear-gradient(160deg,#0D1F30,#081420 80%);border:1.5px solid var(--ice-dim);border-bottom:0;border-radius:16px 16px 0 0;text-align:center}
+body.sh #sheet{transform:none}body.sh #sheetdim{opacity:1;pointer-events:auto}
+#sheet h3{font:700 20px 'Cinzel',serif;letter-spacing:.08em;margin:6px 0 6px}#sheet p{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 4px}
+#sheet .eyebrow{justify-content:center}
+.sgrid{display:grid;gap:10px;margin-top:16px}
+.sgrid .go{margin:0}.go.ghost{background:none;border-color:var(--border);color:var(--muted)}
 /* home */
 #home{padding-bottom:96px}
 .wrap{max-width:520px;margin:0 auto;padding:0 20px;position:relative}
@@ -276,26 +310,27 @@ nav .on{color:var(--ice)}nav .on:before{content:"";position:absolute;top:-1px;wi
   <div class="sx"><svg viewBox="0 0 24 24" fill="none" stroke="#8FE3FF" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M7 8h10a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2v-9a2 2 0 012-2zM9 8V6a3 3 0 016 0v2M9 14h6" fill="rgba(143,227,255,.15)"/></svg><div><b>17</b><span>Items</span></div></div>
  </div>
 
- <div class="card hb">
-  <svg viewBox="0 0 400 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
-   <defs><linearGradient id="hs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06101c"/><stop offset="1" stop-color="#0f2b40"/></linearGradient>
-   <radialGradient id="hm"><stop offset="0" stop-color="#C9F3FF" stop-opacity=".55"/><stop offset="1" stop-color="#8FE3FF" stop-opacity="0"/></radialGradient>
-   <linearGradient id="hf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#081420" stop-opacity=".96"/><stop offset=".5" stop-color="#081420" stop-opacity=".7"/><stop offset="1" stop-color="#081420" stop-opacity="0"/></linearGradient></defs>
-   <rect width="400" height="200" fill="url(#hs)"/>
-   <circle cx="262" cy="52" r="52" fill="url(#hm)"/><circle cx="262" cy="52" r="23" fill="#C9F3FF"/><circle cx="262" cy="52" r="23" fill="#3E7A94" opacity=".25"/>
-   <path d="M150 200l50-80 40 30 55-70 55 60 50-30v90z" fill="#0f2a3d"/><path d="M295 80l22 24-14-4-8 12-6-14z" fill="#8FE3FF" opacity=".25"/>
-   <g fill="#07131f"><path d="M268 168v-34h8v-12l4-26 4 26v12h6v-24l4-34 4 34v24h6v-54l6-44 6 44v54h8v-30l4-24 4 24v30h7v-16l4-16 4 16v16h8v-26l4-18 4 18v26h10v50H268z"/></g>
-   <rect x="326" y="150" width="4" height="14" rx="2" fill="#8FE3FF"/><g fill="#8FE3FF" opacity=".7"><rect x="312" y="122" width="2" height="4"/><rect x="342" y="132" width="2" height="4"/></g>
-   <path d="M250 200l40-26 60-8 60 14v20z" fill="#0b2132"/><path d="M262 188l50-14 50 4 50 14v8H262z" fill="#a9d9ef" opacity=".18"/>
-   <g fill="#06111b"><path d="M372 200l9-34 9 34zM384 200l8-26 8 26zM240 200l6-18 6 18z"/></g>
-   <rect width="400" height="200" fill="url(#hf)"/>
-  </svg>
-  <div class="tx">
-   <div class="eyebrow">Moonlit Colosseum</div>
-   <h2>BATTLE ARENA</h2>
-   <p>Fight, rise, and prove your strength.</p>
-   <a class="cta" href="arena.html"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg>Enter Arena<svg class="ch" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></span></a>
-  </div>
+ <div class="sech" style="margin-top:6px"><h3>Go fight</h3></div>
+ <div class="pair">
+  <button class="card big" id="goExplore">
+   <svg class="art" viewBox="0 0 200 132" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="ex1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06101c"/><stop offset="1" stop-color="#143049"/></linearGradient></defs>
+    <rect width="200" height="132" fill="url(#ex1)"/><circle cx="150" cy="30" r="22" fill="#8FE3FF" opacity=".12"/><circle cx="150" cy="30" r="11" fill="#C9F3FF"/>
+    <path d="M0 96l36-40 28 26 34-46 40 52 30-26 32 34v36H0z" fill="#0f2a3d"/>
+    <path d="M-10 132C40 112 80 118 120 106S190 98 210 104v28z" fill="#1b3a52"/>
+    <path d="M70 132C84 116 96 108 112 100" stroke="#8FE3FF" stroke-width="1.6" stroke-dasharray="3 5" fill="none" opacity=".6" stroke-linecap="round"/>
+    <g fill="#08161f"><path d="M18 118l9-30 9 30zM34 120l7-22 7 22zM164 120l8-26 8 26zM178 122l6-18 6 18z"/></g></svg>
+   <span class="pill">Wild</span>
+   <div class="lb2"><b>EXPLORE<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></b><span>Search the frost for a fight.</span></div>
+  </button>
+  <button class="card big" id="goDuel">
+   <svg class="art" viewBox="0 0 200 132" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="132" fill="url(#ex1)"/>
+    <circle cx="100" cy="62" r="46" fill="#8FE3FF" opacity=".08"/>
+    <g stroke="#C9F3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M76 38l48 48M124 38L76 86M70 92l10-10M130 92l-10-10"/></g>
+    <g fill="#08161f"><circle cx="46" cy="84" r="9"/><path d="M34 112c0-14 6-22 12-22s12 8 12 22z"/><circle cx="154" cy="84" r="9"/><path d="M142 112c0-14 6-22 12-22s12 8 12 22z"/></g>
+    <circle cx="100" cy="62" r="5" fill="#fff"/></svg>
+   <span class="pill" id="duelPill">2 online</span>
+   <div class="lb2"><b>DUEL<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></b><span>Challenge a friend.</span></div>
+  </button>
  </div>
 
  <div class="tl2">
@@ -317,6 +352,32 @@ nav .on{color:var(--ice)}nav .on:before{content:"";position:absolute;top:-1px;wi
 
  <div class="card nt" id="nt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M3 10v4h4l7 4V6L7 10zM17 9a4 4 0 010 6M19 6a8 8 0 010 12"/></svg><div><b>System Notice</b><span>Welcome back, <span id="wn2">Korii</span>!</span></div><em>2h ago</em></div>
 </div>
+
+ <div class="view" id="v-friends">
+  <div class="vt"><h1>FRIENDS</h1><span class="chip" style="color:var(--ice);border-color:var(--ice-dim)" id="fcount">3</span></div>
+  <div class="sech" style="margin-top:0"><h3>Duel a friend</h3><em>Tap to challenge</em></div>
+  <div id="flist"></div>
+  <div class="sech"><h3>Requests</h3><em id="rcount"></em></div>
+  <div id="rlist"></div>
+  <p class="note">To add someone: tap their name in Rankings to open their page, or send <b style="color:var(--ice)">.friendreq Name</b> on WhatsApp.</p>
+ </div>
+
+ <div class="view" id="v-rank">
+  <div class="vt"><h1>RANKINGS</h1><span class="chip" style="color:var(--ice);border-color:var(--ice-dim)">By level</span></div>
+  <div id="rlistall"></div>
+  <p class="note">Tap a name to open their page.</p>
+ </div>
+
+ <div class="view" id="v-profile">
+  <button class="back" id="pback" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>Back</button>
+  <div class="card pp">
+   <div class="av"><i></i></div>
+   <h2 id="ppn">Name</h2><div class="sub2" id="pps">Lv 1</div>
+   <div class="stats"><div class="st"><b id="ppw">0</b><span>Wins</span></div><div class="st"><b id="ppl">0</b><span>Losses</span></div><div class="st"><b id="ppv">0</b><span>Level</span></div></div>
+   <button class="go" id="ppa" type="button">Add friend</button>
+   <p class="note" id="ppnote"></p>
+  </div>
+ </div>
 
  <div class="view" id="v-shop">
   <div class="vt"><h1>SHOP</h1><span class="chip" id="coins">₡ 1,240</span></div>
@@ -343,6 +404,8 @@ nav .on{color:var(--ice)}nav .on:before{content:"";position:absolute;top:-1px;wi
  </div>
 </div></div>
 
+<div id="sheetdim"></div>
+<div id="sheet"><div class="eyebrow" id="shE"></div><h3 id="shT"></h3><p id="shP"></p><div class="sgrid" id="shB"></div></div>
 <div id="dim"></div>
 <aside id="drawer" aria-label="Menu">
  <div class="dh"><div class="av"><i></i></div><div><b id="dn">Korii</b><span>Level 12 Adventurer</span></div></div>
@@ -354,10 +417,10 @@ nav .on{color:var(--ice)}nav .on:before{content:"";position:absolute;top:-1px;wi
 
 <nav>
  <button class="on" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v11h5v-6h4v6h5V10"/></svg>Home</button>
- <a href="arena.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg>Arena</a>
+ <button data-tab="friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.6-4 3.200-6 6.500-6s5.900 2 6.500 6M16 5a3.500 3.500 0 010 7M18.500 14.500c1.700.8 2.800 2.600 3 5.500"/></svg>Friends</button>
  <button data-tab="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.200 12H5.200zM8 8V6a4 4 0 018 0v2"/></svg>Shop</button>
  <button data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></svg>Map</button>
- <button data-soon="Rankings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 01-10 0zM7 5H3v2a4 4 0 004 4M17 5h4v2a4 4 0 01-4 4M12 14v4M8 21h8"/></svg>Rankings</button>
+ <button data-tab="rank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 01-10 0zM7 5H3v2a4 4 0 004 4M17 5h4v2a4 4 0 01-4 4M12 14v4M8 21h8"/></svg>Rankings</button>
 </nav>
 
 <script>
@@ -397,6 +460,52 @@ function tab(t){document.querySelectorAll('.view').forEach(v=>v.classList.toggle
  document.querySelectorAll('nav [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$('home').scrollTop=0}
 document.querySelectorAll('nav [data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 document.querySelectorAll('[data-tab-go]').forEach(b=>b.onclick=()=>tab(b.dataset.tabGo));
+// ---- sample social data (preview only) ----
+let me={n:$('pn').textContent,lv:12};
+const PLAYERS=[{n:'Frostbane',lv:21,w:88,l:30,on:1},{n:'Mira',lv:17,w:61,l:34,on:0},{n:'Thorne',lv:14,w:40,l:22,on:1},{n:'Ashka',lv:13,w:35,l:19,on:0},{n:'Korii',lv:12,w:29,l:17,on:1,me:1},{n:'Vexa',lv:11,w:22,l:25,on:0},{n:'Dunmar',lv:9,w:15,l:21,on:0}];
+const rel={Frostbane:'friend',Mira:'friend',Thorne:'friend',Ashka:'incoming'}; // friend | incoming | sent | none
+const ini=n=>n.slice(0,2).toUpperCase();
+function sheet(o){$('shE').textContent=o.e||'';$('shT').textContent=o.t;$('shP').textContent=o.p||'';const b=$('shB');b.innerHTML='';
+ o.b.forEach(x=>{const e=document.createElement(x.href?'a':'button');e.className='go'+(x.ghost?' ghost':'');e.textContent=x.l;if(x.href)e.href=x.href;e.onclick=()=>{closeSheet();x.f&&x.f()};b.appendChild(e)});document.body.classList.add('sh')}
+function closeSheet(){document.body.classList.remove('sh')}
+$('sheetdim').onclick=closeSheet;
+function renderSocial(){
+ const fr=PLAYERS.filter(p=>rel[p.n]==='friend'&&!p.me),rq=PLAYERS.filter(p=>rel[p.n]==='incoming');
+ $('fcount').textContent=fr.length;$('duelPill').textContent=fr.filter(p=>p.on).length+' online';$('rcount').textContent=rq.length?rq.length+' new':'';
+ $('flist').innerHTML='';fr.forEach(p=>{const d=document.createElement('button');d.className='card prow';
+  d.innerHTML=`<div class="ava ${p.on?'on':''}">${ini(p.n)}</div><div class="mid"><b>${p.n}</b><span class="sm">Lv ${p.lv} · ${p.on?'Online':'Offline'}</span></div><span class="mini">Duel</span>`;
+  d.onclick=()=>sheet({e:'Duel',t:p.n,p:'Lv '+p.lv+'. '+(p.on?'They are online and can accept right now.':'They are offline. They will see your challenge when they are back.'),
+   b:[{l:'Send challenge',f:()=>sent(p)},{l:'View page',ghost:1,f:()=>openProfile(p.n,'friends')}]});$('flist').appendChild(d)});
+ if(!fr.length)$('flist').innerHTML='<p class="note">No friends yet.</p>';
+ $('rlist').innerHTML='';rq.forEach(p=>{const d=document.createElement('div');d.className='card prow';
+  d.innerHTML=`<div class="ava">${ini(p.n)}</div><div class="mid"><b>${p.n}</b><span class="sm">Lv ${p.lv} wants to be friends</span></div><button class="mini" data-a>Accept</button><button class="mini no" data-d>✕</button>`;
+  d.querySelector('[data-a]').onclick=()=>{rel[p.n]='friend';renderSocial();toast(p.n+' is now your friend')};
+  d.querySelector('[data-d]').onclick=()=>{rel[p.n]='none';renderSocial()};$('rlist').appendChild(d)});
+ if(!rq.length)$('rlist').innerHTML='<p class="note" style="margin:0">No pending requests.</p>';
+ $('rlistall').innerHTML='';[...PLAYERS].sort((a,b)=>b.lv-a.lv).forEach((p,i)=>{const d=document.createElement('button');d.className='card prow'+(p.me?' me':'');
+  d.innerHTML=`<div class="rk ${i<3?'t':''}">${i+1}</div><div class="ava">${ini(p.n)}</div><div class="mid"><b>${p.n}${p.me?' (you)':''}</b><span class="sm">${p.w} wins</span></div><span class="sm">Lv ${p.lv}</span>`;
+  d.onclick=()=>openProfile(p.n,'rank');$('rlistall').appendChild(d)});
+}
+function sent(p){sheet({e:'Challenge sent',t:'Waiting for '+p.n,p:'You will be pulled into the fight the moment they accept.',b:[{l:'Okay',ghost:1}]})}
+let pfrom='rank',pcur=null;
+function openProfile(n,from){pfrom=from;pcur=PLAYERS.find(p=>p.n===n);const p=pcur;
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id==='v-profile'));
+ document.querySelectorAll('nav [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===from));$('home').scrollTop=0;
+ $('ppn').textContent=p.n;$('pps').textContent=p.me?'This is you':'Misty Glade · '+(p.on?'Online':'Offline');$('ppw').textContent=p.w;$('ppl').textContent=p.l;$('ppv').textContent=p.lv;paintBtn()}
+function paintBtn(){const p=pcur,b=$('ppa'),r=rel[p.n]||'none',n=$('ppnote');b.disabled=false;b.className='go';n.textContent='';
+ if(p.me){b.style.display='none';return}b.style.display='';
+ if(r==='friend'){b.textContent='Challenge to a duel';b.onclick=()=>sent(p);n.textContent='You are friends.'}
+ else if(r==='sent'){b.textContent='Request sent';b.disabled=true;b.className='go ghost'}
+ else if(r==='incoming'){b.textContent='Accept friend request';b.onclick=()=>{rel[p.n]='friend';renderSocial();paintBtn();toast(p.n+' is now your friend')}}
+ else{b.textContent='Add friend';b.onclick=()=>{rel[p.n]='sent';paintBtn();toast('Friend request sent to '+p.n)};n.textContent='Or send .friendreq '+p.n+' on WhatsApp.'}}
+$('pback').onclick=()=>tab(pfrom);
+renderSocial();
+// Explore: find a wild fight, then the arena opens. Arena is only seen when a fight starts.
+const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
+$('goExplore').onclick=()=>{const f=FOES[Math.random()*FOES.length|0];
+ sheet({e:'Explore',t:'Searching the frost…',p:'You head out past Misty Glade.',b:[]});
+ setTimeout(()=>{sheet({e:'Fight found',t:f.n+' · Lv '+f.lv,p:'It has spotted you. Fight or run?',b:[{l:'Fight',href:'arena.html'},{l:'Run',ghost:1}]})},1300)};
+$('goDuel').onclick=()=>tab('friends');
 $('lvb').onclick=()=>$('pc').classList.toggle('open');
 $('bell').onclick=()=>{tab('home');$('bell').classList.add('read');const n=$('nt');n.scrollIntoView({behavior:'smooth',block:'center'});n.classList.remove('flash');void n.offsetWidth;n.classList.add('flash')};
 let coins=1240;
