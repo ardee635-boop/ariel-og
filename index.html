@@ -555,6 +555,7 @@ async function enter(username,withBoot){
  if(forwardToArena())return;
  let seen=false;const k='nif_welcomed_'+(username||'');try{seen=!!localStorage.getItem(k);localStorage.setItem(k,'1')}catch(e){}
  if(seen)toHome();else openWelcome((p&&p.name)||username);
+ if(window.nifRestore)window.nifRestore();
 }
 $('form').addEventListener('submit',async e=>{
  e.preventDefault();const err=$('lerr'),btn=$('sub');err.textContent='';
@@ -569,7 +570,7 @@ $('form').addEventListener('submit',async e=>{
   const r=await api('/api/auth/'+(mode==='signup'?'signup':'login'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   btn.disabled=false;btn.textContent=old;
   if(!r.ok){err.textContent=r.j.error||'That did not work. Try again.';return}
-  enter(r.j.username||username,true);
+  if(window.nifClearState)window.nifClearState();enter(r.j.username||username,true);
  }catch(x){btn.disabled=false;btn.textContent=old;err.textContent='Server unreachable. It may be waking up, try again in a moment.'}
 });
 api('/api/auth/me').then(r=>{if(r.ok&&r.j.username)enter(r.j.username,false)}).catch(()=>{});
@@ -695,6 +696,7 @@ $('goDuel').onclick=()=>tab('friends');
 const mv=$('v-map'),canvas=$('mapc'),ctx=canvas.getContext('2d'),labels=$('mlabels');
 let W=0,H=0,DPR=1,angle=-.32,tilt=.58,zoom=1,panX=0,panZ=0,drag=false,lastX=0,lastY=0,vx=0,vy=0,lastMove=0,moved=0,wasMulti=false;
 let pinchD=0,pinchA=0,pinchM=null;const ptrs=new Map();
+let pending=null;
 let nodes=[],byId={},els={},sel=null,cur=null,journey=null,jAt=0,running=false,loaded=false,lastFrame=0;
 const pts=[];let genX=NaN,genZ=NaN;
 const SEED=0x4e49464c,GRID=.54,CHUNK=10,SP=4.6;
@@ -725,7 +727,11 @@ function setData(d){
  nodes.forEach(n=>{const e=document.createElement('div');e.className='mlab';e.onclick=ev=>{ev.stopPropagation();select(n.id)};labels.appendChild(e);els[n.id]=e;paintLabel(n)});
  $('mcur').textContent='📍 '+(cur?cur.name:'Unknown');
  if(!loaded&&cur){panX=cur.wx;panZ=cur.wz}
- loaded=true;build(true);select(sel&&byId[sel]?sel:(cur?cur.id:null));
+ loaded=true;
+ if(pending){const q=pending;pending=null;if(isFinite(q.panX)&&isFinite(q.panZ)){panX=q.panX;panZ=q.panZ}
+  if(isFinite(q.zoom))zoom=Math.max(.28,Math.min(2.25,q.zoom));if(isFinite(q.angle))angle=q.angle;
+  if(isFinite(q.tilt)){tilt=q.tilt;$('mtilt').value=q.tilt}if(q.sel&&byId[q.sel])sel=q.sel}
+ build(true);select(sel&&byId[sel]?sel:(cur?cur.id:null));
 }
 function paintLabel(n){const e=els[n.id];e.className='mlab'+(n.current?' cur':'')+(!n.discovered?' unk':'')+(n.locked?' lock':'')+(sel===n.id?' sel':'');
  e.innerHTML='◇ '+(n.discovered?esc2(n.name):'???')+(n.current?'<em>YOU</em>':'')}
@@ -822,6 +828,8 @@ async function load(){
 }
 window.mapOpen=()=>{$('home').classList.add('maplock');resize();load();if(!running){running=true;requestAnimationFrame(frame)}};
 window.mapClose=()=>{$('home').classList.remove('maplock');running=false};
+window.mapGet=()=>({panX,panZ,zoom,angle,tilt,sel});
+window.mapSet=q=>{pending=q};
 })();
 
 (()=>{const _t=tab;tab=function(t){_t(t);if(t==='map')window.mapOpen();else window.mapClose()}})();
@@ -835,7 +843,50 @@ window.mapClose=()=>{$('home').classList.remove('maplock');running=false};
  $('fbadge').style.display='none';
  $('duelSub').textContent='Send .duel @player on WhatsApp';$('duelSub').classList.remove('on');
  $('goDuel').onclick=()=>sheet({e:'Duel',t:'Duels are on WhatsApp',p:'Friends and site duels are coming. For now send .duel @player in the group.',b:[{l:'Okay',ghost:1}]});
- $('logout').onclick=async()=>{drawer(false);closeSheet();try{await api('/api/auth/logout',{method:'POST'})}catch(e){}tab('home');$('form').reset();$('lerr').textContent='';setMode('login');scene('login')};
+ $('logout').onclick=async()=>{drawer(false);closeSheet();try{await api('/api/auth/logout',{method:'POST'})}catch(e){}if(window.nifClearState)window.nifClearState();tab('home');$('form').reset();$('lerr').textContent='';setMode('login');scene('login')};
+})();
+
+// ===== session continuity =====
+// Opening the site link (a fresh navigation) always lands on Home.
+// Coming back to a tab that is already open (switching apps, the browser reloading a
+// background tab) restores the exact page + state. Saved per tab in sessionStorage.
+(()=>{
+ const KEY='nif_state';
+ let nav='navigate';
+ try{const e=performance.getEntriesByType('navigation')[0];if(e)nav=e.type}catch(x){}
+ let saved=null;
+ if(nav==='reload'||nav==='back_forward'){try{saved=JSON.parse(sessionStorage.getItem(KEY)||'null')}catch(x){}}
+ else{try{sessionStorage.removeItem(KEY)}catch(x){}}
+ const curTab=()=>{const v=document.querySelector('.view.show');return v?v.id.slice(2):'home'};
+ let ready=false,hold=false;
+ function save(){
+  if(!ready||hold||!document.body.classList.contains('in'))return;
+  const ts=$('tabScroll');
+  const st={t:curTab(),scroll:$('home').scrollTop,ht:ts?Math.round(ts.scrollLeft/(ts.clientWidth||1)):0};
+  if(st.t==='profile'&&pcur){st.pn=pcur.n;st.pf=pfrom}
+  if(st.t==='map'&&window.mapGet)st.map=window.mapGet();
+  try{sessionStorage.setItem(KEY,JSON.stringify(st))}catch(x){}
+ }
+ const _tab=tab;tab=function(t){_tab(t);save()};
+ const _op=openProfile;openProfile=function(n,f){_op(n,f);save()};
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
+ addEventListener('pagehide',save);
+ setInterval(save,2500);
+ window.nifRestore=function(){
+  if(!saved){ready=true;return}
+  const st=saved;saved=null;hold=true;
+  try{
+   if(st.t==='profile'&&st.pn&&PLAYERS.find(p=>p.n===st.pn))openProfile(st.pn,st.pf||'rank');
+   else if(st.t&&st.t!=='profile'&&$('v-'+st.t)){
+    if(st.t==='map'&&st.map&&window.mapSet)window.mapSet(st.map);
+    tab(st.t)}
+   requestAnimationFrame(()=>{
+    $('home').scrollTop=st.scroll||0;
+    const ts=$('tabScroll');if(ts&&st.ht)ts.scrollTo({left:st.ht*ts.clientWidth})});
+  }catch(x){}
+  hold=false;ready=true;save();
+ };
+ window.nifClearState=()=>{try{sessionStorage.removeItem(KEY)}catch(x){}};
 })();
 </script>
 </body></html>
