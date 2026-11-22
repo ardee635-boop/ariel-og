@@ -518,6 +518,7 @@ let tm;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on'
 document.addEventListener('click',e=>{const b=e.target.closest('[data-soon]');if(b){drawer(false);toast(b.dataset.soon+' coming soon')}});
 const API='https://ariel-bot-38kh.onrender.com';
 const TICKET=new URLSearchParams(location.search).get('t');
+const GOMAP=new URLSearchParams(location.search).get('go')==='map';
 async function api(path,opt){const r=await fetch(API+path,{credentials:'include',...opt});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct=(a,b)=>Math.max(0,Math.min(100,b>0?a/b*100:0))+'%';
@@ -556,6 +557,7 @@ async function enter(username,withBoot){
  let seen=false;const k='nif_welcomed_'+(username||'');try{seen=!!localStorage.getItem(k);localStorage.setItem(k,'1')}catch(e){}
  if(seen)toHome();else openWelcome((p&&p.name)||username);
  if(window.nifRestore)window.nifRestore();
+ if(GOMAP&&!window.__gomapDone){window.__gomapDone=true;try{history.replaceState(null,'',location.pathname)}catch(e){}scene('home');tab('map')}
 }
 $('form').addEventListener('submit',async e=>{
  e.preventDefault();const err=$('lerr'),btn=$('sub');err.textContent='';
