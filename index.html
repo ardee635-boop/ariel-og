@@ -1,5 +1,22 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en"><head>
+<script>
+/* Login that survives phones blocking cross-site cookies: the API sends a token on login/signup,
+   we keep it and send it back as a Bearer header on every call to the API. */
+(function(){var API='https://ariel-bot-38kh.onrender.com',K='nif_token',of=window.fetch;
+window.fetch=function(u,o){o=o||{};var url=typeof u==='string'?u:((u&&u.url)||'');
+ var mine=url.indexOf(API)===0;
+ if(mine){var t=null;try{t=localStorage.getItem(K)}catch(e){}
+  if(t){var h=new Headers(o.headers||{});h.set('Authorization','Bearer '+t);o.headers=h}}
+ return of.call(this,u,o).then(function(r){
+  if(mine){try{
+   if(/\/api\/auth\/(login|signup)$/.test(url)&&r.ok){r.clone().json().then(function(j){if(j&&j.token)localStorage.setItem(K,j.token)}).catch(function(){})}
+   else if(/\/api\/auth\/logout$/.test(url)){localStorage.removeItem(K)}
+   else if(r.status===401&&/\/api\/auth\/me$/.test(url)){localStorage.removeItem(K)}
+  }catch(e){}}
+  return r})}})();
+</script>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Niflheim</title>
 <meta name="theme-color" content="#050a12">
