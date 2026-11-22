@@ -221,8 +221,9 @@ function hurt(t,from,raw,kb){
  else{pop(t,'−'+d,t===P?'#ff6a6a':'#ffffff');if(!t.arm){t.stun=.22;t.atk=0}shake=Math.max(shake,t===E?.1:.2)}
  t.hp=Math.max(0,t.hp-d);t.flash=.12;t.vx=(t.x>=from.x?1:-1)*kb*(t.arm?.3:1);
  if(t.hp<=0){t.dead=true;t.blk=false;ring.visible=false;finish(t===E)}}
-function startAtk(e){if(e.atk>0||e.stun>0||e.dash>0||e.tele>0||e.dead)return false;e.atk=e.atkDur;e.hit=false;e.vx+=e.face*2.2;return true}
-function strike(e){const t=e===P?E:P;if(t.dead)return;const dx=t.x-e.x;if(dx*e.face>-.3&&Math.abs(dx)<e.reach+(t.arm?.7:0)&&Math.abs(t.y-e.y)<1.1)hurt(t,e,e.dmg,e===P?5:4)}
+function startAtk(e){if(e.atk>0||e.stun>0||e.dash>0||e.tele>0||e.dead)return false;e.atk=e.atkDur;e.hit=false;e.vx+=e.face*2.2;if(PVP&&e===P)PVP.a++;return true}
+function strike(e){if(PVP){if(e!==P||PVP.phase!=='fight'||E.dead)return;const dx=E.x-e.x;if(dx*e.face>-.3&&Math.abs(dx)<e.reach+.5&&Math.abs(E.y-e.y)<1.2)pvpSend({t:'hit',a:PVP.a});return}
+ const t=e===P?E:P;if(t.dead)return;const dx=t.x-e.x;if(dx*e.face>-.3&&Math.abs(dx)<e.reach+(t.arm?.7:0)&&Math.abs(t.y-e.y)<1.1)hurt(t,e,e.dmg,e===P?5:4)}
 function jump(e){if(e.dead||e.stun>0||e.jumps>=2)return;e.vy=e.jumps?7.4:8.2;e.jumps++;if(e.jumps===2)pop(e,'✦','#8fdcff')}
 function dash(e,dir){if(e.dead||e.dashCd>0||e.stun>0||e.st<14||e.tele>0)return;e.vx=dir*15;e.inv=.22;e.dash=.22;e.dashCd=.7;e.st-=14;e.atk=0}
 function aoe(e){const cx=e.x+e.face*1.4;if(!P.dead&&Math.abs(P.x-cx)<2.2&&P.y<.8)hurt(P,e,e.dmg*1.4,5)}
@@ -293,7 +294,7 @@ function animate(e,dt){
 /* ---------- input ---------- */
 const inp={mx:0,blk:false};
 function act(a){
- if(S!=='fight'||P.dead)return;
+ if(S!=='fight'||P.dead||(PVP&&PVP.phase!=='fight'))return;
  if(a==='F'){if(!inp.mx)P.face=E.x>=P.x?1:-1;startAtk(P)}
  if(a==='J')jump(P);
  if(a==='D')dash(P,inp.mx?Math.sign(inp.mx):P.face)}
@@ -316,7 +317,7 @@ const kmx=()=>(K.KeyD||K.ArrowRight?1:0)-(K.KeyA||K.ArrowLeft?1:0),kblk=()=>K.Ke
 /* ---------- flow ---------- */
 const show=(id,v)=>{$(id).hidden=!v};
 function start(k){spawn(k);tl=FOES[k].tl;S='fight';show('menu',0);show('res',0);show('styles',0);show('sdesc',0);show('hud',1);show('pad',1);$('mode').textContent='Vs '+E.n;pop({x:0,y:1.2,h:1},'FIGHT!','#ffd166')}
-function toMenu(){S='menu';show('hud',0);show('pad',0);show('res',0);show('menu',1);show('styles',1);show('sdesc',1);spawn(kind);inp.mx=0;inp.blk=false}
+function toMenu(){PVP=null;$('again').style.display='';$('back').style.display='';S='menu';show('hud',0);show('pad',0);show('res',0);show('menu',1);show('styles',1);show('sdesc',1);spawn(kind);inp.mx=0;inp.blk=false}
 const API_BASE='https://ariel-bot-38kh.onrender.com';
 let DATA=null,TICKET=new URLSearchParams(location.search).get('t');
 async function reportResult(r){if(!TICKET){console.log('battle result (dev mode)',r);return null}
@@ -329,6 +330,56 @@ document.querySelectorAll('.card').forEach(c=>c.onclick=()=>start(c.dataset.k));
 $('again').onclick=async()=>{if(!TICKET)return start(kind);try{const r=await fetch(API_BASE+'/api/niflheim/battle/start',{credentials:'include',method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),j=await r.json();if(!r.ok)return toast(j.error||'Cannot start');DATA=j;TICKET=j.ticket;start(j.foe.rig)}catch(e){toast('Server unreachable')}};$('tomenu').onclick=toMenu;$('back').onclick=toMenu;
 function fit(){const w=FW(),h=FH();ASP=w/h;HF=Math.tan(cam.fov*Math.PI/360);renderer.setSize(w,h);cam.aspect=ASP;ARENA=clamp(HF*ASP*46-4.4,4.5,9);cam.updateProjectionMatrix()}
 addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(fit).observe(frame);fit();
+
+/* ---------- live duel (player vs player) ---------- */
+const DUELTOK=new URLSearchParams(location.search).get('duel');let PVP=null;
+const pvpSend=o=>{if(PVP&&PVP.ws&&PVP.ws.readyState===1)PVP.ws.send(JSON.stringify(o))};
+async function pvpInfo(){const r=await fetch(API_BASE+'/api/niflheim/duel/'+encodeURIComponent(DUELTOK),{credentials:'include'}),j=await r.json();
+ if(r.status===401){location.replace('index.html?world=niflheim&duel='+encodeURIComponent(DUELTOK));return null}
+ if(!r.ok){toast(j.error||'Duel unavailable');return null}return j}
+async function pvpBoot(){document.body.classList.add('srv');show('menu',0);
+ try{const j=await pvpInfo();if(j)pvpStart(j)}catch(e){toast('Could not reach the server')}}
+function pvpStart(j){
+ kill(P);kill(E);waves.forEach(w=>scene.remove(w.m));waves=[];kind='pvp';
+ P=ent('p',{hp:j.you.max_hp,dmg:j.you.damage,spd:3.7,reach:1.5,h:1.8,bw:.45});
+ E=ent('ai',{hp:j.foe.max_hp,dmg:j.foe.damage,spd:3.7,reach:1.5,h:1.8,bw:.45,n:j.foe.name,face:-1});
+ const sx=Math.min(3.2,ARENA*.4),me=j.side==='a'?-1:1;P.x=me*sx;E.x=-me*sx;P.face=-me;E.face=me;
+ $('pn').textContent=j.you.name+' · Lv '+j.you.level;$('en').textContent=j.foe.name+' · Lv '+j.foe.level;$('tP').textContent=j.you.name;$('tE').textContent=j.foe.name;ring.visible=false;
+ PVP={info:j,side:j.side,ws:null,phase:'wait',snap:null,a:0,ra:0,acc:0,over:false,tries:0,key:j.wsKey};tl=j.match_seconds;
+ S='fight';show('menu',0);show('res',0);show('styles',0);show('sdesc',0);show('hud',1);show('pad',1);$('back').style.display='none';
+ $('mode').textContent='Live duel';$('tm').textContent=tl;toast('Waiting for '+j.foe.name+'…');pvpConnect()}
+function pvpConnect(){if(!PVP||PVP.over)return;const ws=new WebSocket(API_BASE.replace(/^http/,'ws')+'/ws/duel?k='+encodeURIComponent(PVP.key));PVP.ws=ws;
+ ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}pvpMsg(m)};
+ ws.onclose=async()=>{if(!PVP||PVP.over||PVP.ws!==ws)return;toast('Connection lost, reconnecting…');
+  if(++PVP.tries>8){pvpEnd({outcome:'cancel',reason:'Connection lost.',summary:''});return}
+  await new Promise(r=>setTimeout(r,1500));if(!PVP||PVP.over)return;
+  try{const j=await pvpInfo();if(j){PVP.key=j.wsKey;pvpConnect()}else pvpEnd({outcome:'cancel',reason:'Duel is no longer open.',summary:''})}catch(x){ws.onclose()}}}
+function pvpMsg(m){if(!PVP)return;
+ if(m.t==='sync'){PVP.phase=m.phase==='fight'?'fight':PVP.phase;PVP.tries=0;P.hp=m.hp.me;E.hp=m.hp.foe;tl=m.left;if(m.phase==='lobby')PVP.phase='wait'}
+ else if(m.t==='wait')toast('Waiting for '+PVP.info.foe.name+'…');
+ else if(m.t==='go'){PVP.phase='cd';tl=m.dur;let n=m.in;toast(String(n));const iv=setInterval(()=>{n--;if(n>0)toast(String(n));else clearInterval(iv)},1000)}
+ else if(m.t==='fight'){PVP.phase='fight';tl=m.left;pop({x:0,y:1.2,h:1},'FIGHT!','#ffd166')}
+ else if(m.t==='foe')PVP.snap=m.s;
+ else if(m.t==='dmg')pvpDmg(m);
+ else if(m.t==='tick'){tl=m.left}
+ else if(m.t==='foeoff')toast(PVP.info.foe.name+' disconnected ('+m.secs+'s to return)');
+ else if(m.t==='foeon')toast(PVP.info.foe.name+' is back');
+ else if(m.t==='end')pvpEnd(m)}
+function pvpDmg(m){const t=m.you?P:E,f=m.you?E:P;if(t.dead)return;
+ if(m.blk){t.st=Math.max(0,t.st-(m.d*2+8));t.pulse=.2;pop(t,'BLOCK −'+m.d,'#8fdcff');t.vx=(t.x>=f.x?1:-1)*1.5;if(t===P&&t.st<=0){t.blk=false;t.stun=1;pop(t,'GUARD BROKEN','#ffd166')}}
+ else{pop(t,'−'+m.d,t===P?'#ff6a6a':'#ffffff');t.stun=.22;t.atk=0;shake=Math.max(shake,t===E?.1:.2);t.vx=(t.x>=f.x?1:-1)*5}
+ t.flash=.12;P.hp=m.hp.me;E.hp=m.hp.foe}
+function pvpFrame(dt){PVP.acc+=dt;tl=Math.max(0,tl-dt);$('tm').textContent=Math.ceil(tl);
+ if(PVP.acc>=.05){PVP.acc=0;pvpSend({t:'s',x:+P.x.toFixed(2),y:+P.y.toFixed(2),f:P.face,m:+(P.mx||0).toFixed(2),b:P.blk?1:0,k:P.dash>0?1:0,a:PVP.a})}}
+function remotePhys(e,dt){if(e.dead){phys(e,dt);return}const s=PVP&&PVP.snap;
+ if(s){const k=Math.min(1,dt*14);e.x+=(s.x-e.x)*k;e.y+=(s.y-e.y)*k;e.face=s.f;e.mx=s.m;e.blk=!!s.b;e.dash=s.k?.1:0;e.inv=0;
+  if(s.a>PVP.ra){PVP.ra=s.a;e.atk=e.atkDur;e.hit=true}}
+ ['stun','flash','pulse'].forEach(k=>{if(e[k]>0)e[k]-=dt});if(e.atk>0)e.atk-=dt}
+function pvpEnd(m){if(!PVP||PVP.over)return;PVP.over=true;try{PVP.ws&&PVP.ws.close()}catch(x){}S='over';
+ if(m.outcome==='win')E.dead=true;else if(m.outcome==='loss')P.dead=true;
+ const T={win:'Victory',loss:'Defeated',draw:'Draw',cancel:'Duel cancelled'};
+ setTimeout(()=>{$('rt').textContent=T[m.outcome]||'Duel over';$('rs').textContent=[m.reason,m.summary].filter(Boolean).join(' ');
+  $('again').style.display='none';show('res',1);show('pad',0)},m.outcome==='win'||m.outcome==='loss'?1200:200)}
 /* ---------- loop ---------- */
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000||0);last=now;time+=dt;
  if(S==='fight'||S==='over'){
@@ -336,9 +387,10 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
    const mx=kmx()||inp.mx;
    P.blk=!!(inp.blk||kblk())&&P.stun<=0&&P.atk<=0&&P.dash<=0&&P.st>12&&!P.dead;P.mx=mx;
    if(mx&&P.atk<=0&&P.stun<=0)P.face=Math.sign(mx);
-   think(E,dt);tl-=dt;$('tm').textContent=Math.max(0,Math.ceil(tl));if(tl<=0)finish(P.hp/P.max>E.hp/E.max,1)}
+   if(PVP){if(PVP.phase!=='fight'){P.mx=0;P.blk=false}pvpFrame(dt)}
+   else{think(E,dt);tl-=dt;$('tm').textContent=Math.max(0,Math.ceil(tl));if(tl<=0)finish(P.hp/P.max>E.hp/E.max,1)}}
   else{P.mx=0;E.mx=0}
-  phys(P,dt);phys(E,dt);
+  phys(P,dt);if(PVP)remotePhys(E,dt);else phys(E,dt);
   waves=waves.filter(w=>{w.x+=w.v*dt;w.m.position.x=w.x;w.m.rotation.x+=dt*10;
    let gone=Math.abs(w.x)>ARENA+4;
    if(!gone&&!P.dead&&Math.abs(P.x-w.x)<.6&&P.y<.8){hurt(P,{x:P.x-Math.sign(w.v)},12,3);gone=true}
@@ -360,5 +412,5 @@ async function boot(){if(!TICKET)return;document.body.classList.add('srv');show(
   if(r.status===401){location.replace('index.html?world=niflheim&t='+encodeURIComponent(TICKET));return}if(!r.ok){toast(j.error||'Battle unavailable');return}DATA=j;start(j.foe.rig)}catch(e){toast('Could not reach the server')}}
 $('lgo').onclick=async()=>{try{const r=await fetch(API_BASE+'/api/auth/login',{credentials:'include',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({countryCode:$('lc').value,phoneNumber:$('lp').value,password:$('lw').value})});
  if(r.ok)location.reload();else $('lerr').textContent=(await r.json()).error||'Login failed'}catch(e){$('lerr').textContent='Server unreachable'}};
-boot();
+DUELTOK?pvpBoot():boot();
 </script></body></html>

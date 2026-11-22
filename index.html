@@ -518,6 +518,7 @@ let tm;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on'
 document.addEventListener('click',e=>{const b=e.target.closest('[data-soon]');if(b){drawer(false);toast(b.dataset.soon+' coming soon')}});
 const API='https://ariel-bot-38kh.onrender.com';
 const TICKET=new URLSearchParams(location.search).get('t');
+const DUELTOK=new URLSearchParams(location.search).get('duel');
 const GOMAP=new URLSearchParams(location.search).get('go')==='map';
 async function api(path,opt){const r=await fetch(API+path,{credentials:'include',...opt});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -541,9 +542,9 @@ function fill(username,p){
  $('invp').innerHTML=inv.length?inv.map(([k,v])=>`<div class="inv-row"><div class="inv-icon sm">◆</div><div><div class="nm">${esc(pretty(k))}</div></div><div class="q">×${v}</div></div>`).join(''):'<p class="note">Your bag is empty.</p>';
 }
 function forwardToArena(){
- if(!TICKET)return false;
+ if(!TICKET&&!DUELTOK)return false;
  try{const t=+sessionStorage.getItem('nif_fwd')||0;if(Date.now()-t<15000)return false;sessionStorage.setItem('nif_fwd',Date.now())}catch(e){}
- location.replace('arena.html?t='+encodeURIComponent(TICKET));return true;
+ location.replace(DUELTOK?'arena.html?duel='+encodeURIComponent(DUELTOK):'arena.html?t='+encodeURIComponent(TICKET));return true;
 }
 async function enter(username,withBoot){
  if(withBoot){scene('boot');$('fill').style.width='0';
