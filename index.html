@@ -531,7 +531,7 @@ function fill(username,p){
  if(!p){$('plv').textContent='-';$('ploc').textContent='Not registered';$('dlv').textContent='Not registered yet';$('hpt').textContent='- / -';$('xpt').textContent='- / -';
   $('hpi').style.width='0';$('xpi').style.width='0';['sd','sc','si'].forEach(id=>$(id).textContent='-');$('sloc').textContent='-';$('snx').textContent='-';
   $('invp').innerHTML='<p class="note">Register first to get a bag.</p>';
-  $('nt').querySelector('span').innerHTML='Send <b style="color:var(--ice)">.reg '+esc(n)+'</b> in the WhatsApp group to create your character.';return}
+  $('nt').querySelector('span').innerHTML='Your character is created when you sign up. If you see this, <b style="color:var(--ice)">refresh the page</b> in a moment.';return}
  $('plv').textContent=p.level;$('ploc').textContent=p.location||'';$('dlv').textContent='Level '+p.level+' Adventurer';
  $('hpi').style.width=pct(p.hp,p.max_hp);$('hpt').textContent=p.hp+' / '+p.max_hp;
  $('xpi').style.width=pct(p.xp,p.xp_needed);$('xpt').textContent=p.xp+' / '+p.xp_needed;
@@ -601,7 +601,7 @@ function toSquare(file,size){return new Promise((ok,no)=>{
  im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('unreadable'))};im.src=u})}
 $('editBtn').onclick=()=>{drawer(false);edMsg('picMsg','');edMsg('nameMsg','');$('edName').value=(ME&&ME.name)||$('edNm').textContent;tab('edit')};
 $('eback').onclick=()=>tab('home');
-$('picBtn').onclick=()=>{if(!ME)return edMsg('picMsg','Register first: send .reg YourName in the WhatsApp group.','bad');$('edPic').click()};
+$('picBtn').onclick=()=>{if(!ME)return edMsg('picMsg','Your character isn't ready yet. Refresh the page and try again.','bad');$('edPic').click()};
 $('edPic').onchange=async e=>{
  const f=e.target.files[0];e.target.value='';if(!f)return;
  if(f.size>20*1024*1024)return edMsg('picMsg','That file is too big.','bad');
@@ -621,7 +621,7 @@ $('picRm').onclick=async()=>{
  b.disabled=false};
 async function saveName(){
  const v=$('edName').value.trim();
- if(!ME)return edMsg('nameMsg','Register first: send .reg YourName in the WhatsApp group.','bad');
+ if(!ME)return edMsg('nameMsg','Your character isn't ready yet. Refresh the page and try again.','bad');
  if(!v)return edMsg('nameMsg','Type a name first.','bad');
  const b=$('nameBtn');b.disabled=true;edMsg('nameMsg','Saving…');
  try{
