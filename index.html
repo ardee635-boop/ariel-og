@@ -1,8 +1,457 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Niflheim</title>
-<!-- The login lives in pokemon.html and is shared by both worlds.
-     This page only forwards, keeping ?world=, ?t= and ?scene= intact. -->
-<script>location.replace('pokemon.html' + location.search + location.hash);</script>
-</head><body><noscript><a href="pokemon.html">Continue</a></noscript></body></html>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Niflheim Online</title>
+<meta name="description" content="Niflheim Online. Hunt, level up and fight in the Moonlit Colosseum with your WhatsApp character.">
+<meta name="theme-color" content="#050a12">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050a12;--panel:#0A1420;--border:#234258;--ice:#8FE3FF;--ice-dim:#3E7A94;--frost:#C9F3FF;--text:#EAF6FF;--muted:#7FA0B8;--green:#4ADE80;--red:#ff8a8a;--gold:#FBD34D;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050a12}}
+:root[data-theme="dark"]{--bg:#050a12}
+*,*:before,*:after{box-sizing:inherit;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(ellipse 500px 300px at 20% 0%,rgba(143,227,255,.08),transparent 60%),radial-gradient(ellipse 400px 260px at 100% 30%,rgba(143,227,255,.05),transparent 60%),var(--bg)}
+.snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.flake{position:absolute;top:-10px;background:var(--frost);border-radius:50%;opacity:.5;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) translateX(20px)}}
+.scene{position:fixed;inset:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);opacity:0;pointer-events:none;overflow-y:auto;transition:opacity .4s ease;z-index:1}
+.scene.active{opacity:1;pointer-events:auto}
+.corner{position:fixed;width:26px;height:26px;border:1.5px solid rgba(143,227,255,.3);z-index:5;pointer-events:none;transition:opacity .4s}
+.corner.tl{top:calc(16px + env(safe-area-inset-top,0px));left:16px;border-right:0;border-bottom:0}.corner.tr{top:calc(16px + env(safe-area-inset-top,0px));right:16px;border-left:0;border-bottom:0}
+.corner.bl{bottom:calc(16px + env(safe-area-inset-bottom,0px));left:16px;border-right:0;border-top:0}.corner.br{bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;border-left:0;border-top:0}
+body.in .corner{opacity:0}
+/* login */
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:32px 20px}
+.eyebrow{font-size:11px;letter-spacing:.24em;color:var(--ice);text-transform:uppercase;opacity:.85;display:flex;align-items:center;gap:10px}
+.eyebrow:before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ice);box-shadow:0 0 8px var(--ice),0 0 16px var(--ice);animation:pd 1.6s ease-in-out infinite}
+@keyframes pd{50%{opacity:.3}}
+.auth-title{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(26px,7vw,36px);letter-spacing:.06em;text-align:center;text-shadow:0 0 24px rgba(143,227,255,.2)}
+.auth-title span,.wm span{color:var(--ice)}
+.card{position:relative;background:linear-gradient(160deg,#0D1F30,#081420 75%);border:1.5px solid var(--ice-dim);border-radius:10px;box-shadow:0 0 0 1px rgba(143,227,255,.06),0 0 30px rgba(143,227,255,.08)}
+.card:before,.card:after{content:"◆";position:absolute;top:10px;color:var(--ice);font-size:10px;opacity:.7}
+.card:before{left:10px}.card:after{right:10px}
+.auth{width:min(400px,92vw);padding:28px 24px 24px}
+.toggle{display:flex;gap:2px;margin:4px auto 22px;border:1px solid var(--border);padding:3px;width:fit-content}
+.toggle button{font:500 11px 'Inter';letter-spacing:.1em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:7px 18px;cursor:pointer;border-radius:4px;transition:.2s}
+.toggle button.on{background:rgba(143,227,255,.12);color:var(--ice)}
+.fg{margin-bottom:16px}
+.lb{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.row{display:flex;gap:8px}
+.in{width:100%;background:rgba(143,227,255,.03);border:1px solid var(--border);border-radius:6px;color:var(--text);font:14px 'Inter';padding:11px 13px;outline:none;transition:.2s}
+.in:focus{border-color:var(--ice);box-shadow:0 0 0 1px rgba(143,227,255,.3),0 0 16px rgba(143,227,255,.12);background:rgba(143,227,255,.05)}
+.in::placeholder{color:var(--muted);opacity:.6}
+.cc{flex:0 0 78px;position:relative}.cc i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted);font-size:14px}.cc .in{padding-left:24px}
+.hint{font-size:10px;color:var(--muted);margin-top:6px;opacity:.75}
+.pw{position:relative}.pw .in{padding-right:42px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;color:var(--muted);cursor:pointer}
+.pw svg{width:17px;height:17px;display:block}
+.go{width:100%;margin-top:6px;background:linear-gradient(135deg,rgba(143,227,255,.14),rgba(62,214,255,.08));border:1px solid var(--ice-dim);border-radius:6px;color:var(--ice);font:600 14px 'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase;padding:13px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;text-align:center;text-decoration:none;display:block}
+.go:hover{background:linear-gradient(135deg,rgba(143,227,255,.25),rgba(62,214,255,.16));box-shadow:0 0 24px rgba(143,227,255,.2);color:var(--frost)}
+.go:active{transform:translateY(1px)}
+.sw{text-align:center;margin-top:18px;font-size:12.5px;color:var(--muted)}
+.sw button{background:none;border:0;color:var(--ice);font:12.5px 'Inter';cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0}
+/* boot */
+#boot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.bl{font-size:12px;color:var(--ice);letter-spacing:.08em;opacity:0;text-align:center}
+.bl.show{animation:bf .5s ease forwards}
+@keyframes bf{0%{opacity:0;transform:translateY(4px)}30%{opacity:1}45%{opacity:.2}60%{opacity:1}100%{opacity:1;transform:none}}
+.track{width:240px;height:3px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden;border-radius:2px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--ice-dim),var(--ice));box-shadow:0 0 10px var(--ice);transition:width 2.2s linear}
+/* welcome */
+#welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:56px 22px 40px;text-align:center}
+.skip{position:fixed;top:calc(18px + env(safe-area-inset-top,0px));right:54px;background:none;border:0;color:var(--muted);font:500 11px 'Inter';letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:8px;z-index:6}
+.emblem{position:relative;width:132px;height:132px;display:grid;place-items:center}
+.emblem:before{content:"";position:absolute;inset:-26px;border-radius:50%;background:radial-gradient(circle,rgba(143,227,255,.28),transparent 66%);animation:glow 4s ease-in-out infinite}
+@keyframes glow{50%{opacity:.45;transform:scale(1.08)}}
+.emblem svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.r1{transform-origin:50% 50%;animation:spin 40s linear infinite}.r2{transform-origin:50% 50%;animation:spin 26s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rise{opacity:0;transform:translateY(12px)}
+.on-w .rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.wwm{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(38px,11vw,58px);letter-spacing:.12em;text-shadow:0 0 30px rgba(143,227,255,.35);margin:0}
+.wwm span{color:var(--ice)}
+.wsub{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:-8px}
+.wsub b{color:var(--frost);font-weight:600}
+.pager{width:min(440px,92vw);padding:26px 22px 22px;min-height:196px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pg{display:none}.pg.show{display:block;animation:flk .45s steps(1,end)}
+@keyframes flk{0%{opacity:0}6%{opacity:1;transform:translateX(-3px);filter:brightness(1.8)}12%{opacity:.3;transform:translateX(2px)}20%{opacity:1;transform:none;filter:none}}
+.pg .k{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ice);margin-bottom:8px}
+.pg h3{font-family:'Cinzel',serif;font-weight:600;font-size:21px;letter-spacing:.08em;margin:0 0 10px}
+.pg p{font-size:13.5px;line-height:1.75;color:var(--muted);margin:0}.pg p b{color:var(--ice);font-weight:600}
+.dots{display:flex;gap:10px;margin-top:20px}
+.dots button{width:8px;height:8px;border-radius:50%;border:1px solid var(--ice-dim);background:none;padding:0;cursor:pointer;transition:.25s}
+.dots button.on{background:var(--ice);box-shadow:0 0 10px var(--ice);width:22px;border-radius:99px}
+.wgo{width:min(440px,92vw)}
+/* drawer + views */
+.mb{display:flex;align-items:center;gap:12px}
+.ib.m svg{width:18px;height:18px}
+#dim{position:fixed;inset:0;background:rgba(2,6,12,.7);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(300px,82vw);z-index:21;transform:translateX(-102%);transition:transform .32s cubic-bezier(.2,.7,.2,1);background:linear-gradient(160deg,#0D1F30,#081420 80%);border-right:1.5px solid var(--ice-dim);box-shadow:0 0 40px rgba(143,227,255,.12);padding:calc(22px + env(safe-area-inset-top,0px)) 18px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+body.dr #drawer{transform:none}body.dr #dim{opacity:1;pointer-events:auto}
+.dh{display:flex;align-items:center;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.dh .av{width:52px;height:52px}.dh b{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.04em;display:block}.dh span{font-size:11px;color:var(--muted)}
+.di{display:flex;align-items:center;gap:14px;width:100%;padding:14px 8px;background:none;border:0;border-bottom:1px solid rgba(35,66,88,.5);color:var(--text);font:500 14px 'Inter';letter-spacing:.04em;cursor:pointer;text-align:left}
+.di svg{width:20px;height:20px;color:var(--ice);flex:none}
+.di.out2{margin-top:auto;border:1px solid rgba(255,138,138,.35);border-radius:6px;justify-content:center;color:var(--red);font-family:'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase;font-size:13px}
+.di.out2 svg{color:var(--red)}
+.dv{font-size:10px;color:var(--muted);text-align:center;margin-top:12px;letter-spacing:.14em}
+.view{display:none}.view.show{display:block;animation:flk .45s steps(1,end)}
+.vt{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 14px}
+.vt h1{font-family:'Cinzel',serif;font-weight:600;font-size:28px;letter-spacing:.06em;margin:0;text-shadow:0 0 24px rgba(143,227,255,.2)}
+.chip{font-size:12px;color:var(--gold);border:1px solid rgba(251,211,77,.4);border-radius:99px;padding:5px 12px;font-weight:600}
+.item{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:12px}
+.item .ic{width:46px;height:46px;flex:none;border:1px solid var(--ice-dim);border-radius:8px;background:radial-gradient(circle at 50% 40%,#1c4c63,#0a1622 75%);display:grid;place-items:center;font-size:22px}
+.item div{flex:1;min-width:0}.item b{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.05em;display:block}.item span{font-size:11.5px;color:var(--muted);line-height:1.4}
+.buy{flex:none;background:rgba(143,227,255,.1);border:1px solid var(--ice-dim);border-radius:6px;color:var(--ice);font:600 12px 'Inter';padding:9px 12px;cursor:pointer;white-space:nowrap}
+.buy:active{transform:translateY(1px)}.buy[disabled]{opacity:.4}
+.mapc{padding:14px 10px 6px;margin-bottom:14px}.mapc svg{width:100%;height:auto;display:block}
+.zone{display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:10px}
+.zone i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ice-dim);flex:none}
+.zone.here i{background:var(--ice);border-color:var(--ice);box-shadow:0 0 10px var(--ice)}
+.zone.lock{opacity:.55}
+.zone b{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.05em;display:block}.zone span{font-size:11.5px;color:var(--muted)}
+.zone em{margin-left:auto;font-style:normal;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ice)}
+.note{font-size:11.5px;color:var(--muted);text-align:center;margin:14px 0 0;line-height:1.6}
+/* home v2 */
+.pc{padding:16px;margin:20px 0 14px;display:flex;gap:16px;overflow:hidden}
+.pc .wmk{position:absolute;right:-6px;top:50%;width:120px;transform:translateY(-50%);opacity:.07;pointer-events:none}
+.pc .av{width:96px;height:96px;position:relative}
+.pc .av i{width:72%;height:72%}
+.pc .mf{padding-top:4px}
+.pc .nm{margin-top:6px;font-size:22px;justify-content:flex-start}
+.lvb{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:2px 0;color:var(--gold);font:600 14px 'Cinzel',serif;letter-spacing:.06em;cursor:pointer}
+.lvb svg{width:14px;height:14px;transition:transform .25s}.pc.open .lvb svg{transform:rotate(180deg)}
+.more{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:11.5px;color:var(--muted);line-height:1.6}
+.pc.open .more{max-height:60px;margin-bottom:4px}
+.br{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--muted)}
+.br svg{width:15px;height:15px;flex:none}.br .ba{flex:1;margin:0}.br b{font-weight:500;min-width:62px;text-align:right;color:var(--text);font-size:11.5px}
+.sts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sx{display:flex;align-items:center;gap:9px;padding:12px 10px;border:1px solid var(--border);border-radius:10px;background:rgba(143,227,255,.03)}
+.sx svg{width:26px;height:26px;flex:none}.sx b{display:block;font-family:'Cinzel',serif;font-size:17px;color:var(--frost);line-height:1.1}.sx span{font-size:10.5px;color:var(--muted)}
+.hb{position:relative;overflow:hidden;min-height:196px;margin-bottom:14px;display:flex;flex-direction:column;justify-content:center;padding:20px 18px}
+.hb:before,.hb:after{z-index:2}
+.hb>svg{position:absolute;inset:0;width:100%;height:100%}
+.hb .tx{position:relative;z-index:1}
+.hb h2{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(23px,7vw,30px);letter-spacing:.08em;margin:4px 0 4px;text-shadow:0 2px 14px #000c}
+.hb p{font-size:13px;color:var(--muted);margin:0 0 16px;text-shadow:0 2px 10px #000}
+.hb .eyebrow{font-size:10.5px}.hb .eyebrow:before{border-radius:0;transform:rotate(45deg);animation:none;width:7px;height:7px}
+.cta{--c:12px;position:relative;display:inline-flex;padding:1.5px;background:var(--ice);color:var(--text);text-decoration:none;filter:drop-shadow(0 0 10px rgba(143,227,255,.45));clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% 50%,calc(100% - var(--c)) 100%,var(--c) 100%,0 50%)}
+.cta span{display:flex;align-items:center;gap:12px;padding:13px 26px 13px 20px;background:linear-gradient(180deg,#0c2234,#07131f);clip-path:polygon(calc(var(--c) - 1px) 0,calc(100% - var(--c) + 1px) 0,100% 50%,calc(100% - var(--c) + 1px) 100%,calc(var(--c) - 1px) 100%,0 50%);font:600 14px 'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase}
+.cta svg{width:22px;height:22px;color:var(--frost)}.cta svg.ch{width:16px;height:16px;color:var(--ice)}
+.cta:active{transform:translateY(1px)}
+.tl2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.t2{position:relative;display:block;padding:0;overflow:hidden;cursor:pointer;color:var(--text);font:inherit;text-align:left;text-decoration:none;min-height:150px}
+.t2 .art{display:block;width:100%;height:92px}
+.t2 .lb2{position:absolute;left:0;right:0;bottom:0;padding:10px 12px 11px;background:linear-gradient(transparent,rgba(5,10,18,.92) 38%);display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
+.t2 b{font:600 13px 'Cinzel',serif;letter-spacing:.1em;display:block}.t2 b:before{content:"◆ ";color:var(--ice);font-size:9px}
+.t2 span{font-size:11.5px;color:var(--muted)}.t2 svg.go2{width:16px;height:16px;color:var(--frost);flex:none;margin-bottom:3px}
+.nt{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:6px}
+.nt>svg{width:28px;height:28px;color:var(--ice);flex:none}.nt div{flex:1;min-width:0}.nt b{font-size:13px;font-weight:600;display:block}.nt span{font-size:12.5px;color:var(--muted)}.nt em{font-style:normal;font-size:11px;color:var(--muted);align-self:flex-start}
+.nt.flash{animation:nf .9s ease}@keyframes nf{30%{box-shadow:0 0 0 1px var(--ice),0 0 26px rgba(143,227,255,.5)}}
+.bell{position:relative}.bell:after{content:"";position:absolute;top:4px;right:5px;width:8px;height:8px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff4d5e}.bell.read:after{display:none}
+.rt{display:flex;gap:8px;align-items:center}
+/* home */
+#home{padding-bottom:96px}
+.wrap{max-width:520px;margin:0 auto;padding:0 20px;position:relative}
+.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0 0}
+.wm{font-family:'Cinzel',serif;font-size:19px;letter-spacing:.08em;font-weight:600}
+.ib{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);background:none;cursor:pointer}
+.ib svg{width:18px;height:18px}
+.greet{margin:26px 0 4px;font-size:11px;letter-spacing:.24em;color:var(--ice);text-transform:uppercase;opacity:.85}
+.hello{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(28px,8vw,38px);letter-spacing:.05em;margin:0 0 18px;text-shadow:0 0 24px rgba(143,227,255,.2)}
+.hello span{color:var(--ice)}
+.me{display:flex;gap:14px;padding:16px;margin-bottom:16px}
+.av{width:88px;height:88px;flex:none;border-radius:8px;border:1.5px solid var(--ice-dim);background:radial-gradient(circle at 50% 40%,#2a6f8c,#0a1622 75%);display:flex;align-items:center;justify-content:center}
+.av i{width:70%;height:70%;border-radius:50%;background:conic-gradient(from 90deg,#9FE8FF,#1B4A5C,#9FE8FF);box-shadow:0 0 18px rgba(143,227,255,.5) inset}
+.mf{flex:1;min-width:0;padding-top:2px}
+.nm{font-family:'Cinzel',serif;font-weight:600;font-size:19px;letter-spacing:.04em;display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+.nm b{color:var(--gold);font-size:13px;white-space:nowrap;font-weight:600;padding-top:3px}
+.loc{font-size:12px;color:var(--muted);margin:3px 0 10px}
+.ba{height:7px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid var(--border);overflow:hidden;margin:5px 0}
+.ba i{display:block;height:100%;border-radius:99px}
+.hp i{background:linear-gradient(90deg,#d94a62,#ff93a3);width:82%}.xp i{background:linear-gradient(90deg,var(--ice-dim),var(--ice));width:46%}
+.bt{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foot{margin:0 -16px -16px;grid-column:1/-1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.st{border:1px solid var(--border);border-radius:8px;background:rgba(143,227,255,.03);padding:12px 6px;text-align:center}
+.st b{display:block;font-family:'Cinzel',serif;font-size:19px;color:var(--frost)}.st span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hero{padding:22px 20px 20px;margin-bottom:12px;text-align:center}
+.hero h2{font-family:'Cinzel',serif;font-weight:700;font-size:22px;letter-spacing:.1em;margin:4px 0 6px;text-shadow:0 0 20px rgba(143,227,255,.3)}
+.hero p{font-size:13px;line-height:1.6;color:var(--muted);margin:0 0 16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.tile{padding:16px 14px;text-align:left;cursor:pointer;color:var(--text);font:inherit;text-decoration:none;display:block}
+.tile b{display:block;font-family:'Cinzel',serif;font-size:14px;letter-spacing:.08em;margin:14px 0 4px}
+.tile span{font-size:12px;color:var(--muted);line-height:1.5}
+.tile .ic{width:30px;height:30px;color:var(--ice)}
+.tile.boss{border-color:rgba(251,211,77,.45)}.tile.boss .ic{color:var(--gold)}
+.sec{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:22px 2px 10px}
+.cmds{display:flex;flex-wrap:wrap;gap:7px}
+.cmds code{font:600 12px ui-monospace,Menlo,monospace;border:1px solid var(--border);background:rgba(143,227,255,.04);padding:6px 10px;border-radius:6px;color:var(--ice)}
+.out{text-align:center;margin-top:22px}.out button{background:none;border:0;color:var(--muted);font:12.5px 'Inter';text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);background:rgba(5,10,18,.94);border-top:1px solid var(--border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .4s}
+body.in nav{opacity:1;pointer-events:auto}
+nav button,nav a{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 12px;background:none;border:0;color:var(--muted);font:500 10.5px 'Inter';letter-spacing:.1em;text-transform:uppercase;text-decoration:none;cursor:pointer;position:relative}
+nav svg{width:22px;height:22px}
+nav .on{color:var(--ice)}nav .on:before{content:"";position:absolute;top:-1px;width:34px;height:2px;background:var(--ice);box-shadow:0 0 10px var(--ice)}
+#toast{position:fixed;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translate(-50%,-16px);background:rgba(15,35,26,.92);border:1px solid rgba(74,222,128,.4);padding:11px 18px;border-radius:8px;font-size:12.5px;color:#b9f5cf;opacity:0;pointer-events:none;z-index:60;transition:.35s}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div id="toast"></div>
+<div class="snow" id="snow"></div>
+
+<!-- LOGIN -->
+<div class="scene active" id="login">
+ <div class="eyebrow">NIFLHEIM // SYSTEM ACCESS</div>
+ <div class="auth-title">ADVENTURER <span>LOGIN</span></div>
+ <div class="card auth">
+  <div class="toggle"><button class="on" id="tl" type="button">Log In</button><button id="ts" type="button">Sign Up</button></div>
+  <form id="form" autocomplete="on">
+   <div id="su" hidden><div class="fg"><label class="lb" for="un">Username</label><input class="in" id="un" placeholder="Choose an adventurer name" maxlength="50" autocomplete="username"><div class="hint">up to 50 characters, this becomes your in-game name</div></div></div>
+   <div class="fg"><label class="lb" for="ph">Phone Number</label>
+    <div class="row"><div class="cc"><i>+</i><input class="in" id="co" inputmode="numeric" placeholder="234" maxlength="4" autocomplete="off"></div><input class="in" id="ph" inputmode="numeric" placeholder="8031234567" autocomplete="tel-national"></div>
+    <div class="hint">country code (e.g. 234), then number, leading 0 is stripped automatically</div></div>
+   <div class="fg"><label class="lb" for="pw">Password</label>
+    <div class="pw"><input class="in" id="pw" type="password" placeholder="••••••••" autocomplete="current-password"><button type="button" id="eye" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="hint">min. 5 characters</div></div>
+   <div class="hint" id="lerr" role="alert" style="color:var(--red);opacity:1;min-height:14px;margin:0 0 10px;font-size:11.5px"></div>
+   <button class="go" id="sub" type="submit">Log In</button>
+   <div class="sw" id="swl">New here? <button type="button" id="sw">Create an account</button></div>
+  </form>
+ </div>
+</div>
+
+<!-- BOOT -->
+<div class="scene" id="boot">
+ <div class="bl" id="b1">◈ VERIFYING CREDENTIALS</div><div class="bl" id="b2">◈ SYNCING ADVENTURER RECORD</div><div class="bl" id="b3">◈ WELCOME BACK</div>
+ <div class="track"><div class="fill" id="fill"></div></div>
+</div>
+
+<!-- WELCOME -->
+<div class="scene" id="welcome">
+ <button class="skip" id="skip" type="button">Skip</button>
+ <div class="emblem rise" style="animation-delay:.05s">
+  <svg viewBox="0 0 132 132" fill="none" stroke="#8FE3FF" stroke-linecap="round" stroke-linejoin="round">
+   <circle class="r1" cx="66" cy="66" r="62" stroke-width="1" stroke-dasharray="2 7" opacity=".7"/>
+   <circle class="r2" cx="66" cy="66" r="52" stroke-width="1.2" stroke-dasharray="30 12" opacity=".5"/>
+   <g stroke-width="2"><path d="M66 22v88M28 44l76 44M28 88l76-44"/>
+    <path d="M66 30l-8-8M66 30l8-8M66 102l-8 8M66 102l8 8M36 48l-11-2M36 48l-3 11M96 84l11 2M96 84l3-11M36 84l-11 2M36 84l-3-11M96 48l11-2M96 48l3 11" stroke-width="1.6"/></g>
+   <circle cx="66" cy="66" r="6" fill="#0A1420" stroke-width="2"/>
+  </svg>
+ </div>
+ <h1 class="wwm rise" style="animation-delay:.25s">NIFL<span>HEIM</span></h1>
+ <div class="wsub rise" style="animation-delay:.45s">Welcome, <b id="wname">Korii</b></div>
+ <div class="card pager rise" style="animation-delay:.65s">
+  <div class="pg show"><div class="k">The Realm</div><h3>CARVED FROM ICE</h3><p>Frost-bound towns, wild frontier routes and waters that <b>never fully thaw</b>. Something old sleeps beneath the surface.</p></div>
+  <div class="pg"><div class="k">The Arena</div><h3>THE MOONLIT COLOSSEUM</h3><p>Fight rivals, wolves and bosses on screen. <b>Every victory follows you home</b> to your WhatsApp character.</p></div>
+  <div class="pg"><div class="k">Your Legend</div><h3>YOURS TO DECIDE</h3><p>Level up, loot the frozen wild and climb the ranks. <b>Your status window</b> is one tap away, so check it often.</p></div>
+  <div class="dots" id="dots"><button class="on" aria-label="Page 1"></button><button aria-label="Page 2"></button><button aria-label="Page 3"></button></div>
+ </div>
+ <button class="go wgo rise" id="wnext" type="button" style="animation-delay:.85s">Continue</button>
+</div>
+
+<!-- HOME -->
+<div class="scene" id="home"><div class="wrap">
+ <div class="top"><div class="mb"><button class="ib m" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="wm">NIFL<span>HEIM</span></div></div><div class="rt"><button class="ib bell" id="bell" aria-label="Notices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0112 0v6l1.500 2h-15zM10 21a2 2 0 004 0"/></svg></button><button class="ib" data-soon="Profile" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg></button></div></div>
+ <div class="view show" id="v-home">
+ <div class="card pc" id="pc">
+  <svg class="wmk" viewBox="0 0 132 132" fill="none" stroke="#8FE3FF" stroke-width="3" stroke-linecap="round"><path d="M66 10v112M18 38l96 56M18 94l96-56"/></svg>
+  <div class="av"><i></i></div>
+  <div class="mf">
+   <div class="nm"><span id="pn">Korii</span></div>
+   <button class="lvb" id="lvb" type="button"><span id="lv">Lv 12</span> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l5-5 5 5"/></svg></button>
+   <div class="more" id="more">Misty Glade · 520 XP to level 13<br>Equipped: Iron Sword</div>
+   <div class="br"><svg viewBox="0 0 24 24" fill="#ff8aa0"><path d="M12 21s-8-5.200-8-11a4.600 4.600 0 018-3 4.600 4.600 0 018 3c0 5.800-8 11-8 11z"/></svg>HP<div class="ba hp"><i id="hpi" style="width:92%"></i></div><b id="hpt">184 / 200</b></div>
+   <div class="br"><svg viewBox="0 0 24 24" fill="#8FE3FF"><path d="M12 2l2.600 7.400L22 12l-7.400 2.600L12 22l-2.600-7.400L2 12l7.400-2.600z"/></svg>EXP<div class="ba xp"><i id="xpi" style="width:48%"></i></div><b id="xpt">480 / 1000</b></div>
+  </div>
+ </div>
+
+ <div class="sts">
+  <div class="sx"><svg viewBox="0 0 24 24" fill="none" stroke="#8FE3FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg><div><b id="sd">38</b><span>Damage</span></div></div>
+  <div class="sx"><svg viewBox="0 0 24 24"><ellipse cx="9" cy="17" rx="7" ry="3" fill="#b8860b"/><ellipse cx="9" cy="14.500" rx="7" ry="3" fill="#FBD34D"/><ellipse cx="14" cy="10" rx="6" ry="2.600" fill="#b8860b"/><ellipse cx="14" cy="8" rx="6" ry="2.600" fill="#FBD34D"/></svg><div><b id="sc">1,240</b><span>Coins</span></div></div>
+  <div class="sx"><svg viewBox="0 0 24 24" fill="none" stroke="#8FE3FF" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M7 8h10a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2v-9a2 2 0 012-2zM9 8V6a3 3 0 016 0v2M9 14h6" fill="rgba(143,227,255,.15)"/></svg><div><b id="si">17</b><span>Items</span></div></div>
+ </div>
+
+ <div class="card hb">
+  <svg viewBox="0 0 400 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+   <defs><linearGradient id="hs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06101c"/><stop offset="1" stop-color="#0f2b40"/></linearGradient>
+   <radialGradient id="hm"><stop offset="0" stop-color="#C9F3FF" stop-opacity=".55"/><stop offset="1" stop-color="#8FE3FF" stop-opacity="0"/></radialGradient>
+   <linearGradient id="hf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#081420" stop-opacity=".96"/><stop offset=".5" stop-color="#081420" stop-opacity=".7"/><stop offset="1" stop-color="#081420" stop-opacity="0"/></linearGradient></defs>
+   <rect width="400" height="200" fill="url(#hs)"/>
+   <circle cx="262" cy="52" r="52" fill="url(#hm)"/><circle cx="262" cy="52" r="23" fill="#C9F3FF"/><circle cx="262" cy="52" r="23" fill="#3E7A94" opacity=".25"/>
+   <path d="M150 200l50-80 40 30 55-70 55 60 50-30v90z" fill="#0f2a3d"/><path d="M295 80l22 24-14-4-8 12-6-14z" fill="#8FE3FF" opacity=".25"/>
+   <g fill="#07131f"><path d="M268 168v-34h8v-12l4-26 4 26v12h6v-24l4-34 4 34v24h6v-54l6-44 6 44v54h8v-30l4-24 4 24v30h7v-16l4-16 4 16v16h8v-26l4-18 4 18v26h10v50H268z"/></g>
+   <rect x="326" y="150" width="4" height="14" rx="2" fill="#8FE3FF"/><g fill="#8FE3FF" opacity=".7"><rect x="312" y="122" width="2" height="4"/><rect x="342" y="132" width="2" height="4"/></g>
+   <path d="M250 200l40-26 60-8 60 14v20z" fill="#0b2132"/><path d="M262 188l50-14 50 4 50 14v8H262z" fill="#a9d9ef" opacity=".18"/>
+   <g fill="#06111b"><path d="M372 200l9-34 9 34zM384 200l8-26 8 26zM240 200l6-18 6 18z"/></g>
+   <rect width="400" height="200" fill="url(#hf)"/>
+  </svg>
+  <div class="tx">
+   <div class="eyebrow">Moonlit Colosseum</div>
+   <h2>BATTLE ARENA</h2>
+   <p>Fight, rise, and prove your strength.</p>
+   <a class="cta" href="arena.html"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg>Enter Arena<svg class="ch" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></span></a>
+  </div>
+ </div>
+
+ <div class="tl2">
+  <button class="card t2" data-tab-go="shop">
+   <svg class="art" viewBox="0 0 200 92" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="92" fill="#081a2a"/><circle cx="100" cy="64" r="60" fill="#8FE3FF" opacity=".08"/>
+    <g fill="#8FE3FF"><path d="M56 70l8-22 10 22z" opacity=".85"/><path d="M130 68l10-26 9 26z" opacity=".7"/><path d="M82 66l6-30 8 30z" fill="#C9F3FF"/><path d="M110 66l7-18 7 18z" opacity=".9"/></g>
+    <path d="M62 70h76v22H62z" fill="#12293b" stroke="#3E7A94" stroke-width="2"/><path d="M58 68c0-12 84-12 84 0z" fill="#17364b" stroke="#3E7A94" stroke-width="2"/><rect x="96" y="70" width="8" height="10" rx="2" fill="#FBD34D"/></svg>
+   <div class="lb2"><div><b>SHOP</b><span>Get stronger.</span></div><svg class="go2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></div>
+  </button>
+  <button class="card t2" data-tab-go="map">
+   <svg class="art" viewBox="0 0 200 92" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="92" fill="#081a2a"/>
+    <g stroke="#8FE3FF" opacity=".08"><path d="M0 20h200M0 45h200M0 70h200M40 0v92M90 0v92M140 0v92M180 0v92"/></g>
+    <path d="M24 74C60 74 62 44 100 44S150 24 178 22" fill="none" stroke="#3E7A94" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>
+    <circle cx="24" cy="74" r="6" fill="#081a2a" stroke="#3E7A94" stroke-width="2"/><circle cx="178" cy="22" r="6" fill="#081a2a" stroke="#3E7A94" stroke-width="2"/>
+    <circle cx="100" cy="44" r="13" fill="#8FE3FF" opacity=".15"/><circle cx="100" cy="44" r="6" fill="#8FE3FF"/></svg>
+   <div class="lb2"><div><b>MAP</b><span>Find your way.</span></div><svg class="go2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></div>
+  </button>
+ </div>
+
+ <div class="card nt" id="nt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M3 10v4h4l7 4V6L7 10zM17 9a4 4 0 010 6M19 6a8 8 0 010 12"/></svg><div><b>System Notice</b><span id="ntx">Welcome back, <span id="wn2">Korii</span>!</span></div><em>2h ago</em></div>
+</div>
+
+ <div class="view" id="v-shop">
+  <div class="vt"><h1>SHOP</h1><span class="chip" id="coins">₡ 1,240</span></div>
+  <div class="card item"><div class="ic">🧪</div><div><b>HP Potion</b><span>Restores health mid-fight.</span></div><button class="buy" data-n="HP Potion" data-p="50">₡ 50</button></div>
+  <div class="card item"><div class="ic">🗡️</div><div><b>Iron Sword</b><span>+8 damage when equipped.</span></div><button class="buy" data-n="Iron Sword" data-p="300">₡ 300</button></div>
+  <div class="card item"><div class="ic">🛡️</div><div><b>Leather Armor</b><span>Softens every hit you take.</span></div><button class="buy" data-n="Leather Armor" data-p="180">₡ 180</button></div>
+  <div class="card item"><div class="ic">❄️</div><div><b>Frost Charm</b><span>A keepsake from the old ice.</span></div><button class="buy" data-n="Frost Charm" data-p="220">₡ 220</button></div>
+  <p class="note">Sample items for now. Buy for real on WhatsApp with .shop and .buy.</p>
+ </div>
+
+ <div class="view" id="v-map">
+  <div class="vt"><h1>MAP</h1><span class="chip" id="mloc" style="color:var(--ice);border-color:var(--ice-dim)">Misty Glade</span></div>
+  <div class="card mapc"><svg viewBox="0 0 320 190" fill="none" stroke-linecap="round">
+   <path d="M50 150C100 150 100 100 150 100S220 60 270 50" stroke="#3E7A94" stroke-width="2" stroke-dasharray="3 7"/>
+   <circle cx="50" cy="150" r="9" fill="#0A1420" stroke="#3E7A94" stroke-width="2"/>
+   <circle cx="150" cy="100" r="16" fill="rgba(143,227,255,.12)"/><circle cx="150" cy="100" r="9" fill="#8FE3FF"/>
+   <circle cx="270" cy="50" r="9" fill="#0A1420" stroke="#3E7A94" stroke-width="2" stroke-dasharray="2 3"/>
+   <g font-family="Inter" font-size="10" fill="#7FA0B8" text-anchor="middle"><text x="50" y="176">Ash Town</text><text x="150" y="132" fill="#C9F3FF">You are here</text><text x="270" y="30">Frostfang Pass</text></g>
+  </svg></div>
+  <div class="card zone"><i></i><div><b>Ash Town</b><span>Safe. Shops and rest.</span></div><em>Town</em></div>
+  <div class="card zone here"><i></i><div><b>Misty Glade</b><span>Slimes and wild boars.</span></div><em>Here</em></div>
+  <div class="card zone lock"><i></i><div><b>Frostfang Pass</b><span>Reach level 15 to enter.</span></div><em>Locked</em></div>
+  <p class="note">Travel with .explore on WhatsApp. Zones shown here are samples for now.</p>
+ </div>
+</div></div>
+
+<div id="dim"></div>
+<aside id="drawer" aria-label="Menu">
+ <div class="dh"><div class="av"><i></i></div><div><b id="dn">Korii</b><span id="dlv">Level 12 Adventurer</span></div></div>
+ <button class="di" data-soon="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
+ <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
+ <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
+ <div class="dv">NIFLHEIM ONLINE</div>
+</aside>
+
+<nav>
+ <button class="on" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v11h5v-6h4v6h5V10"/></svg>Home</button>
+ <a href="arena.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg>Arena</a>
+ <button data-tab="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.200 12H5.200zM8 8V6a4 4 0 018 0v2"/></svg>Shop</button>
+ <button data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></svg>Map</button>
+ <button data-soon="Rankings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 01-10 0zM7 5H3v2a4 4 0 004 4M17 5h4v2a4 4 0 01-4 4M12 14v4M8 21h8"/></svg>Rankings</button>
+</nav>
+
+<script>
+const $=id=>document.getElementById(id);
+// snow
+for(let i=0;i<34;i++){const f=document.createElement('div');f.className='flake';const s=1+Math.random()*2.6;
+ f.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;animation-duration:${8+Math.random()*12}s;animation-delay:${-Math.random()*14}s`;$('snow').appendChild(f)}
+function scene(id){document.querySelectorAll('.scene').forEach(s=>s.classList.toggle('active',s.id===id));document.body.classList.toggle('in',id==='home')}
+let mode='login';
+function setMode(m){mode=m;$('tl').classList.toggle('on',m==='login');$('ts').classList.toggle('on',m==='signup');$('su').hidden=m!=='signup';
+ $('sub').textContent=m==='signup'?'Create Account':'Log In';
+ $('swl').innerHTML=m==='signup'?'Already have an account? <button type="button" id="sw">Log in</button>':'New here? <button type="button" id="sw">Create an account</button>';
+ $('sw').onclick=()=>setMode(m==='signup'?'login':'signup')}
+$('tl').onclick=()=>setMode('login');$('ts').onclick=()=>setMode('signup');$('sw').onclick=()=>setMode('signup');
+$('eye').onclick=()=>{const p=$('pw');p.type=p.type==='password'?'text':'password'};
+// toast
+let tm;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>t.classList.remove('on'),1600)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-soon]');if(b){drawer(false);toast(b.dataset.soon+' coming soon')}});
+// ---- live: real login + real character data ----
+const API='https://ariel-bot-38kh.onrender.com';
+const TICKET=new URLSearchParams(location.search).get('t');
+async function api(path,opt){const r=await fetch(API+path,{credentials:'include',...opt});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(a,b)=>Math.max(0,Math.min(100,b>0?a/b*100:0))+'%';
+function fill(username,p){
+ const n=(p&&p.name)||username||'Adventurer';
+ ['pn','dn','wn2','wname'].forEach(id=>$(id).textContent=n);
+ if(!p){$('lv').textContent='Lv -';$('dlv').textContent='Not registered yet';$('hpt').textContent='- / -';$('xpt').textContent='- / -';
+  $('hpi').style.width='0';$('xpi').style.width='0';['sd','sc','si'].forEach(id=>$(id).textContent='-');$('more').textContent='No character yet';
+  $('ntx').textContent='Send .reg '+n+' in the WhatsApp group to create your character.';return}
+ $('lv').textContent='Lv '+p.level;$('dlv').textContent='Level '+p.level+' Adventurer';
+ $('hpi').style.width=pct(p.hp,p.max_hp);$('hpt').textContent=p.hp+' / '+p.max_hp;
+ $('xpi').style.width=pct(p.xp,p.xp_needed);$('xpt').textContent=p.xp+' / '+p.xp_needed;
+ $('sd').textContent=p.damage;$('sc').textContent=(+p.coins).toLocaleString();
+ $('si').textContent=Object.values(p.inventory||{}).reduce((a,b)=>a+(+b||0),0);
+ const eq=Object.values(p.equipped||{}).filter(Boolean).join(', ')||'Nothing equipped';
+ $('more').innerHTML=esc(p.location||'')+' · '+Math.max(0,p.xp_needed-p.xp)+' XP to level '+(p.level+1)+'<br>Equipped: '+esc(eq);
+ $('coins').textContent='₡ '+(+p.coins).toLocaleString();$('mloc').textContent=p.location||'';
+}
+function forwardToArena(){
+ if(!TICKET)return false;
+ try{const t=+sessionStorage.getItem('nif_fwd')||0;if(Date.now()-t<15000)return false;sessionStorage.setItem('nif_fwd',Date.now())}catch(e){}
+ location.replace('arena.html?t='+encodeURIComponent(TICKET));return true;
+}
+// username = account name; withBoot = play the boot sequence (fresh login)
+async function enter(username,withBoot){
+ if(withBoot){scene('boot');$('fill').style.width='0';
+  ['b1','b2','b3'].forEach((id,i)=>{$(id).classList.remove('show');setTimeout(()=>$(id).classList.add('show'),250+i*700)});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('fill').style.width='100%'))}
+ let p=null;
+ const [r]=await Promise.all([api('/api/niflheim/me').catch(()=>null),new Promise(ok=>setTimeout(ok,withBoot?2700:0))]);
+ if(r&&r.ok&&r.j.player)p=r.j.player;
+ fill(username,p);
+ if(forwardToArena())return;
+ let seen=false;const k='nif_welcomed_'+(username||'');try{seen=!!localStorage.getItem(k);localStorage.setItem(k,'1')}catch(e){}
+ if(seen)toHome();else openWelcome((p&&p.name)||username);
+}
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault();const err=$('lerr'),btn=$('sub');err.textContent='';
+ const countryCode=$('co').value.trim(),phoneNumber=$('ph').value.trim().replace(/^0+/,''),password=$('pw').value,username=$('un').value.trim();
+ if(!/^[0-9]{1,4}$/.test(countryCode))return err.textContent='Enter a valid country code, like 234.';
+ if(!/^[0-9]{5,}$/.test(phoneNumber))return err.textContent='Enter a valid phone number.';
+ if(mode==='signup'&&!username)return err.textContent='Choose an adventurer name.';
+ if(password.length<5)return err.textContent='Password must be at least 5 characters.';
+ btn.disabled=true;const old=btn.textContent;btn.textContent='One moment…';
+ try{
+  const body=mode==='signup'?{username,countryCode,phoneNumber,password}:{countryCode,phoneNumber,password};
+  const r=await api('/api/auth/'+(mode==='signup'?'signup':'login'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  btn.disabled=false;btn.textContent=old;
+  if(!r.ok){err.textContent=r.j.error||'That did not work. Try again.';return}
+  enter(r.j.username||username,true);
+ }catch(x){btn.disabled=false;btn.textContent=old;err.textContent='Server unreachable. It may be waking up, try again in a moment.'}
+});
+// already logged in? skip the login screen
+api('/api/auth/me').then(r=>{if(r.ok&&r.j.username)enter(r.j.username,false)}).catch(()=>{});
+// welcome (shown after login; in the real site show it once per account)
+let wp=0;const pgs=[...document.querySelectorAll('.pg')],dts=[...document.querySelectorAll('#dots button')];
+function showPage(i){wp=i;pgs.forEach((p,j)=>p.classList.toggle('show',j===i));dts.forEach((d,j)=>d.classList.toggle('on',j===i));$('wnext').textContent=i===pgs.length-1?'Begin Your Journey':'Continue'}
+function openWelcome(n){$('wname').textContent=n;showPage(0);const w=$('welcome');w.classList.remove('on-w');scene('welcome');void w.offsetWidth;w.classList.add('on-w')}
+function toHome(){$('welcome').classList.remove('on-w');scene('home')}
+$('wnext').onclick=()=>wp<pgs.length-1?showPage(wp+1):toHome();
+dts.forEach((d,i)=>d.onclick=()=>showPage(i));
+$('skip').onclick=toHome;
+function drawer(o){document.body.classList.toggle('dr',o)}
+$('menuBtn').onclick=()=>drawer(true);$('dim').onclick=()=>drawer(false);
+function tab(t){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id==='v-'+t));
+ document.querySelectorAll('nav [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$('home').scrollTop=0}
+document.querySelectorAll('nav [data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.querySelectorAll('[data-tab-go]').forEach(b=>b.onclick=()=>tab(b.dataset.tabGo));
+$('lvb').onclick=()=>$('pc').classList.toggle('open');
+$('bell').onclick=()=>{tab('home');$('bell').classList.add('read');const n=$('nt');n.scrollIntoView({behavior:'smooth',block:'center'});n.classList.remove('flash');void n.offsetWidth;n.classList.add('flash')};
+document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>toast('Buy on WhatsApp with .buy'));
+$('logout').onclick=async()=>{drawer(false);try{await api('/api/auth/logout',{method:'POST'})}catch(e){}tab('home');$('form').reset();$('lerr').textContent='';setMode('login');scene('login')};
+</script>
+</body></html>

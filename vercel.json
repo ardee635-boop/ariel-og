@@ -1,3 +1,7 @@
 {
-  "buildCommand": null
+  "buildCommand": null,
+  "redirects": [
+    { "source": "/pokemon", "destination": "/", "permanent": false },
+    { "source": "/pokemon.html", "destination": "/", "permanent": false }
+  ]
 }
