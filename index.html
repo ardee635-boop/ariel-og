@@ -281,6 +281,16 @@ body.sh #sheet{transform:none}
 .mgo:not([disabled]):active{transform:translateY(1px)}
 .mmsg{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--muted);font-size:13px;line-height:1.7;background:rgba(3,10,19,.88)}
 .mmsg.on{display:flex}
+/* ===== profile edit (rename + picture) ===== */
+.swirl.has{background:var(--av) center/cover no-repeat;box-shadow:0 0 14px rgba(143,227,255,.45);filter:none}
+.avatar-frame .swirl.has{width:100%;height:100%;border-radius:inherit}
+.edc{padding:16px;margin-top:14px;text-align:left}
+.edc .lb{display:block;margin-bottom:8px}
+.edrow{display:flex;gap:10px}.edrow .go{margin:0;flex:1}
+.edc .hint{margin-top:8px}.edc>.go{margin-top:12px}
+.edmsg{min-height:16px;font-size:12px;margin-top:8px;color:var(--muted)}.edmsg.bad{color:#ff8a8a}.edmsg.ok{color:#7FE0A8}
+.go[disabled]{opacity:.5;pointer-events:none}
+.go[hidden]{display:none}
 </style></head>
 <body>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -426,6 +436,29 @@ body.sh #sheet{transform:none}
   </div>
  </div>
 
+<div class="view" id="v-edit">
+  <button class="back" id="eback" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>Back</button>
+  <div class="pp">
+   <div class="avatar-frame"><div class="swirl" id="edAv"></div></div>
+   <h2 id="edNm">Name</h2><div class="s2">Edit your profile</div>
+   <div class="card edc">
+    <label class="lb">Profile picture</label>
+    <div class="edrow"><button class="go" id="picBtn" type="button">Choose picture</button><button class="go ghost" id="picRm" type="button" hidden>Remove</button></div>
+    <input id="edPic" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+    <div class="hint">PNG, JPG or WebP. It is cropped square and shrunk for you.</div>
+    <div class="edmsg" id="picMsg" role="status"></div>
+   </div>
+   <div class="card edc">
+    <label class="lb" for="edName">Adventurer name</label>
+    <input class="in" id="edName" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Your name">
+    <div class="hint">2 to 20 characters: letters, numbers, spaces, - and _</div>
+    <button class="go" id="nameBtn" type="button">Save name</button>
+    <div class="edmsg" id="nameMsg" role="status"></div>
+   </div>
+   <p class="note">You can also rename on WhatsApp with <b>.setname NewName</b>.</p>
+  </div>
+ </div>
+
  <div class="view" id="v-shop">
   <div class="lb-page-head"><h1>SHOP</h1><p>Your coins: <span style="color:var(--yellow);font-weight:600">1,240</span></p></div>
   <div class="lb-list">
@@ -461,7 +494,7 @@ body.sh #sheet{transform:none}
 <div id="dim"></div>
 <aside id="drawer" aria-label="Menu">
  <div class="dh"><div class="avatar-frame"><div class="swirl"></div></div><div><b id="dn">Korii</b><span id="dlv">Level 12 Adventurer</span></div></div>
- <button class="di" data-soon="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
+ <button class="di" id="editBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
  <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
  <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
 </aside>
@@ -490,7 +523,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const pct=(a,b)=>Math.max(0,Math.min(100,b>0?a/b*100:0))+'%';
 const pretty=k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 function fill(username,p){
- const n=(p&&p.name)||username||'Adventurer';
+ const n=(p&&p.name)||username||'Adventurer';ME=p||null;setAvatar(p&&p.avatar||null);$('edNm').textContent=n;$('edName').value=n;
  ['pn','dn','wn2','wname'].forEach(id=>$(id).textContent=n);
  $('nt').querySelector('em').textContent='just now';
  if(!p){$('plv').textContent='-';$('ploc').textContent='Not registered';$('dlv').textContent='Not registered yet';$('hpt').textContent='- / -';$('xpt').textContent='- / -';
@@ -546,6 +579,54 @@ function openWelcome(n){showPage(0);const w=$('welcome');w.classList.remove('on-
 function toHome(){$('welcome').classList.remove('on-w');scene('home')}
 $('wnext').onclick=()=>wp<pgs.length-1?showPage(wp+1):toHome();
 dts.forEach((d,i)=>d.onclick=()=>showPage(i));$('skip').onclick=toHome;
+// profile edit: rename + picture
+let ME=null;
+function setAvatar(url){
+ document.querySelectorAll('#pcard .swirl,.dh .swirl,#edAv').forEach(e=>{
+  if(url){e.style.setProperty('--av','url("'+url+'")');e.classList.add('has')}
+  else{e.style.removeProperty('--av');e.classList.remove('has')}});
+ $('picRm').hidden=!url;
+}
+function edMsg(id,t,cls){const e=$(id);e.textContent=t||'';e.className='edmsg'+(cls?' '+cls:'')}
+function toSquare(file,size){return new Promise((ok,no)=>{
+ const u=URL.createObjectURL(file),im=new Image();
+ im.onload=()=>{try{const s=Math.min(im.naturalWidth,im.naturalHeight),sx=(im.naturalWidth-s)/2,sy=(im.naturalHeight-s)/2;
+  const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+  x.fillStyle='#081420';x.fillRect(0,0,size,size);x.drawImage(im,sx,sy,s,s,0,0,size,size);
+  URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85))}catch(e){no(e)}};
+ im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('unreadable'))};im.src=u})}
+$('editBtn').onclick=()=>{drawer(false);edMsg('picMsg','');edMsg('nameMsg','');$('edName').value=(ME&&ME.name)||$('edNm').textContent;tab('edit')};
+$('eback').onclick=()=>tab('home');
+$('picBtn').onclick=()=>{if(!ME)return edMsg('picMsg','Register first: send .reg YourName in the WhatsApp group.','bad');$('edPic').click()};
+$('edPic').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ if(f.size>20*1024*1024)return edMsg('picMsg','That file is too big.','bad');
+ const b=$('picBtn');b.disabled=true;edMsg('picMsg','Uploading…');
+ try{
+  const img=await toSquare(f,256);
+  const r=await api('/api/niflheim/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:img})});
+  if(!r.ok)edMsg('picMsg',r.j.error||'Upload failed. Try again.','bad');
+  else{ME.avatar=r.j.avatar;setAvatar(r.j.avatar);edMsg('picMsg','Picture updated.','ok')}
+ }catch(x){edMsg('picMsg','That picture could not be read.','bad')}
+ b.disabled=false};
+$('picRm').onclick=async()=>{
+ const b=$('picRm');b.disabled=true;
+ try{const r=await api('/api/niflheim/avatar',{method:'DELETE'});
+  if(r.ok){if(ME)ME.avatar=null;setAvatar(null);edMsg('picMsg','Picture removed.','ok')}else edMsg('picMsg',r.j.error||'Could not remove it.','bad')
+ }catch(x){edMsg('picMsg','Server unreachable. Try again.','bad')}
+ b.disabled=false};
+async function saveName(){
+ const v=$('edName').value.trim();
+ if(!ME)return edMsg('nameMsg','Register first: send .reg YourName in the WhatsApp group.','bad');
+ if(!v)return edMsg('nameMsg','Type a name first.','bad');
+ const b=$('nameBtn');b.disabled=true;edMsg('nameMsg','Saving…');
+ try{
+  const r=await api('/api/niflheim/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:v})});
+  if(!r.ok)edMsg('nameMsg',r.j.error||'Could not rename. Try again.','bad');
+  else{ME.name=r.j.name;['pn','dn','wn2','wname','edNm'].forEach(id=>{const e=$(id);if(e)e.textContent=r.j.name});$('edName').value=r.j.name;edMsg('nameMsg','Name changed to '+r.j.name+'.','ok')}
+ }catch(x){edMsg('nameMsg','Server unreachable. Try again.','bad')}
+ b.disabled=false}
+$('nameBtn').onclick=saveName;$('edName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName()}};
 // drawer + ribbon tabs
 function drawer(o){document.body.classList.toggle('dr',o)}
 $('menuBtn').onclick=()=>drawer(true);$('dim').onclick=()=>drawer(false);
