@@ -1,0 +1,882 @@
+ARIEL AMONG US — MASTER DESIGN & MERGE NOTE v4 (merged with Session 7 Sabotage Note)
+
+Status: Master design, Sessions 1–6 implemented and tested; Session 7 (sabotage) designed and ready to build
+Current stage: Session 7 — Part 7A (shared sabotage framework) is next
+Implementation: Sessions 1–6 authorised and delivered; Session 7 awaiting go-ahead to start Part 7A
+Map: The Skeld, using the supplied image and approximate travel values (14 rooms). Sabotage station rooms still need confirming.
+Rule: Newer user decisions override older proposals. Proposed features are not confirmed implementations.
+Merge: Sections 20–24 below combine the master design's sabotage rules with the Session 7 build note (Parts 7A–7D).
+
+---
+
+WHAT'S COMPLETED
+
+Source: Build Plan, Session 1–6 handoffs and the merged codebase. Regression suites: Session 1 (4 tests), 2 (9), 3 (9), 4 (8), 5 (8), 6 (10) — all passing on the merged tree (48 total).
+
+| Session | Scope | Status |
+| --- | --- | --- |
+| 1 | Map, world clock, lobby and game shell, config module, router isolation | Done |
+| 2 | Movement: .m, .stop, .goback, departure boundary, arrivals, 2-second room-event window, corridor encounters | Done |
+| 3 | .status, camping awareness, .follow/.unfollow, bodies, witness records, .cscene | Done |
+| 4 | Roles, Scientist at 7+ players, .kill (4s resolve, 30s cooldown), vents, .vitals/.witness, .cooldown/.CDs | Done |
+| 5 | Tasks (lobby size + 1), task interactions, .task next, quote-reply, ghost tasks, task victory | Done |
+| 6 | Meetings, private changeable votes, witnessed-only .report, ghost half-time travel, Ghost group gate, .say | Done |
+| 7 | Sabotage (Parts 7A–7D) | Not started |
+| 8 | Full-match simulation, hardening, final win conditions | Not started |
+
+Sabotage-related work already in place:
+
+- [x] Sabotage cooldown values and the 30–40s deadline range are in the config module (Lights 3 min, Reactor 5 min, Communications 3 min, O₂ 4 min).
+- [x] Meeting rule decided and implemented: active sabotage deadlines pause during a meeting and resume afterwards; cooldowns keep running. Covered by a Session 6 test.
+- [x] Per-game world clock, event log with timestamps, single sanitised broadcast path and clean shutdown on game end — the foundations Part 7A builds on.
+- [x] Task-interaction lifecycle (one-minute idle cancel, .task next, no duplicates per player) — Part 7A reuses it for repairs.
+- [x] Dead players cannot use .vitals/.witness (settled in Session 4; resolves the earlier assistant proposal).
+- [ ] Placeholder only: the existing ".sabotage reactor" starts the old Meltdown mechanic (rooms O2 and Admin, 30s) with ".repair". Part 7A–7C replace it.
+- [ ] .cooldown / .CDs do not yet list sabotage cooldowns.
+
+Known limits carried forward:
+
+- The bot gates Ghost-group messages by deleting them; it does not change real WhatsApp admin roles. Message deletion needs the bot to be group admin.
+- Persistence after restart: recommended to end the game cleanly rather than resume.
+- Full player-departure reconciliation for task totals, and the final win-condition text, belong to Session 8.
+
+---
+
+1. Source labels
+
+- [CODE] — Confirmed existing implementation.
+- [GEMINI DISCUSSION] — Information or ideas from Gemini discussions.
+- [USER DESIGN DIRECTION] — Decisions explicitly made by the user.
+- [ASSISTANT PROPOSAL] — Suggestions not yet approved.
+- [TEST SIMULATION] — Illustrative scenarios, not verified live behaviour.
+- [UNDECIDED] — A design choice still open.
+- [NEEDS VERIFICATION] — Requires checking existing code or another source.
+- [BUG/RISK TO INVESTIGATE] — A potential implementation problem.
+
+2. Development order
+
+1. Stage 1 — Living world: Rooms, movement, stopping, arrivals, departures, awareness and world events.
+2. Stage 2 — Perspectives and privacy: Roles, witnesses, ghosts, knowledge and communications.
+3. Stage 3 — Event rules: Kills, meetings, interrupted actions, sabotage deadlines and simultaneous events.
+4. Stage 4 — Whole-game testing: Simulate matches, test edge cases and compare expected behaviour with the existing code and Gemini discussions.
+5. Stage 5 — Integration and implementation: Audit existing code and implement only after explicit approval.
+
+Current boundary: Session 2 movement is implemented and tested. Do not proceed to Session 3 without the user's next instruction.
+
+---
+
+3. Existing implementation baseline
+
+[CODE — reported in the original audit; re-verify before implementation]
+
+Relevant files:
+
+- "engine/router/amongus.py" — Mode management, lobby handling and command dispatch.
+- "engine/router/amongus_game.py" — Game state, players, movement, tasks, kills, meetings, sabotage and victory checks.
+- "engine/router/amongus_map.py" — Map, connections and task definitions.
+- "engine/router/handle.py" — Message handling and routing integration.
+- "engine/router/__init__.py" — Router package integration.
+- "engine/bridge.py", "bot/bridge.js", "bot/groups.js" — Additional integration points.
+
+Reported baseline:
+
+- Lobby size: 4–20 players.
+- Inactivity timeout: 10 minutes.
+- Kill resolution delay: 4 seconds.
+- Kill cooldown: 30 seconds between successful kills, according to the newer design.
+- Reported Impostor counts: one below 7 players, two below 14, and three from 14 players onward.
+
+The existing map reportedly has 14 rooms: Cafeteria, MedBay, Upper Engine, Security, Reactor, Lower Engine, Electrical, Storage, Admin, Weapons, O2, Navigation, Shields and Communications.
+
+Kitchen, Bedroom and Dorm are illustrative names unless confirmed by Gemini's final map.
+
+Reported commands include ".amongus on/off", ".lobby open/start/list", ".join", ".leave", ".amenu", ".m", ".where", ".task", ".tasks", ".progress", ".players", ".kill", ".vent", ".sabotage", ".cooldown", ".follow", ".report", ".meeting", ".vote", ".setghostgroup" and ".c".
+
+Existing behaviour must be re-verified before implementation.
+
+---
+
+STAGE 1 — LIVING WORLD
+
+4. World progression and presence
+
+[USER DESIGN DIRECTION]
+
+- The world continues progressing without players sending messages.
+- Movement, timers and relevant events are tracked independently of observers.
+- Inactivity does not freeze the world.
+- Authoritative world state is separate from what individual players know.
+- A player can be physically present in a room, travelling through a corridor or stopped at a corridor position.
+- Nearby does not automatically mean visible or observable; awareness depends on the relevant room, corridor and event rules.
+
+5. Room departures
+
+[USER DESIGN DIRECTION — DECIDED]
+
+A player stops counting as present in a room only when they physically cross the exit boundary into the corridor.
+
+- Issuing a movement command does not itself mean the player has left.
+- Before crossing the boundary, the player still counts as present in the room.
+- After crossing, they count as travelling.
+- Players still inside the room receive an update such as:
+
+«Yellow left Cafeteria.»
+
+The update does not reveal Yellow's destination.
+
+6. Room arrivals
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- Players physically inside the destination room receive the normal arrival update.
+- Players travelling toward the room do not receive its arrival update merely because they are approaching.
+- Simultaneous arrivals within the specified one-second span must be resolved from actual movement, direction and arrival state.
+- Notification processing order must not arbitrarily change what players should have observed.
+
+Example:
+
+«Red arrived in the Kitchen beside you.»
+
+The final wording must be consistent with the ordinary awareness rules.
+
+7. Room-event awareness window
+
+[USER DESIGN DIRECTION — DECIDED]
+
+A two-second window applies to the described room arrival/departure awareness cases.
+
+- If one player leaves and another enters or leaves within the relevant window, the departing player can know about that room event.
+- A newly arrived player can know that another player was present and left within the window.
+- Merely passing through a corridor outside a room does not tell room occupants that someone passed.
+
+Actual event timestamps and presence must determine awareness, not the order in which messages are processed.
+
+8. Corridor encounters
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- Two players travelling through the same corridor can encounter each other; both know about the encounter.
+- A travelling player can encounter someone stopped in that corridor.
+- The encounter does not automatically reveal whether the stopped player deliberately stopped.
+- A player inside a room does not automatically know someone passed through the corridor outside.
+- Corridor encounters are distinct from room arrivals and departures.
+
+9. Stopping and ".stop"
+
+[USER DESIGN DIRECTION — DECIDED]
+
+Movement normally continues until the player reaches the destination, but ".stop" can interrupt it.
+
+- ".stop" halts movement immediately.
+- The player remains at their exact current position, including halfway through a corridor.
+- The player can later issue a new movement command from that position.
+- The world tracks the stopped position independently of messages.
+- The camping timer begins for that continuous stop.
+
+The rule applies to deliberate stopping during travel as well as stopping in a room.
+
+[UNDECIDED] Any special response for ".stop" when the player is already stationary.
+
+10. Camping awareness
+
+[USER DESIGN DIRECTION — DECIDED]
+
+Camping awareness applies to all players, subject to the later Ghost exception below.
+
+Trigger conditions:
+
+1. A player remains stopped in one place for at least one minute.
+2. Another eligible player must be nearby, meaning physically in the same room or corridor.
+3. If someone is nearby when the minute passes, the event triggers once the threshold is reached.
+4. If nobody is nearby at that point, the event waits until someone enters the same room or corridor.
+5. Even a brief two-second pass through the same corridor can trigger awareness if the time requirement has already been met.
+
+The nearby player may suspect the stopped player is camping, but this is not proof of their role or intentions.
+
+The stopped player receives a private warning:
+
+«The other players are onto you. You've been here for a while.»
+
+Reset rules:
+
+- Leaving the current position resets the camping timer.
+- Stopping somewhere new starts a fresh timer.
+- Awareness triggers at most once per continuous stop.
+- The private warning also occurs only once per stop.
+- Later players passing by do not retrigger the same event.
+
+[USER DESIGN DIRECTION — GHOST EXCEPTION] Ghosts do not trigger camping awareness. Ghost-to-Ghost awareness still applies.
+
+11. Movement history and ".goback"
+
+[USER DESIGN DIRECTION — DECIDED]
+
+".goback" returns a player toward the last room they physically occupied before their current journey began.
+
+- Works from the exact current position, including halfway through a corridor.
+- Calculates the fastest route back to the reference room.
+- Does not simply replay every historical detour.
+- Corridor encounters remain possible during the return.
+- Repeating ".goback" while already returning does not start another return.
+
+Example response:
+
+«You're already going back to Kitchen.»
+
+If the player issues a new movement command during the return:
+
+- The return is cancelled immediately.
+- The player stays at the exact current position.
+- The new destination becomes active.
+- Travel time is recalculated from the current position.
+- The reference room does not change merely because the player redirected.
+
+The reference room changes only when the player physically enters a new room.
+
+Example:
+
+Kitchen → travelling toward Electrical → ".goback" → redirect toward MedBay → ".goback"
+
+The return target remains Kitchen until the player physically enters MedBay.
+
+[NEEDS VERIFICATION] The fastest-route travel-time calculation must be reconciled with the earlier timing discussion. Example: if a normal Kitchen-to-Storage journey takes 10 seconds and the player has travelled for 9 seconds, the return journey was discussed as taking 9 seconds rather than the one second remaining to the original destination. The precise implementation still requires confirmation.
+
+12. Crime scenes
+
+[USER DESIGN DIRECTION — DECIDED]
+
+Command aliases:
+
+- ".cscene"
+- ".crimescene"
+- ".cs"
+
+The command lists only reported crime scenes.
+
+Example:
+
+«Crime Scenes
+
+1. Kitchen — Red
+2. Bedroom — Yellow»
+
+The colour identifies the victim, not the killer.
+
+Rules:
+
+- Unreported bodies do not appear.
+- Reporting a body makes its crime scene eligible for listing.
+- Previously reported crime scenes remain listed for the rest of the game, including after meetings.
+- Reporting another body adds an entry without removing earlier reported entries.
+- The command must never reveal an unreported death.
+
+[NEEDS VERIFICATION] Keep persistent crime-scene history separate from the active-body list if reporting removes bodies from rooms.
+
+---
+
+TASKS AND PLAYER INTERACTIONS
+
+13. Ordinary tasks
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- A room may contain multiple tasks.
+- Each ".task" completes one task only.
+- The bot tells the player how many tasks remain or that all tasks are complete.
+- Living players can complete only their assigned tasks and only in the correct room.
+- Task cooldown is 30 seconds per living player.
+- Cooldowns are independent between players and continue during movement and meetings.
+- Attempts while moving or meeting are rejected without consuming or resetting cooldown.
+- Each Crewmate receives total lobby size + 1 tasks. Impostors are included in the lobby-size calculation.
+- Examples: 4-player lobby = 5 tasks per Crewmate; 10-player lobby = 11; 20-player lobby = 21.
+- Completed Crewmate tasks contribute to the team task-victory condition.
+- Ordinary tasks are separate from sabotage repairs.
+
+14. Task interaction lifecycle
+
+[USER DESIGN DIRECTION]
+
+- Players may quote-reply to a task message so the bot can identify the intended task.
+- Stale or duplicate task completion must be rejected.
+- A task interaction stays active for one minute without activity, then cancels and its poll/interaction is deleted.
+- ".task next" abandons the current interaction and starts the next eligible task.
+- If ".task" is used while another interaction is active, respond:
+
+«You already have an active task in progress. Type ".task next" to abandon your current task and begin your next task.»
+
+- Leaving the game cancels an active interaction as soon as the bot detects departure.
+- Task-related informational messages in the game group use hidetag so everyone is notified.
+- Task interaction types should vary appropriately; not every puzzle should be random.
+
+15. Cooldown information
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- ".cooldown" and ".CDs" are general commands available to all players.
+- They display the cooldowns applicable to that player, based on their role and actions.
+- They are not Scientist-only commands.
+
+---
+
+STAGE 2 — PERSPECTIVES AND PRIVACY
+
+16. Crewmate
+
+[USER DESIGN DIRECTION]
+
+- Ordinary Crewmates have no special investigation command.
+- They rely on normal awareness, ".status", ".cscene" and meetings.
+- They retain memories across meetings; the bot must not repeat old information as though it were newly observed.
+- They can complete their assigned tasks.
+- Their team goal is to complete the task requirement or eliminate all Impostors, subject to the final victory rules.
+- Emergency sabotage failure has a game-ending consequence; exact victory handling must be reconciled with the implementation.
+
+17. Scientist
+
+[USER DESIGN DIRECTION — DECIDED]
+
+Scientist is a special Crewmate role.
+
+".vitals"
+
+- Scientist-only.
+- Cooldown: 20 seconds.
+- Displays the full player list and each player's status:
+  - Alive
+  - Dead — Unreported
+  - Dead — Witnessed
+  - Dead — Reported
+
+Definitions:
+
+- Unreported: No one other than the killer has witnessed the corpse.
+- Witnessed: At least one person other than the killer has seen the corpse, but it has not been reported.
+- Reported: The body has been reported.
+
+".witness"
+
+- Scientist-only.
+- Cooldown: 1 minute 15 seconds.
+- Displays the vitals list plus the witnesses associated with each corpse.
+- Witness records persist throughout the game, including after reports and meetings.
+- The reporter counts as a witness and appears in bold in the witness output.
+- Other Impostors count as witnesses if they saw the corpse before it was reported.
+- Neither ".vitals" nor ".witness" automatically reveals the killer or the location/time of death.
+
+[ASSISTANT PROPOSAL — NOT YET CONFIRMED] A dead Scientist cannot use ".vitals" or ".witness".
+
+18. General information and murder awareness
+
+[USER DESIGN DIRECTION]
+
+- A victim does not automatically know who killed them.
+- A player may have suspects based on who was present, subject to later witness and privacy rules.
+- A nearby player may receive a vague notification after a kill:
+
+«There seems to be distress in the room. Use ".status" to check.»
+
+- If ".status" confirms a body:
+
+«You found a body. Red is dead.»
+
+- The victim's colour may be revealed; the killer is not automatically revealed.
+- ".status" actively checks the current room and reports actual occupants, including during Lights sabotage.
+- ".status" does not reveal past presence or actions, and being present does not prove a kill.
+
+19. Ghosts
+
+[USER DESIGN DIRECTION — DECIDED]
+
+A Ghost is a post-death state, not a starting role.
+
+Movement and awareness
+
+- Ghosts use the same map and world.
+- They have half the normal travel time. A 12-second normal trip takes 6 seconds for a Ghost.
+- They do not teleport; their room and corridor positions remain physically tracked.
+- They can receive movement and room updates and observe events according to their location.
+- Ghosts do not directly interfere with living players.
+- Ghosts do not trigger camping awareness.
+- Ghost-to-Ghost awareness applies.
+
+Communication
+
+- A dedicated Ghost group exists.
+- Only Ghosts are admins in that group during the game.
+- Non-Ghosts cannot type there.
+- Ghosts can discuss suspected or known killer identities in the Ghost group.
+- Living players cannot see Ghost-group discussions.
+- Ghosts cannot chat in the main living game group; their messages there are deleted immediately.
+- Bot-generated system updates from game actions may still appear in the main game group.
+- A Ghost's ".say" sends the message to the Ghost group instead of the living game group.
+- Ghosts cannot participate in living meetings or votes.
+- After the game ends, everyone returns to normal status and Ghost-group restrictions reset.
+
+Ghost tasks
+
+- Ghosts can complete any available task through bot DM, even if it was not assigned to them.
+- Ghost task completions contribute to Crewmate task victory.
+- Ghost task cooldown is 50 seconds.
+
+---
+
+SABOTAGE SYSTEMS
+
+Merged from the master design (original sections 20–24) and the Session 7 note. Status tags: [DONE] implemented, [TODO] to build, [OPEN] decision still needed.
+
+20. General sabotage rules and shared framework (Part 7A)
+
+[USER DESIGN DIRECTION — DECIDED]
+
+Multiple sabotages may be active simultaneously. There is no one-sabotage-at-a-time restriction.
+
+Cooldowns:
+
+- Lights: 3 minutes.
+- Reactor: 5 minutes.
+- Communications: 3 minutes.
+- O₂: 4 minutes.
+
+Cooldown starts on activation and continues while the sabotage is active, and during meetings.
+
+Each sabotage has its own active state, deadline if applicable, cooldown and repair interaction. Fixing one sabotage does not fix or reset another.
+
+Impostors trigger sabotage remotely with ".sabotage <name>". Repairing requires travel to the appropriate location.
+
+Shared rules:
+
+- Group announcements go through the single sanitised broadcast path: activation, 20 seconds left, 10 seconds left, final result. No per-second messages.
+- The world clock drives deadlines and warnings; they never wait on a player's next command.
+- Game end cancels every sabotage timer, repair interaction and pending scan.
+- A sabotage failure ends the game. Final victory text is finished in Session 8.
+- Meetings: O₂ and Reactor countdowns pause until the meeting ends; cooldowns keep running. [DECIDED — implemented for deadlines in Session 6]
+
+Part 7A build:
+
+1. [DONE] Sabotage base object: name, state (idle, active, repaired, failed), activated_at, deadline, cooldown_until, repair hooks.
+2. [DONE] Per-game registry with one instance per sabotage type.
+3. [DONE] Cooldowns, deadline range and 20s/10s warning thresholds live in the config module.
+4. [DONE] ".sabotage" command: impostor-only, DM-only routing, cooldown check and remaining-time reply.
+5. [DONE] World-clock hooks for deadlines and warnings; deadline pause/resume across meetings; shared repair interaction slot reusing the Session 5 lifecycle.
+6. [DONE] Event-log entries for activation, repair and failure, with timestamps.
+7. [DONE] Cleanup on repair, failure and game end.
+
+Part 7A checklist:
+
+- [x] Two sabotages active together; repair one, the other stays active with its own timer.
+- [x] Cooldown displays correctly and keeps running while active and during a meeting.
+- [x] Sabotage activated then game ended: no running timer, nothing sent afterwards.
+
+Note: Part-specific repair mechanics are in 7B/7C. O₂/Reactor activation does not yet assign a deadline; Part 7C wires their configured 30–40s deadlines and paired scans.
+
+21. Lights sabotage (Part 7B)
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- Impostor triggers ".sabotage lights" remotely.
+- Cooldown: 3 minutes, starting on activation.
+- Lights remain sabotaged until repaired; there is no automatic timeout.
+- Fresh passive movement observations obscure identities while preserving the event, such as someone entering, leaving or passing.
+- Impostors see true identities.
+- Once Lights is repaired, new observations return to normal; past observations remain remembered.
+- ".status" actively reveals current-room occupants even during Lights.
+
+Repair
+
+- Repair location: Electrical.
+- A player physically arrives and uses ".task".
+- Bot creates a poll-style switch puzzle in the game group.
+- A small set of predefined circuit patterns is used; the puzzle is not wholly random.
+- Switch selections change other switches according to the selected pattern.
+- The interaction is bot-managed; it is not a native WhatsApp poll with linked controls.
+- Different players can attempt repairs independently. Each player has a separate interaction; selections do not affect each other.
+- The first successful completion repairs Lights for everyone. Simultaneous near-completions count only once.
+- On repair, all active repair polls are deleted.
+- Abandonment or inactivity cancels only that player's attempt; Lights remains active and other attempts continue.
+- A player cannot have duplicate active repair interactions.
+
+Build:
+
+1. [TODO] Lights sabotage object and an observation-masking flag read by the awareness layer.
+2. [TODO] Per-player switch-puzzle interactions, first-success repair and poll cleanup.
+3. [TODO] Circuit pattern library in its own puzzle-data module. [OPEN] The pattern list still needs writing.
+
+Checklist:
+
+- [ ] Two players repair Lights at once: one repair counts, all polls deleted.
+- [ ] One player abandons: Lights stays active, the other attempt continues.
+- [ ] Observations made during Lights stay masked after repair; new ones are not.
+
+22. Communications sabotage (Part 7B)
+
+[USER DESIGN DIRECTION — DECIDED]
+
+- Triggered remotely with ".sabotage communications".
+- Cooldown: 3 minutes. Remains active until repaired.
+- Locks the game group against ordinary player messages; bot system messages may still appear. This needs the bot to be group admin.
+- Camping awareness is inactive. A pending camping trigger is dropped, not delayed; a fresh stop after repair starts a new timer.
+- Automatic passive room-arrival, departure and corridor-encounter notifications are suppressed.
+- ".follow", movement, kills, meetings, reporting/voting, timers, repairs and authoritative world state continue.
+- [OPEN] Which information commands are restricted. Disabling ".players" and ".progress" was only a proposal.
+- No individual replay of missed passive movement updates after repair. Instead, send one consolidated report of players inactive for more than 60 seconds, with current locations and durations. This is not proof of guilt.
+
+Repair
+
+- Player must physically arrive in Communications and use ".task".
+- Bot posts a scrambled phrase in the game group with hidetag; the player replies with the intended phrase.
+- Correct answer repairs immediately. Incorrect answer leaves it active and allows another attempt.
+- Answers ignore punctuation, capitalisation, spacing and stray symbols. Listed equivalent variants count; different meanings do not.
+- The one-minute inactivity cancellation and ".task next" rules apply.
+
+Build:
+
+1. [TODO] Communications sabotage object, group-lock call via the transport, suppression flags for passive notices and camping.
+2. [TODO] Inactivity report after repair; phrase puzzle with answer normaliser.
+3. [TODO] Phrase set with accepted variants in the puzzle-data module. [OPEN] The phrase list still needs writing.
+
+Checklist:
+
+- [ ] During Communications: no passive notices, camping never fires, ".follow" works.
+- [ ] After repair: one consolidated report, no replay of missed updates.
+- [ ] Wrong phrase leaves Communications active; a correct variant with different punctuation repairs it.
+
+23. Paired-scan sabotages: O₂ and Reactor (Part 7C)
+
+[USER DESIGN DIRECTION — DECIDED, stations and Reactor timing open]
+
+Both need two players at two stations to send "scan" within two seconds of each other before a deadline.
+
+| | O₂ | Reactor |
+| --- | --- | --- |
+| Command | ".sabotage oxygen" | ".sabotage reactor" |
+| Cooldown | 4 min | 5 min |
+| Deadline | Random 30–40s | Random 30–40s (proposed) |
+| Stations | Two rooms | Two rooms |
+| Failure | Game-ending | Game-ending |
+
+Shared pair-scan rules:
+
+- Only one active player per station interaction.
+- First player at a station is told "Waiting for partner." When a partner reaches the other station, both are told to send "scan" as ordinary text.
+- Both scans must land within 2 seconds, measured on the bot's own receive time, not WhatsApp delivery time.
+- A failed pair can retry while time remains. The deadline never resets.
+- If either player leaves before both scans are accepted, that pair's attempt cancels immediately.
+- If a player dies or leaves the game, their interaction ends and another eligible player can take over while time remains.
+- Immediate resolution, no grace period. Valid paired scans before the deadline repair it. Deadline first, or scans straddling it, fails it.
+- Repairing one does not touch other active sabotages.
+- Announcements: activation, 20s left, 10s left, final result.
+- Reactor repair success ends the sabotage immediately. Deadline expiry is an emergency failure with a game-ending consequence under the final victory rules (Session 8).
+
+Build:
+
+1. [TODO] PairedScan component shared by both: two station slots, waiting state, scan-window check, cancel and takeover.
+2. [TODO] O₂ and Reactor objects that pick a deadline from the config range on activation and register the 20s/10s warnings.
+3. [TODO] Station rooms read from the map module, not hard-coded in sabotage code.
+4. [TODO] Failure handling that ends the game through the shared path and cancels everything else.
+
+[OPEN] Station rooms. The map module only has the old Meltdown pair (O2 and Admin). [ASSISTANT PROPOSAL] Use O2 + Admin for O₂, and pick a second pair for Reactor from the Skeld map; needs your confirmation.
+[OPEN] Reactor deadline: proposed 30–40s, same as O₂.
+
+Checklist:
+
+- [ ] Valid pair repairs before the deadline and ends it immediately.
+- [ ] Scans 1.9s apart succeed; 2.1s apart fail with retry allowed.
+- [ ] Scans straddling the deadline fail the sabotage.
+- [ ] One player leaves mid-attempt: attempt cancels, a new player can take the station.
+- [ ] A player dies at a station: interaction ends, a replacement can take over.
+- [ ] Deadline expiry with no scans fails the sabotage and ends the game cleanly.
+
+24. Sabotage integration and sign-off (Part 7D)
+
+No new rules. Proves the four sabotages work together with scripted timelines on the fake clock.
+
+Scenarios:
+
+1. All four active at once; repair in a different order each run; each repair affects only its own sabotage.
+2. Lights active during a kill: witnesses see masked identities, the impostor sees true ones, ".status" shows real occupants.
+3. Communications active during a kill and report: passive notices suppressed, meeting still works, inactivity report sent after repair.
+4. O₂ and Reactor active together with one pair of players: they can only be at one station at a time, so one must fail or be handed over.
+5. Meeting called during an active timed sabotage (deadlines pause, per the rule above).
+6. Near-simultaneous scans at the deadline: one tick before, same tick, one tick after.
+7. Player leaves or dies mid-repair, for each sabotage type.
+8. Game ends (win, failure, host ".endgame") with sabotages and interactions pending: nothing acts afterwards.
+
+Sign-off:
+
+- [ ] All Part 7A, 7B and 7C checklist items pass.
+- [ ] The eight scenarios pass on the fake clock, plus one run on the real tick thread.
+- [ ] Existing golden handle test still passes unchanged.
+- [ ] No group message contains a real WhatsApp identity.
+- [ ] Open decisions written back into the build plan, then Session 8 starts.
+
+Order: 7A first. 7B and 7C are independent once 7A passes, so either can go next; 7D last. Don't start the next part until the current one passes.
+
+Open decisions still blocking Session 7:
+
+- [OPEN] Restricted info commands during Communications sabotage (blocks 7B).
+- [OPEN] Lights circuit patterns and Communications phrases with accepted variants (block 7B).
+- [OPEN] Station rooms for O₂ and Reactor, and the Reactor deadline (block 7C).
+
+---
+
+IMPOSTORS, KILLS AND VENTS
+
+25. Impostors and kills
+
+[USER DESIGN DIRECTION]
+
+- In games with multiple Impostors, each Impostor privately learns the colours of their teammates.
+- Impostors cannot kill fellow Impostors.
+- Kill cooldown is 30 seconds between successful kills.
+- Kill target must be eligible and in the same room.
+- Existing code reportedly has a four-second kill resolution delay and rechecks conditions; verify this later.
+- Impostors can sabotage remotely, but repairs require travel.
+- Vent access depends on role permissions.
+- Impostors may fake tasks, lie and accuse.
+- There is no blanket kill announcement to the entire group; awareness rules determine who learns what.
+- Victims do not automatically learn their killer's identity.
+
+[NEEDS VERIFICATION] Existing ".kill" reportedly expects a target JID. A colour-based command such as ".kill red" is not confirmed implemented.
+
+26. Vent system
+
+[USER DESIGN DIRECTION]
+
+- ".vent" checks vent status and connections.
+- ".vent in" enters a vent.
+- ".vent <destination>" travels between connected vents while inside.
+- ".vent out" exits at the current vent's room.
+- Vent travel and exit are instant.
+- Maximum time inside: 15 seconds.
+- The timer starts on entry and does not reset between vents.
+- When time expires, the player is automatically ejected at their current vent.
+- Reported cooldown: 30 seconds after a successful vent trip/exiting; exact start point needs definition.
+
+Awareness
+
+- Nearby players see “Blue has used a vent” when the player enters.
+- They are not told whether the player remains inside, travels between vents or exits.
+- Room occupants see “Blue arrived from a vent” when a player emerges.
+- They learn the emergence room, not the entry vent or route.
+- Automatic ejection produces the ordinary “Blue arrived from a vent” update, with no overstay announcement.
+- No remote notification is sent to people elsewhere.
+- Vent occupants do not count as present in the room.
+
+Reported connections, to verify:
+
+- Reactor / Upper Engine / Lower Engine.
+- Electrical / MedBay / Security.
+- Weapons / Navigation / Shields.
+
+---
+
+FOLLOWING SYSTEM
+
+27. ".follow [colour]"
+
+[USER DESIGN DIRECTION — DECIDED]
+
+".follow" is a general game mechanic, not a special role.
+
+A player uses ".follow [colour]" to begin tailing a nearby player.
+
+Example:
+
+«".follow green"»
+
+Response:
+
+«You are now tailing Green.»
+
+Updates while following
+
+The follower receives relevant updates about the target's movements and observable events, such as:
+
+«They appear to be doing tasks.»
+
+This does not establish whether the target is genuinely completing a task or merely pretending.
+
+Movement examples:
+
+«They are leaving the Kitchen.»
+
+«Trailing...»
+
+«They have arrived at the Dorm.»
+
+If the follower witnesses the target kill someone:
+
+«They have killed a Crewmate (Black).»
+
+«You have witnessed a murder!»
+
+The actual wording and room names should match the final map and event rules.
+
+Losing the trail
+
+If the target enters a vent:
+
+«They have entered a vent. You lost their trail.»
+
+The follower can follow the target again if they later get close enough.
+
+Ending following
+
+- ".unfollow" manually ends following.
+- If the follower begins an action requiring them to remain still, following ends immediately.
+- Losing a trail is distinct from deliberately unfollowing.
+- The follower receives an appropriate end-of-tail notification.
+
+Target awareness
+
+After 25 seconds of being followed, if the target has not discovered the follower earlier, the target receives:
+
+«You are being followed by Blue.»
+
+".status" can reveal followers earlier.
+
+When the tail ends, the target receives messages such as:
+
+«Blue loses interest and stops following.»
+
+«You're no longer being followed.»
+
+The follower receives:
+
+«You have lost their tail.»
+
+Exact notification wording should reflect the actual reason following ended. Awareness of a follower is not proof that the follower is an Impostor.
+
+[NEEDS VERIFICATION] Existing ".follow" behaviour and target-resolution rules must be audited before implementation.
+
+---
+
+MEETINGS AND COMMUNICATION
+
+28. Meetings and reporting
+
+[CODE — reported in the original audit; re-verify]
+
+- ".report" and ".meeting" exist.
+- Reported meeting/voting window: 60 seconds.
+- Ties reportedly cause no ejection.
+- Ejected role is reportedly revealed.
+- Meetings pause movement and task completion.
+- Cooldowns continue during meetings.
+- Ghosts cannot participate in living meetings or voting.
+- Reporting a body and manually calling a meeting are distinct actions.
+- ".report" only works when the player has witnessed a corpse.
+- Persistent crime-scene and witness history survives meetings.
+
+Detailed ordering and edge cases belong to Stage 3.
+
+29. Group communication proposals
+
+[ASSISTANT PROPOSAL — NOT ALL DECISIONS CONFIRMED]
+
+- ".say <message>" relays a living player's contribution to the game group under their assigned colour, hiding their real WhatsApp name.
+- Players cannot impersonate another colour.
+- Ordinary DMs are not broadcast.
+- Group-to-group communication retains the actual group identity.
+- ".GC" and ".dm" were proposed as navigation links, not as message-sending or voting commands.
+- ".GC" should target the correct game group.
+- WhatsApp link behaviour needs verification.
+
+Voting details still requiring design include changing votes, non-votes, departed players, secret tally output and final result presentation. Votes may be submitted in the group or by DM; examples include ".vote Red" and ".vote skip". Votes remain secret until the timer ends, with private acknowledgement.
+
+---
+
+STAGE 4 — ARCHITECTURE RISKS TO INVESTIGATE
+
+30. Potential issues
+
+[BUG/RISK TO INVESTIGATE — NOT CONFIRMED BUGS]
+
+- Multiple groups accidentally sharing one active lobby or game state.
+- Replacing a lobby while a game is active.
+- Cross-group command routing or interference with Pokémon mode.
+- State persistence after restart.
+- Movement timers becoming stale or out of sync.
+- Background processing delays and restart recovery.
+- Simultaneous arrival handling and notification ordering.
+- Pending kills conflicting with meetings or game termination.
+- Timer duplication and inconsistent task state.
+- Colour-to-player resolution and identity validation.
+- Privacy leaks between public group messages and private information.
+- Reported crime-scene history being lost when active bodies are removed.
+- Following state failing to end when the target enters a vent or the follower begins a stillness-required action.
+- ".stop" leaving a stale movement timer or failing to preserve the player's exact corridor position.
+- Camping awareness triggering incorrectly after a stop, movement restart or change of position.
+
+---
+
+CURRENT CHECKLIST
+
+Stage 1 — Living world
+
+- [x] Continuous world progression independent of messages.
+- [x] Room departure boundary and destination privacy.
+- [x] Room arrival awareness.
+- [x] Simultaneous-arrival handling principle.
+- [x] Two-second room-event awareness rule.
+- [x] Corridor encounter distinction.
+- [x] Camping trigger, reset and once-per-stop rules.
+- [x] Ghosts excluded from camping awareness.
+- [x] ".goback" reference-room and redirection rules.
+- [x] ".cscene" reported-crime-scene rules.
+- [x] ".stop" interrupts movement at the exact current position.
+- [x] Resolve remaining ".goback" travel-time detail.
+- [ ] Confirm remaining movement and awareness edge cases.
+
+Stage 2 — Perspectives and privacy
+
+- [x] Baseline Crewmate information.
+- [x] Scientist commands and witness records.
+- [x] Ghost movement, tasks, communication and awareness.
+- [x] Following information and notifications.
+- [ ] Finish remaining role perspectives and privacy rules.
+- [ ] Complete role-specific information and visibility rules.
+- [ ] Resolve group chat versus private message edge cases.
+
+Stage 3 — Event rules
+
+- [x] Kills during movement (Session 4).
+- [x] Meetings during pending kills (Session 4/6).
+- [ ] Interrupted actions.
+- [~] Sabotage deadlines and repairs — deadline pause during meetings done (Session 6); framework, repairs and the four sabotages are Session 7.
+- [ ] Simultaneous event ordering.
+- [x] Voting edge cases (Session 6: changeable votes, skip, ties, departed players).
+
+Stage 4 — Whole-game testing
+
+- [ ] Simulate a complete match from lobby to victory.
+- [ ] Test edge cases and unusual event sequences.
+- [ ] Compare expected behaviour with the existing code and Gemini's discussions.
+- [ ] Approve the final master specification and test checklist.
+
+Stage 5 — Integration and implementation
+
+- [ ] Audit the existing implementation.
+- [ ] Decide what to retain, repair or replace.
+- [ ] Obtain explicit implementation approval.
+- [ ] Implement and test the agreed specification.
+
+Current next step: Session 7, Part 7A — shared sabotage framework. Sessions 1–6 are complete.
+
+Implementation is approved through Session 6. Session 7 starts on your go-ahead.
+
+SESSION 2 IMPLEMENTATION UPDATE
+
+The latest user instruction authorized starting with Session 2. This update supersedes the earlier “no coding until approved” status for the movement slice only.
+
+- Implemented exact position in a corridor, a one-world-tick room-exit boundary, `.m`, `.stop` and `.goback`.
+- Implemented room departure/arrival awareness, timestamp-paired room events within two seconds, same-time arrival snapshots and corridor encounters.
+- `.goback` selects the fastest route from the player's current corridor position and preserves its reference room through redirection.
+- `received_at_ms` was verified in the WhatsApp bridge as `Date.now()` at receipt.
+- The one-tick exit delay and two-second travel-distance encounter radius are configurable implementation defaults; review these if the intended gameplay timing differs.
+- Verified with `npm run test:amongus`: Session 1 (4 tests) and Session 2 (9 tests) passed.
+- The Session 2 handoff file and updated build plan are in `docs/amongus/`.
+
+SESSIONS 3–6 IMPLEMENTATION UPDATE
+
+Sessions 3–6 were delivered after Session 2. Details live in SESSION_3_HANDOFF.md to SESSION_6_HANDOFF.md; the summary table is under "WHAT'S COMPLETED" near the top of this note. Verified with npm run test:amongus: 48 tests across Sessions 1–6.

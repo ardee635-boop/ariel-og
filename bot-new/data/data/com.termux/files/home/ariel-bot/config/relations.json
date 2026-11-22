@@ -1,0 +1,8 @@
+{
+  "_note": "Fixed family facts about Ariel. People are matched by phone number (digits, country code) or by an env var name in phoneEnv. These are the base: things she learns later can add to them, never replace them. Optional: aka = other names they go by.",
+  "people": [
+    { "name": "Ivy",  "phone": "2347073047260", "relation": "your sister" },
+    { "name": "Yuki", "phone": "2348154056320", "relation": "your sister" },
+    { "name": "the King", "phoneEnv": "KING_NUMBER", "relation": "your brother" }
+  ]
+}

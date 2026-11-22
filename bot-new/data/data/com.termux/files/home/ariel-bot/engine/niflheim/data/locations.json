@@ -1,0 +1,190 @@
+{
+  "_note": "Names and descriptions are placeholders — Ice King will replace them. 'requires' is empty in Session 1.",
+  "locations": [
+    {
+      "id": "ash_town",
+      "name": "Ash Town",
+      "type": "town",
+      "description": "The quiet heart of the world, where every road begins.",
+      "exits": {
+        "north": "whispering_woods",
+        "east": "emberfield",
+        "south": "silverbrook",
+        "west": "duskhollow"
+      },
+      "requires": {}
+    },
+    {
+      "id": "misty_glade",
+      "name": "Misty Glade",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "south": "whispering_woods"
+      },
+      "requires": {}
+    },
+    {
+      "id": "cinder_creek",
+      "name": "Cinder Creek",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "west": "whispering_woods"
+      },
+      "requires": {}
+    },
+    {
+      "id": "oldstone_path",
+      "name": "Oldstone Path",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "east": "whispering_woods"
+      },
+      "requires": {}
+    },
+    {
+      "id": "whispering_woods",
+      "name": "Whispering Woods",
+      "type": "hub",
+      "description": "A well-trodden crossing where several paths meet.",
+      "exits": {
+        "south": "ash_town",
+        "north": "misty_glade",
+        "east": "cinder_creek",
+        "west": "oldstone_path"
+      },
+      "requires": {}
+    },
+    {
+      "id": "thornfield",
+      "name": "Thornfield",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "south": "emberfield"
+      },
+      "requires": {}
+    },
+    {
+      "id": "ravenwood",
+      "name": "Ravenwood",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "west": "emberfield"
+      },
+      "requires": {}
+    },
+    {
+      "id": "crystal_lake",
+      "name": "Crystal Lake",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "north": "emberfield"
+      },
+      "requires": {}
+    },
+    {
+      "id": "emberfield",
+      "name": "Emberfield",
+      "type": "hub",
+      "description": "A well-trodden crossing where several paths meet.",
+      "exits": {
+        "west": "ash_town",
+        "north": "thornfield",
+        "east": "ravenwood",
+        "south": "crystal_lake"
+      },
+      "requires": {}
+    },
+    {
+      "id": "hunters_rest",
+      "name": "Hunter's Rest",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "west": "silverbrook"
+      },
+      "requires": {}
+    },
+    {
+      "id": "frostmere",
+      "name": "Frostmere",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "north": "silverbrook"
+      },
+      "requires": {}
+    },
+    {
+      "id": "broken_bridge",
+      "name": "Broken Bridge",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "east": "silverbrook"
+      },
+      "requires": {}
+    },
+    {
+      "id": "silverbrook",
+      "name": "Silverbrook",
+      "type": "hub",
+      "description": "A well-trodden crossing where several paths meet.",
+      "exits": {
+        "north": "ash_town",
+        "east": "hunters_rest",
+        "south": "frostmere",
+        "west": "broken_bridge"
+      },
+      "requires": {}
+    },
+    {
+      "id": "moonlit_grove",
+      "name": "Moonlit Grove",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "south": "duskhollow"
+      },
+      "requires": {}
+    },
+    {
+      "id": "ashen_crossing",
+      "name": "Ashen Crossing",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "north": "duskhollow"
+      },
+      "requires": {}
+    },
+    {
+      "id": "wolfsbane_ridge",
+      "name": "Wolfsbane Ridge",
+      "type": "place",
+      "description": "A quiet stretch of wild land.",
+      "exits": {
+        "east": "duskhollow"
+      },
+      "requires": {}
+    },
+    {
+      "id": "duskhollow",
+      "name": "Duskhollow",
+      "type": "hub",
+      "description": "A well-trodden crossing where several paths meet.",
+      "exits": {
+        "east": "ash_town",
+        "north": "moonlit_grove",
+        "south": "ashen_crossing",
+        "west": "wolfsbane_ridge"
+      },
+      "requires": {}
+    }
+  ]
+}

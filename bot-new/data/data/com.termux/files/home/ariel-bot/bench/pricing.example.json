@@ -1,0 +1,4 @@
+{
+  "_note": "Copy to pricing.json. USD per 1M tokens, key = provider=model. Leave a model out (or free) and its cost shows n/a.",
+  "groq=openai/gpt-oss-120b": { "in": 0.15, "out": 0.60 }
+}

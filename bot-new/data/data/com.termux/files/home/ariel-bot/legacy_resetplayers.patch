@@ -1,0 +1,194 @@
+--- a/engine/router/admin.py
++++ b/engine/router/admin.py
+@@ -75,6 +75,44 @@
+             lines = [f"• {r['sender']} (added {r['added_at']})" for r in rows]
+             return "📋 *Legacy list (post-launch additions):*\n" + "\n".join(lines)
+ 
++        if cmd == ".legacy":
++            # Snapshot everyone currently signed in (phone JID + LID, plus
++            # site accounts) onto the legacy list, in one go.
++            r = self.db.legacy_add_all_signed_in(added_by=sender)
++            return (
++                "👑 *Legacy snapshot done.*\n"
++                f"• Players scanned: {r['players']}\n"
++                f"• Site accounts scanned: {r['site']}\n"
++                f"• Unique ids found (jid + lid): {r['ids']}\n"
++                f"• Newly added: {r['added']} "
++                f"({r['added_jid']} jid, {r['added_lid']} lid)\n"
++                f"• Already on the list: {r['already']}\n\n"
++                "_Run *.legacylist* to see the list. Legacy survives "
++                "*.resetplayers*._"
++            )
++
++        if cmd == ".resetplayers":
++            # Destructive and irreversible, so it needs an explicit confirm.
++            if not args or args[0].lower() != "confirm":
++                n = len(self.db.all_senders())
++                return (
++                    f"⚠️ *This wipes ALL {n} registered player(s)* and everything "
++                    "about them, in every world: profiles, parties/boxes, "
++                    "registrations, meta/RPG sessions, Niflheim data, NPC "
++                    "memory, affection, directives, site accounts and warnings.\n\n"
++                    "Kept: the legacy list, royalty ranks, and the world itself.\n\n"
++                    "Run *.legacy* first if you haven't. "
++                    "To proceed, send: *.resetplayers confirm*"
++                )
++            counts = self.db.reset_all_players()
++            self.cache.clear()
++            self.sessions.clear()
++            lines = [f"• {t}: {n}" for t, n in counts.items()]
++            return (
++                "🗑️ *All players wiped.*\n" + "\n".join(lines) +
++                "\n\n_Legacy list, ranks and world data were left untouched._"
++            )
++
+         if cmd == ".delete":
+             if not args: return "⚠️ Usage: *.delete [name]*"
+             tn = " ".join(args)
+--- a/engine/router/handle.py
++++ b/engine/router/handle.py
+@@ -54,7 +54,7 @@
+         ".ping", ".uptime", ".stats", ".owner", ".groupid",
+         ".ranks", ".whois", ".rules", ".gyms", ".warnings", ".font",
+         ".home", ".tp", ".player", ".setstage", ".tagall", ".hidetag",
+-        ".addlegacy", ".legacylist", ".delete",
++        ".addlegacy", ".legacylist", ".legacy", ".resetplayers", ".delete",
+         ".ff", ".ffp",
+         ".board", ".redeem", ".rankup", ".quest", ".quests", ".task", ".tasks",
+         ".models", ".model", ".llmtest", ".nvtest",   # King-only LLM model switching (rpg_cmds/models.py)
+@@ -104,6 +104,23 @@
+                received_at_ms=None, message_key=None, pool_niflheim=False):
+         self.chat.record_names(sender)
+ 
++        # ── Owner-only bulk commands (.legacy / .resetplayers) ──────────
++        # Intercepted FIRST so no pool gate (Normal/Pokemon/RPG), DM-vs-group
++        # difference, registration check or stage can silently swallow them.
++        # Allowed for the King or the admin number.
++        _owner_cmd = (text or "").strip().split(" ")[0].lower()
++        if _owner_cmd in (".legacy", ".resetplayers"):
++            from permissions import is_king
++            if sender == ADMIN_SENDER or is_king(sender):
++                try:
++                    _args = (text or "").strip().split()[1:]
++                    return self._handle_admin(sender, None, _owner_cmd, _args, text, mentioned_jid)
++                except Exception as _e:
++                    print(f"[ADMIN] {_owner_cmd} failed: {_e!r}", file=sys.stderr, flush=True)
++                    return f"⚠️ {_owner_cmd} failed: {_e}"
++            print(f"[ADMIN] {_owner_cmd} ignored: {sender} is not King/admin", file=sys.stderr, flush=True)
++            return None
++
+         # ── Among Us mode gate — fully isolated, checked before ANYTHING
+         # else (Ariel calls, directives, Pokémon registration, stage
+         # machine). If not handled here, falls through unchanged. ──
+--- a/engine/core/db_core.py
++++ b/engine/core/db_core.py
+@@ -167,6 +167,45 @@
+ 
+         self._commit()
+ 
++    # Every table that holds per-player data, wiped whole by
++    # reset_all_players(). Spared on purpose: legacy_players, bot_ranks,
++    # and all world data (rpg_places/passages/world_npcs/world_objects,
++    # quest_board rows, pokemon_cache, zone_discovery).
++    _PLAYER_TABLES = (
++        "players", "registrations", "player_meta",
++        "npc_familiarity", "npc_events",
++        "ariel_affection", "ariel_directives",
++        "zone_spawns",
++        "niflheim_players", "niflheim_journeys", "niflheim_fights",
++        "niflheim_duels", "niflheim_tickets",
++        "users", "warnings",           # Node-side site accounts + moderation
++    )
++
++    def reset_all_players(self):
++        """Wipe every player, in every world (Pokemon, RPG, Niflheim, site
++        accounts). Returns {table: rows_deleted}. Each table is wiped in
++        its own try/rollback so one missing/odd table can't abort the rest.
++        Also releases any claimed quests on the board."""
++        counts = {}
++        for table in self._PLAYER_TABLES:
++            try:
++                if not self._table_exists(table):
++                    continue
++                n = self._fetchone(self._ex(f"SELECT COUNT(*) FROM {table}"))[0]
++                self._ex(f"DELETE FROM {table}")
++                self._commit()
++                counts[table] = n
++            except Exception as e:
++                self._rollback()
++                print(f"[DB] reset_all_players: {table} failed: {e}", file=sys.stderr, flush=True)
++                counts[table] = "error"
++        try:
++            self._ex("UPDATE quest_board SET claimed_by = NULL, claimed_at = NULL")
++            self._commit()
++        except Exception:
++            self._rollback()
++        return counts
++
+     def _table_exists(self, name):
+         if self._mode == "pg":
+             row = self._fetchone(self._ex(
+--- a/engine/pokemon/db_pokemon.py
++++ b/engine/pokemon/db_pokemon.py
+@@ -28,6 +28,61 @@
+         ))
+         return [{"sender": r[0], "added_by": r[1], "added_at": r[2]} for r in rows]
+ 
++    def legacy_add_all_signed_in(self, added_by=None):
++        """
++        Snapshot EVERY currently signed-in player onto the legacy list,
++        under every identity we hold for them, so legacy status still
++        matches no matter which id shape shows up later (phone JID or
++        @lid). Sources:
++          - players.sender, players.jid, players.lid  (registered trainers)
++          - users.phone (website sign-ups; the Node auth table)
++        Idempotent: ids already on the list are counted, not re-added.
++        Returns a dict of counts for the admin reply.
++        """
++        ids = set()
++        try:
++            rows = self._fetchall(self._ex("SELECT sender, jid, lid FROM players"))
++        except Exception:
++            # old DB without the jid/lid columns: fall back to sender only
++            self._rollback()
++            try:
++                rows = [(r[0], None, None) for r in
++                        self._fetchall(self._ex("SELECT sender FROM players"))]
++            except Exception:
++                self._rollback()
++                rows = []
++        for sender, jid, lid in rows:
++            for v in (sender, jid, lid):
++                v = (v or "").strip()
++                if v:
++                    ids.add(v)
++        n_players = len(rows)
++
++        n_site = 0
++        try:
++            if self._table_exists("users"):
++                for (phone,) in self._fetchall(self._ex("SELECT phone FROM users")):
++                    phone = (phone or "").strip().lstrip("+")
++                    if phone.isdigit():
++                        ids.add(f"{phone}@s.whatsapp.net")
++                        n_site += 1
++        except Exception:
++            self._rollback()
++
++        existing = {r["sender"] for r in self.legacy_players_all()}
++        new = sorted(ids - existing)
++        for i in new:
++            self.legacy_player_add(i, added_by=added_by)
++        return {
++            "players":  n_players,
++            "site":     n_site,
++            "ids":      len(ids),
++            "added":    len(new),
++            "already":  len(ids) - len(new),
++            "added_lid": sum(1 for i in new if i.endswith("@lid")),
++            "added_jid": sum(1 for i in new if not i.endswith("@lid")),
++        }
++
+     def quest_board_generated_at(self):
+         """Timestamp (ISO string) of the current board, or None if empty."""
+         rows = self._fetchall(self._ex("SELECT generated_at FROM quest_board LIMIT 1"))

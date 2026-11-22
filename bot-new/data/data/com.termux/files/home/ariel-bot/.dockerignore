@@ -1,0 +1,6 @@
+broken/
+node_modules/
+.git/
+__pycache__/
+*.pyc
+config/identities.json.bak

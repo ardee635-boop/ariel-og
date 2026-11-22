@@ -1,0 +1,90 @@
+{
+  "start": {
+    "level": 1,
+    "xp": 0,
+    "hp": 200,
+    "coins": 0,
+    "location": "ash_town",
+    "location_name": "Ash Town"
+  },
+  "xp_curve": {
+    "base": 100,
+    "exponent": 1.5
+  },
+  "level_up": {
+    "max_hp": 100,
+    "coins": 500,
+    "heal_by_hp_gained": true
+  },
+  "registration": {
+    "name_min": 2,
+    "name_max": 20
+  },
+  "travel": {
+    "border_time": {
+      "town": 5,
+      "hub": 7,
+      "place": 7
+    }
+  },
+  "journey_events": {
+    "fight_chance": 0.25,
+    "flavour_chance": 0.4,
+    "event_point": 0.5,
+    "fight_placeholder": "You sense something lurking nearby, but it keeps its distance.",
+    "flavour_lines": [
+      "A cold breeze carries the smell of distant smoke.",
+      "You spot old footprints in the dirt, leading nowhere.",
+      "A crow watches you from a branch, then flies off.",
+      "The path is quiet. Too quiet.",
+      "You find a smooth stone and toss it aside."
+    ]
+  },
+  "combat": {
+    "round_seconds": 30,
+    "defend_multiplier": 0.5,
+    "attack_base": 15,
+    "attack_per_level": 5,
+    "coin_chance": 0.7,
+    "drop_unique": 0.2,
+    "drop_general": 0.05,
+    "potions": {
+      "Small HP Potion": 30,
+      "HP Potion": 60
+    },
+    "default_potion_order": [
+      "Small HP Potion",
+      "HP Potion"
+    ],
+    "fight_poll_seconds": 2
+  },
+  "shop": {
+    "session": 1
+  },
+  "duel": {
+    "invite_seconds": 60,
+    "round_seconds": 30,
+    "round_cap": 12,
+    "defend_multiplier": 0.5
+  },
+  "arena": {
+    "ticket_ttl_seconds": 900,
+    "min_win_seconds": 3,
+    "seconds_per_hit": 0.45,
+    "speed_margin": 0.8,
+    "rig": {
+      "slime": "wolf",
+      "wild_wolf": "wolf",
+      "forest_boar": "wolf",
+      "goblin": "ai",
+      "hrimthurs": "boss",
+      "cinderfang": "wolf"
+    },
+    "_note": "rig = which 3D model the website uses for a monster (placeholder until real models exist)",
+    "boss_cooldown_seconds": 3600
+  },
+  "auto_combat": {
+    "max_rounds": 60,
+    "potion_below_hp_pct": 30
+  }
+}

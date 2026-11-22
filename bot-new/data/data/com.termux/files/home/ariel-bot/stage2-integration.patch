@@ -1,0 +1,51 @@
+--- orig/entry.js	2026-10-31 09:53:02.650490366 +0000
++++ out/bot/handler/entry.js	2026-10-31 09:53:02.674466490 +0000
+@@ -14,6 +14,7 @@
+ import { _getDB } from '../lib/db.js';
+ import { ts } from '../lib/log.js';
+ import { CONTINUE } from './_common.js';
++import { arielIngest, arielAdmin } from '../ariel/wire.js';
+ 
+ export async function run(ctx) {
+     let { sock, msg } = ctx;
+@@ -25,6 +26,12 @@
+     const isDM = chatJid?.endsWith('@s.whatsapp.net') || chatJid?.endsWith('@lid');
+     if (!chatJid?.endsWith('@g.us') && !isDM) return; // ignore anything that's neither a group nor a 1:1 DM (broadcast lists, status, etc.)
+ 
++    // ── Ariel ingest (stage 2) — store the message silently ─────────
++    // Fire and forget: never awaited, never throws, so a database problem
++    // can't slow down or break commands. It only stores messages from chats
++    // where Ariel's chat switch is on, and skips commands. It sends nothing.
++    arielIngest(sock, msg);
++
+     // ── DM path — Ariel conversation only, global .chatdm on/off ───
+     // DMs never touch the rest of this function (group metadata, LID
+     // resolution, rank checks, every other pool/command) — this is
+@@ -294,5 +301,13 @@
+     ctx.lower = lower;
+     ctx.isKingSender = isKingSender;
+     ctx.lowerCmdOnlyPre = lowerCmdOnlyPre;
++
++    // ── .ariel status / .ariel people — King only, read-only checks ──
++    // (not .arielstatus / .arielstickers: those are separate old commands)
++    if (isKingSender && (lower === '.ariel' || lower.startsWith('.ariel '))) {
++        const reply = await arielAdmin(text);
++        if (reply) await _replyMaybeSilent(sock, chatJid, reply, msg);
++        return;
++    }
+     return CONTINUE;
+ }
+--- orig/groups.js	2026-10-31 09:53:02.653233252 +0000
++++ out/bot/groups.js	2026-10-31 09:53:02.674842069 +0000
+@@ -203,6 +203,11 @@
+ export function setPool(groupJid, poolName, on) {
+     if (!botState.groupPools[groupJid]) botState.groupPools[groupJid] = { ...DEFAULT_POOLS };
+     botState.groupPools[groupJid][poolName] = on;
++    // Ariel keeps a copy of the .chat switch in ariel.chats.settings. Loaded lazily
++    // (dynamic import) so groups.js doesn't pull the Ariel files in at startup.
++    if (poolName === 'chat') {
++        import('./ariel/wire.js').then((m) => m.syncChatEnabled(groupJid, on === true)).catch(() => {});
++    }
+ }
+ 
+ // ── Message handler ───────────────────────────────────────────

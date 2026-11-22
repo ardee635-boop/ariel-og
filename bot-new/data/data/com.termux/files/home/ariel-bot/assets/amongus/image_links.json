@@ -1,0 +1,84 @@
+{
+  "_help": "Paste DIRECT image links (https://...) between the quotes. Blank = no image (text only). 'default' is used when a colour has no link of its own. meeting_call = shown with the meeting call (the caller's colour); ejection = shown with the role reveal (the ejected player's colour). Edits are picked up without a restart. maps = a picture of a whole map, sent by .map and with the group's game-start message (key = the map id, e.g. skeld). lobby = one picture sent with .lobby open. tasks_list = one picture sent with a living player's .tasks. stage = the background pictures (square = mini preview, landscape = full preview; optional crewmate/impostor backgrounds, else default). characters = each colour's character (a transparent PNG) placed on the left of the stage.",
+  "lobby": "https://i.ibb.co/206KWfdN/Amongus-lobby.jpg",
+  "tasks_list": "https://i.ibb.co/BKvB9fC2/Among-us-tasks.jpg",
+  "meeting_call": {
+    "default": "",
+    "red": "https://i.ibb.co/PvD7hKx9/Red.png",
+    "blue": "https://i.ibb.co/Xk62PXm0/blue.png",
+    "green": "https://i.ibb.co/RGQZCm0r/Green.png",
+    "pink": "https://i.ibb.co/8Dyv5Gms/Pink.png",
+    "orange": "",
+    "yellow": "https://i.ibb.co/ksmQNnrt/Yellow.png",
+    "black": "https://i.ibb.co/MDLQNxKd/Black.png",
+    "white": "https://i.ibb.co/Kj7ZDW2N/White.png",
+    "purple": "",
+    "brown": "",
+    "cyan": "https://i.ibb.co/wh2pJbKY/Cyan.png",
+    "lime": "https://i.ibb.co/4wtCqG9r/Lime.png",
+    "maroon": "https://i.ibb.co/yFF27rKY/Maroon.png",
+    "rose": "",
+    "banana": "",
+    "gray": "https://i.ibb.co/RGD3DVX7/Grey.png",
+    "tan": "",
+    "coral": "",
+    "turquoise": "",
+    "lavender": ""
+  },
+  "ejection": {
+    "default": "",
+    "red": "https://i.ibb.co/PvD7hKx9/Red.png",
+    "blue": "https://i.ibb.co/Xk62PXm0/blue.png",
+    "green": "https://i.ibb.co/RGQZCm0r/Green.png",
+    "pink": "https://i.ibb.co/8Dyv5Gms/Pink.png",
+    "orange": "",
+    "yellow": "https://i.ibb.co/ksmQNnrt/Yellow.png",
+    "black": "https://i.ibb.co/MDLQNxKd/Black.png",
+    "white": "https://i.ibb.co/Kj7ZDW2N/White.png",
+    "purple": "",
+    "brown": "",
+    "cyan": "https://i.ibb.co/wh2pJbKY/Cyan.png",
+    "lime": "https://i.ibb.co/4wtCqG9r/Lime.png",
+    "maroon": "https://i.ibb.co/yFF27rKY/Maroon.png",
+    "rose": "",
+    "banana": "",
+    "gray": "https://i.ibb.co/RGD3DVX7/Grey.png",
+    "tan": "",
+    "coral": "",
+    "turquoise": "",
+    "lavender": ""
+  },
+  "maps": {
+    "skeld": "https://i.ibb.co/fVwcF21P/The-Skeld-map.jpg",
+    "cyberia": "",
+    "orbital": ""
+  },
+  "stage": {
+    "square": {
+      "default": "https://i.ibb.co/KcvhM8Xb/among-stage-square.jpg",
+      "crewmate": "",
+      "impostor": "",
+      "emergency": "https://i.ibb.co/rR9BV8zv/among-us-emergency.jpg",
+      "report": "https://i.ibb.co/JW50Bykg/among-us-report-body.jpg",
+      "ejection": "https://i.ibb.co/bRK49cWF/Ejection.jpg"
+    },
+    "landscape": {
+      "default": "https://i.ibb.co/9HJGdFTM/amongus-stage-landscape.jpg",
+      "crewmate": "",
+      "impostor": ""
+    }
+  },
+  "characters": {
+    "red": "https://i.ibb.co/PvD7hKx9/Red.png",
+    "blue": "https://i.ibb.co/Xk62PXm0/blue.png",
+    "green": "https://i.ibb.co/RGQZCm0r/Green.png",
+    "pink": "https://i.ibb.co/8Dyv5Gms/Pink.png",
+    "yellow": "https://i.ibb.co/ksmQNnrt/Yellow.png",
+    "black": "https://i.ibb.co/MDLQNxKd/Black.png",
+    "white": "https://i.ibb.co/Kj7ZDW2N/White.png",
+    "cyan": "https://i.ibb.co/wh2pJbKY/Cyan.png",
+    "lime": "https://i.ibb.co/4wtCqG9r/Lime.png",
+    "maroon": "https://i.ibb.co/yFF27rKY/Maroon.png",
+    "gray": "https://i.ibb.co/RGD3DVX7/Grey.png"
+  }
+}

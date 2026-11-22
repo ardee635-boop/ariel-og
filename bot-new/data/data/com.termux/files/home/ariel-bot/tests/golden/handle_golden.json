@@ -1,0 +1,3384 @@
+{
+"flags000|.groupid|dm": [
+null,
+[],
+[]
+],
+"flags000|.groupid|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|.location|dm": [
+null,
+[],
+[]
+],
+"flags000|.location|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|.menu|dm": [
+null,
+[],
+[]
+],
+"flags000|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|.ping|dm": [
+null,
+[],
+[]
+],
+"flags000|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags000|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|.status|dm": [
+null,
+[],
+[]
+],
+"flags000|.status|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags000|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags000|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags000|hello there|dm": [
+null,
+[],
+[]
+],
+"flags000|hello there|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.groupid|dm": [
+null,
+[],
+[]
+],
+"flags001|.groupid|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.location|dm": [
+null,
+[],
+[]
+],
+"flags001|.location|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.menu|dm": [
+null,
+[],
+[]
+],
+"flags001|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.ping|dm": [
+null,
+[],
+[]
+],
+"flags001|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags001|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|.status|dm": [
+null,
+[],
+[]
+],
+"flags001|.status|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags001|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags001|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags001|hello there|dm": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags001|hello there|grp": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.groupid|dm": [
+"*Your JID:* `222@s.whatsapp.net`",
+[],
+[]
+],
+"flags010|.groupid|grp": [
+"*Group JID:* `g1@g.us`\n*LID:* `lid9`",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.location|dm": [
+null,
+[],
+[]
+],
+"flags010|.location|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.menu|dm": [
+null,
+[],
+[]
+],
+"flags010|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.ping|dm": [
+null,
+[],
+[]
+],
+"flags010|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags010|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|.status|dm": [
+null,
+[],
+[]
+],
+"flags010|.status|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags010|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags010|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags010|hello there|dm": [
+null,
+[],
+[]
+],
+"flags010|hello there|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.groupid|dm": [
+"*Your JID:* `222@s.whatsapp.net`",
+[],
+[]
+],
+"flags011|.groupid|grp": [
+"*Group JID:* `g1@g.us`\n*LID:* `lid9`",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.location|dm": [
+null,
+[],
+[]
+],
+"flags011|.location|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.menu|dm": [
+null,
+[],
+[]
+],
+"flags011|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.ping|dm": [
+"ARIEL<.ping>",
+[
+[
+"222@s.whatsapp.net",
+".ping",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags011|.ping|grp": [
+"ARIEL<.ping>",
+[
+[
+"222@s.whatsapp.net",
+".ping",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.ranks|dm": [
+"ARIEL<.ranks>",
+[
+[
+"222@s.whatsapp.net",
+".ranks",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags011|.ranks|grp": [
+"ARIEL<.ranks>",
+[
+[
+"222@s.whatsapp.net",
+".ranks",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|.status|dm": [
+null,
+[],
+[]
+],
+"flags011|.status|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags011|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags011|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags011|hello there|dm": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags011|hello there|grp": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.groupid|dm": [
+null,
+[],
+[]
+],
+"flags100|.groupid|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.location|dm": [
+"\ud83d\udccd *Oak Town* (12, 11)\n\n -    \u5408   -     -     -     -    \ud80c\udffa\ud83d\udf14   -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n\u276e  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7   \u26b2   \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n(Oak Town \u00b7 Town)\n1 up        3 left\n2",
+[],
+[]
+],
+"flags100|.location|grp": [
+"\ud83d\udccd *Oak Town* (12, 11)\n\n -    \u5408   -     -     -     -    \ud80c\udffa\ud83d\udf14   -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n\u276e  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7   \u26b2   \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n(Oak Town \u00b7 Town)\n1 up        3 left\n2",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.menu|dm": [
+null,
+[],
+[]
+],
+"flags100|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.ping|dm": [
+null,
+[],
+[]
+],
+"flags100|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags100|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|.status|dm": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"flags100|.status|grp": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags100|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags100|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags100|hello there|dm": [
+null,
+[],
+[]
+],
+"flags100|hello there|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.groupid|dm": [
+null,
+[],
+[]
+],
+"flags101|.groupid|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.location|dm": [
+"ARIEL<.location>",
+[
+[
+"222@s.whatsapp.net",
+".location",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|.location|grp": [
+"ARIEL<.location>",
+[
+[
+"222@s.whatsapp.net",
+".location",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.menu|dm": [
+"ARIEL<.menu>",
+[
+[
+"222@s.whatsapp.net",
+".menu",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|.menu|grp": [
+"ARIEL<.menu>",
+[
+[
+"222@s.whatsapp.net",
+".menu",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.ping|dm": [
+null,
+[],
+[]
+],
+"flags101|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags101|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|.status|dm": [
+"ARIEL<.status>",
+[
+[
+"222@s.whatsapp.net",
+".status",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|.status|grp": [
+"ARIEL<.status>",
+[
+[
+"222@s.whatsapp.net",
+".status",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags101|hello there|dm": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags101|hello there|grp": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.groupid|dm": [
+"*Your JID:* `222@s.whatsapp.net`",
+[],
+[]
+],
+"flags110|.groupid|grp": [
+"*Group JID:* `g1@g.us`\n*LID:* `lid9`",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.location|dm": [
+"\ud83d\udccd *Oak Town* (12, 11)\n\n -    \u5408   -     -     -     -    \ud80c\udffa\ud83d\udf14   -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n\u276e  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7   \u26b2   \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n(Oak Town \u00b7 Town)\n1 up        3 left\n2",
+[],
+[]
+],
+"flags110|.location|grp": [
+"\ud83d\udccd *Oak Town* (12, 11)\n\n -    \u5408   -     -     -     -    \ud80c\udffa\ud83d\udf14   -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n\u276e  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7   \u26b2   \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n(Oak Town \u00b7 Town)\n1 up        3 left\n2",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.menu|dm": [
+null,
+[],
+[]
+],
+"flags110|.menu|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.ping|dm": [
+null,
+[],
+[]
+],
+"flags110|.ping|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.ranks|dm": [
+null,
+[],
+[]
+],
+"flags110|.ranks|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|.status|dm": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"flags110|.status|grp": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags110|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags110|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags110|hello there|dm": [
+null,
+[],
+[]
+],
+"flags110|hello there|grp": [
+null,
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.groupid|dm": [
+"*Your JID:* `222@s.whatsapp.net`",
+[],
+[]
+],
+"flags111|.groupid|grp": [
+"*Group JID:* `g1@g.us`\n*LID:* `lid9`",
+[],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.location|dm": [
+"ARIEL<.location>",
+[
+[
+"222@s.whatsapp.net",
+".location",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|.location|grp": [
+"ARIEL<.location>",
+[
+[
+"222@s.whatsapp.net",
+".location",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.menu|dm": [
+"ARIEL<.menu>",
+[
+[
+"222@s.whatsapp.net",
+".menu",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|.menu|grp": [
+"ARIEL<.menu>",
+[
+[
+"222@s.whatsapp.net",
+".menu",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.ping|dm": [
+"ARIEL<.ping>",
+[
+[
+"222@s.whatsapp.net",
+".ping",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|.ping|grp": [
+"ARIEL<.ping>",
+[
+[
+"222@s.whatsapp.net",
+".ping",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.ranks|dm": [
+"ARIEL<.ranks>",
+[
+[
+"222@s.whatsapp.net",
+".ranks",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|.ranks|grp": [
+"ARIEL<.ranks>",
+[
+[
+"222@s.whatsapp.net",
+".ranks",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|.status|dm": [
+"ARIEL<.status>",
+[
+[
+"222@s.whatsapp.net",
+".status",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|.status|grp": [
+"ARIEL<.status>",
+[
+[
+"222@s.whatsapp.net",
+".status",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|Ariel|dm": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|Ariel|grp": [
+"ARIEL<Ariel>",
+[
+[
+"222@s.whatsapp.net",
+"Ariel",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|ariel hey you|dm": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|ariel hey you|grp": [
+"ARIEL<hey you>",
+[
+[
+"222@s.whatsapp.net",
+"hey you",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"flags111|hello there|dm": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+null,
+null,
+null
+]
+],
+[]
+],
+"flags111|hello there|grp": [
+"ARIEL<hello there>",
+[
+[
+"222@s.whatsapp.net",
+"hello there",
+"Rose",
+"g1@g.us",
+"x@s"
+]
+],
+[
+[
+"g1@g.us",
+"222@s.whatsapp.net",
+"Rose"
+]
+]
+],
+"fresh|.accept": [
+"\u26a0\ufe0f Usage: *.accept [number]*",
+[],
+[]
+],
+"fresh|.addlegacy": [
+null,
+[],
+[]
+],
+"fresh|.advance": [
+null,
+[],
+[]
+],
+"fresh|.ambush": [
+"You're not inside a dungeon.",
+[],
+[]
+],
+"fresh|.arena": [
+"You are challenging the *Niflheim Soulbound Arena*.\nDo you wish to continue?\nOur fee is *100 coins*.\n\n`.Accept`      `.Reject`",
+[],
+[]
+],
+"fresh|.atk": [
+null,
+[],
+[]
+],
+"fresh|.bag": [
+null,
+[],
+[]
+],
+"fresh|.bal": [
+"\ud83d\udcb0 Coins: 0",
+[],
+[]
+],
+"fresh|.betmenu": [
+"\ud83c\udfb0 *CASINO*\n\u2503 `.cf [bet]` \u2014 Coinflip \u00b7 40% \u00b7 2.35x\n\u2503 `.di [bet] [1-6]` \u2014 Guess the Die \u00b7 1-in-6 \u00b7 5.2x\n\u2503 `.db [bet]` \u2014 Dice Bet \u00b7 40% \u00b7 2.35x\n\u2503 `.slots [bet]` \u2014 Slots \u00b7 jackpots up to 10x\n\u2503 `.roulette [bet] [red/black/green/no.]` \u2014 varies\n\n_Min bet \u20a110 \u00b7 Max bet \u20a15000 \u00b7 `all` bets everything_",
+[],
+[]
+],
+"fresh|.board": [
+"\ud83d\udccb *Quest Board \u2014 Oak Town*\n\n_Slots: 0/3 \u00b7 Showing 10 of 20_\n\n\n*1. Catch 5 Caterpie*\n   \ud83d\udcb0 55\u20a1  \u26a0\ufe0f -30\u20a1\n   _.accept 1 to take this quest_\n\n*2. Defeat 8 wild Pok\u00e9mon*\n   \ud83d\udcb0 67\u20a1  \u26a0\ufe0f -11\u20a1\n   _.accept 2 to take this quest_\n\n*3. Defeat 3 wild Pok\u00e9mon*\n   \ud83d\udcb0 35\u20a1  \u26a0\ufe0f -23\u20a1\n   _.accept 3 to take this quest_\n\n*4. Defeat 6 wild Pok\u00e9mon*\n   \ud83d\udcb0 35\u20a1  \u26a0\ufe0f -27\u20a1\n   _.accept 4 to take this quest_\n\n*5. Defeat 4 wild Pok\u00e9m",
+[],
+[]
+],
+"fresh|.buy": [
+"_Usage: .buy [no.] [quantity]_",
+[],
+[]
+],
+"fresh|.buy potion 1": [
+"_Usage: .buy [no.] [quantity]_",
+[],
+[]
+],
+"fresh|.card": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"fresh|.cardv": [
+"\ud83c\udfb4 *Card Designs*\n\n1. Normal \u2705\n2. Glitch\n3. Metallic\n4. Flame\n\n_.cardv [no.] to switch_",
+[],
+[]
+],
+"fresh|.catch": [
+null,
+[],
+[]
+],
+"fresh|.cds": [
+null,
+[],
+[]
+],
+"fresh|.cf": [
+"_Usage: give an amount to bet, e.g. `.cf 100`_",
+[],
+[]
+],
+"fresh|.challenge": [
+"\u2694\ufe0f _Tag someone to challenge. e.g._ `.challenge @PlayerB`",
+[],
+[]
+],
+"fresh|.db": [
+"_Usage: give an amount to bet, e.g. `.cf 100`_",
+[],
+[]
+],
+"fresh|.decline": [
+"_You back out of the challenge. The arena will be waiting whenever you're ready._",
+[],
+[]
+],
+"fresh|.delete": [
+null,
+[],
+[]
+],
+"fresh|.di": [
+"_Usage: `.di [bet] [1-6]`_",
+[],
+[]
+],
+"fresh|.dig": [
+null,
+[],
+[]
+],
+"fresh|.dive": [
+null,
+[],
+[]
+],
+"fresh|.end": [
+"You're not currently traveling.",
+[],
+[]
+],
+"fresh|.explore": [
+"Usage: .explore <north/south/east/west>",
+[],
+[]
+],
+"fresh|.ff": [
+null,
+[],
+[]
+],
+"fresh|.ffd": [
+null,
+[],
+[]
+],
+"fresh|.ffi": [
+null,
+[],
+[]
+],
+"fresh|.ffp": [
+null,
+[],
+[]
+],
+"fresh|.fight": [
+null,
+[],
+[]
+],
+"fresh|.fish": [
+"_You don't have a Fishing Rod._\n_Grab one from the shop first._",
+[],
+[]
+],
+"fresh|.flee": [
+null,
+[],
+[]
+],
+"fresh|.font": [
+"\ud83c\udfa8 *Menu Presets*\n\n*.font 0*  \u2014 Default \u2605\u5f61\n*.font 1*  \u2014 Ice Crystal \u22c6\u207a\u208a\u2745\n*.font 2*  \u2014 Double Star \u2726\u2727\n*.font 3*  \u2014 Fire \ud83d\udd25\n*.font 4*  \u2014 Niflheim \u2744\n\n_Type .font [0-4] to switch_",
+[],
+[]
+],
+"fresh|.forfeit": [
+"_.forfeit only applies to PvP battles. Use .flee instead._",
+[],
+[]
+],
+"fresh|.giveup": [
+null,
+[],
+[]
+],
+"fresh|.goback": [
+"You're not inside a dungeon.",
+[],
+[]
+],
+"fresh|.goto": [
+"You're not inside a dungeon.",
+[],
+[]
+],
+"fresh|.goto x": [
+"You're not inside a dungeon.",
+[],
+[]
+],
+"fresh|.groupid": [
+"*Your JID:* `222@s.whatsapp.net`",
+[],
+[]
+],
+"fresh|.gym": [
+"_There's no gym here._",
+[],
+[]
+],
+"fresh|.gyms": [
+"\ud83c\udfdb\ufe0f _View all gyms, requirements, and leaders here:_\nhttps://ariel-og.vercel.app/?scene=gyms",
+[],
+[]
+],
+"fresh|.hatch": [
+"_You don't have any eggs ready to hatch._",
+[],
+[]
+],
+"fresh|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"fresh|.hidetag": [
+null,
+[],
+[]
+],
+"fresh|.home": [
+null,
+[],
+[]
+],
+"fresh|.hud": [
+"\ud83c\udfa8 *HUD Styles*\n\n*.hud 1* \u2014 Full\n*.hud 2* \u2014 Header\n*.hud 3* \u2014 Plain",
+[],
+[]
+],
+"fresh|.hunt": [
+"_You can't hunt in a town._\n_Use .quicktravel to change location._",
+[],
+[]
+],
+"fresh|.info": [
+"\ud83d\udd0e *.info* \u2014 detailed lookup\n\n_.info [pokemon]_  \u2014 species, stats, types, moves\n_.info [item]_     \u2014 description, effect, price\n_.info [zone]_     \u2014 danger, encounters, gym\n\n_Example: .info charizard_",
+[],
+[]
+],
+"fresh|.inv": [
+"\ud83c\udf92 *T's Bag*\n\n_Your bag is empty._\n_.catch [no.] \u00b7 .med [no.] \u00b7 .use [no.]_",
+[],
+[]
+],
+"fresh|.inventory": [
+"\ud83c\udf92 *T's Bag*\n\n_Your bag is empty._\n_.catch [no.] \u00b7 .med [no.] \u00b7 .use [no.]_",
+[],
+[]
+],
+"fresh|.lb": [
+"\ud83c\udfc6 *Leaderboard \u2014 Level*\n\n\ud83e\udd47 *T* \u2014 1LV\n\n_.lb [level|pvp|caught|badges]_",
+[],
+[]
+],
+"fresh|.leave": [
+"\u26ea\ufe0e *Town Square* \u26ea\ufe0e\nNPC: Ariel\n\n_\"Welcome to Avalon.\"_\n\n*.guild*\n*.shop*\n*.forge*\n*.quicktravel [zone] to move on*",
+[],
+[]
+],
+"fresh|.legacylist": [
+null,
+[],
+[]
+],
+"fresh|.location": [
+"\ud83d\udccd *Oak Town* (12, 11)\n\n -    \u5408   -     -     -     -    \ud80c\udffa\ud83d\udf14   -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n -     -     -     -     -     -     -     -     -  \n\u276e  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7   \u26b2   \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n\ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7  \ud800\udcb7\n(Oak Town \u00b7 Town)\n1 up        3 left\n2",
+[],
+[]
+],
+"fresh|.look": [
+null,
+[],
+[]
+],
+"fresh|.me": [
+"*Ariel's read on you:* Reserved (0/100)",
+[],
+[]
+],
+"fresh|.med": [
+null,
+[],
+[]
+],
+"fresh|.mine": [
+null,
+[],
+[]
+],
+"fresh|.name": [
+"_Usage: .name p[slot] [nickname]  or  .name pc[slot] [nickname]_",
+[],
+[]
+],
+"fresh|.name Foo": [
+"_Usage: .name p[slot] [nickname]  or  .name pc[slot] [nickname]_",
+[],
+[]
+],
+"fresh|.next": [
+null,
+[],
+[]
+],
+"fresh|.no": [
+null,
+[],
+[]
+],
+"fresh|.nonsense": [
+null,
+[],
+[]
+],
+"fresh|.owner": [
+null,
+[],
+[]
+],
+"fresh|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"fresh|.pheal": [
+"\ud83c\udf92 _Your party is empty._",
+[],
+[]
+],
+"fresh|.ping": [
+null,
+[],
+[]
+],
+"fresh|.player": [
+null,
+[],
+[]
+],
+"fresh|.pokedex": [
+"\u256d\u2501\u2501\u2770 \u2316 \ud835\ude7f\ud835\ude7e\ud835\ude7a\u00c9\ud835\ude73\ud835\ude74\ud835\ude87 \u2316 \u2771\u2501\u2501\u256e\n\u2503 Seen   \u203a 0\n\u2503 Caught \u203a 0\n\u2570\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u256f",
+[],
+[]
+],
+"fresh|.quest": [
+"\ud83d\udccb _No active quests._\n_Visit .board in town to grab some._",
+[],
+[]
+],
+"fresh|.quests": [
+"\ud83d\udccb _No active quests._\n_Visit .board in town to grab some._",
+[],
+[]
+],
+"fresh|.quicktravel": [
+"_You haven't visited any other zones yet._\n_You need to reach an area manually to travel there._",
+[],
+[]
+],
+"fresh|.ranks": [
+null,
+[],
+[]
+],
+"fresh|.rankup": [
+"\ud83c\udfc5 *Rank Up: F \u2192 E*\n\n\u2694\ufe0f Wild Defeats: 0/50\n\ud83c\udfc6 Badges: 0/0\n\n_Keep training!_",
+[],
+[]
+],
+"fresh|.redeem": [
+"\ud83c\udfc6 _No completed quests to redeem._",
+[],
+[]
+],
+"fresh|.reject": [
+null,
+[],
+[]
+],
+"fresh|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"fresh|.resetprofile": [
+"\ud83d\uddd1\ufe0f *Profile fully wiped.*\n_Character, registration, NPC/Ariel affinity, quest claims, and site login all cleared. Legacy status and rank preserved._\n\n_Type *.start* to begin anew._",
+[],
+[]
+],
+"fresh|.roulette": [
+"_Usage: `.roulette [bet] [red/black/green/0-36]`_",
+[],
+[]
+],
+"fresh|.rules": [
+null,
+[],
+[]
+],
+"fresh|.run": [
+null,
+[],
+[]
+],
+"fresh|.sell": [
+"_Usage: .sell [inv no.] [quantity]_",
+[],
+[]
+],
+"fresh|.sell potion": [
+"_Usage: .sell [inv no.] [quantity]_",
+[],
+[]
+],
+"fresh|.setage": [
+"_Usage: .setage [value]_",
+[],
+[]
+],
+"fresh|.setbio": [
+"_Usage: .setbio [text]_",
+[],
+[]
+],
+"fresh|.setskill": [
+"\u2699\ufe0f *Skill Nicknames*\n\n_.setskill [pokemon]_ \u2014 assign a nickname to a skill\n_.setskill list_ \u2014 view all your skill nicknames\n_.unsetskill [pokemon]_ \u2014 remove a nickname",
+[],
+[]
+],
+"fresh|.setskill a": [
+"_No Pok\u00e9mon found for \"a\"._",
+[],
+[]
+],
+"fresh|.setstage": [
+null,
+[],
+[]
+],
+"fresh|.shop": [
+"\ud83d\uded2 *POK\u00c9MART*\n_Town prices_\n_Full catalog available in cities_\n\n\ud83d\udc8a Potions\n  *1.* Potion \u2014 \u20a1100\n  *2.* Super Potion \u2014 \u20a1150\n  *3.* Hyper Potion \u2014 \u20a1400\n  *4.* Max Potion \u2014 \u20a1800\n\n\ud83c\udf92 Field Items\n  *5.* Breadcrumbs \u2014 \u20a1100\n\n\u2728 Status Heals\n  *6.* Ice Heal \u2014 \u20a1200\n  *7.* Paralyze Heal \u2014 \u20a1200\n  *8.* Antidote \u2014 \u20a1300\n  *9.* Awakening \u2014 \u20a1400\n  *10.* Full Heal \u2014 \u20a1800\n\n\ud83d\udd35 Pok\u00e9 Balls\n  *11.* Pok\u00e9 Ball \u2014 \u20a1400\n\n\ud83e\udd5a Eggs\n",
+[],
+[]
+],
+"fresh|.skill": [
+"\ud83c\udf92 _Your party is empty._",
+[],
+[]
+],
+"fresh|.skills": [
+"\ud83c\udf92 _Your party is empty._",
+[],
+[]
+],
+"fresh|.skip": [
+null,
+[],
+[]
+],
+"fresh|.slots": [
+"_Usage: give an amount to bet, e.g. `.cf 100`_",
+[],
+[]
+],
+"fresh|.start": [
+"Welcome back, T.\n_Use 1 2 3 4 to move._",
+[],
+[]
+],
+"fresh|.stats": [
+null,
+[],
+[]
+],
+"fresh|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"fresh|.stop": [
+null,
+[],
+[]
+],
+"fresh|.swap": [
+null,
+[],
+[]
+],
+"fresh|.swap 1": [
+null,
+[],
+[]
+],
+"fresh|.switch": [
+"_Usage:_\n_.switch p[slot] p[slot] \u2014 swap two party slots_\n_.switch p[slot] pc \u2014 move a party mon to the PC_\n_.switch p[slot] pc[slot] \u2014 swap a party mon with a PC mon_",
+[],
+[]
+],
+"fresh|.tagall": [
+null,
+[],
+[]
+],
+"fresh|.talk": [
+null,
+[],
+[]
+],
+"fresh|.task": [
+null,
+[],
+[]
+],
+"fresh|.tasks": [
+null,
+[],
+[]
+],
+"fresh|.tp": [
+null,
+[],
+[]
+],
+"fresh|.trap": [
+"You're not inside a dungeon.",
+[],
+[]
+],
+"fresh|.tutorial": [
+"EXC ModuleNotFoundError: No module named 'tutorial'",
+[],
+[]
+],
+"fresh|.unsetskill": [
+"_Usage: .unsetskill [pokemon]_",
+[],
+[]
+],
+"fresh|.uptime": [
+null,
+[],
+[]
+],
+"fresh|.use": [
+null,
+[],
+[]
+],
+"fresh|.warnings": [
+null,
+[],
+[]
+],
+"fresh|.whois": [
+null,
+[],
+[]
+],
+"fresh|.yes": [
+null,
+[],
+[]
+],
+"fresh|.zone": [
+"Name: Oak Town\nStatus: Town\n\nPoke Center: No\nGyms: None\nArenas: None\nDungeons: None\n\nConnections: ??? (north)",
+[],
+[]
+],
+"fresh|1": [
+null,
+[],
+[]
+],
+"fresh|north": [
+null,
+[],
+[]
+],
+"fresh|w": [
+null,
+[],
+[]
+],
+"state:arena|.fight": [
+null,
+[],
+[]
+],
+"state:arena|.flee": [
+null,
+[],
+[]
+],
+"state:arena|.foo": [
+null,
+[],
+[]
+],
+"state:arena|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:arena|.next": [
+null,
+[],
+[]
+],
+"state:arena|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:arena|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:arena|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:arena|.swap 1": [
+null,
+[],
+[]
+],
+"state:battle_menu|.fight": [
+null,
+[],
+[]
+],
+"state:battle_menu|.flee": [
+null,
+[],
+[]
+],
+"state:battle_menu|.foo": [
+null,
+[],
+[]
+],
+"state:battle_menu|.heal": [
+null,
+[],
+[]
+],
+"state:battle_menu|.next": [
+null,
+[],
+[]
+],
+"state:battle_menu|.party": [
+null,
+[],
+[]
+],
+"state:battle_menu|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:battle_menu|.status": [
+null,
+[],
+[]
+],
+"state:battle_menu|.swap 1": [
+null,
+[],
+[]
+],
+"state:dead|.fight": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.flee": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.foo": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.heal": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.next": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.party": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.reset": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:dead|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:dead|.swap 1": [
+"_All your Pok\u00e9mon have fainted. Visit a Pok\u00e9mon Center to heal up._",
+[],
+[]
+],
+"state:encounter|.fight": [
+null,
+[],
+[]
+],
+"state:encounter|.flee": [
+"\ud83d\udca8 _You ran from the wild it!_",
+[],
+[]
+],
+"state:encounter|.foo": [
+null,
+[],
+[]
+],
+"state:encounter|.heal": [
+null,
+[],
+[]
+],
+"state:encounter|.next": [
+null,
+[],
+[]
+],
+"state:encounter|.party": [
+null,
+[],
+[]
+],
+"state:encounter|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:encounter|.status": [
+null,
+[],
+[]
+],
+"state:encounter|.swap 1": [
+null,
+[],
+[]
+],
+"state:exploring|.fight": [
+null,
+[],
+[]
+],
+"state:exploring|.flee": [
+null,
+[],
+[]
+],
+"state:exploring|.foo": [
+null,
+[],
+[]
+],
+"state:exploring|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:exploring|.next": [
+null,
+[],
+[]
+],
+"state:exploring|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:exploring|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:exploring|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:exploring|.swap 1": [
+null,
+[],
+[]
+],
+"state:gym|.fight": [
+null,
+[],
+[]
+],
+"state:gym|.flee": [
+null,
+[],
+[]
+],
+"state:gym|.foo": [
+null,
+[],
+[]
+],
+"state:gym|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:gym|.next": [
+null,
+[],
+[]
+],
+"state:gym|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:gym|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:gym|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:gym|.swap 1": [
+null,
+[],
+[]
+],
+"state:pve_swap|.fight": [
+"_Choose a Pok\u00e9mon to send out with .swap (no.), or .flee._",
+[],
+[]
+],
+"state:pve_swap|.flee": [
+"_You fled the battle!_",
+[],
+[]
+],
+"state:pve_swap|.foo": [
+"_Choose a Pok\u00e9mon to send out with .swap (no.), or .flee._",
+[],
+[]
+],
+"state:pve_swap|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:pve_swap|.next": [
+null,
+[],
+[]
+],
+"state:pve_swap|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:pve_swap|.reset": [
+"_Choose a Pok\u00e9mon to send out with .swap (no.), or .flee._",
+[],
+[]
+],
+"state:pve_swap|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:pve_swap|.swap 1": [
+"\u26a0\ufe0f _Invalid slot._",
+[],
+[]
+],
+"state:pvp_blackout|.fight": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.flee": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.foo": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.heal": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.next": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.party": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.reset": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.status": [
+null,
+[],
+[]
+],
+"state:pvp_blackout|.swap 1": [
+null,
+[],
+[]
+],
+"state:pvp_pending|.fight": [
+null,
+[],
+[]
+],
+"state:pvp_pending|.flee": [
+null,
+[],
+[]
+],
+"state:pvp_pending|.foo": [
+null,
+[],
+[]
+],
+"state:pvp_pending|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:pvp_pending|.next": [
+null,
+[],
+[]
+],
+"state:pvp_pending|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:pvp_pending|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:pvp_pending|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:pvp_pending|.swap 1": [
+null,
+[],
+[]
+],
+"state:pvp|.fight": [
+null,
+[],
+[]
+],
+"state:pvp|.flee": [
+null,
+[],
+[]
+],
+"state:pvp|.foo": [
+null,
+[],
+[]
+],
+"state:pvp|.heal": [
+"_Your party has no conscious Pok\u00e9mon._",
+[],
+[]
+],
+"state:pvp|.next": [
+null,
+[],
+[]
+],
+"state:pvp|.party": [
+"\ud83c\udf92 _Your party is empty. Get a starter from Prof. Oak._",
+[],
+[]
+],
+"state:pvp|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:pvp|.status": [
+"[Card]\nName: T\nClass: None\nAge: --\nZone: oak_town\nPokemon: --\nBio: --",
+[],
+[]
+],
+"state:pvp|.swap 1": [
+null,
+[],
+[]
+],
+"state:raid|.fight": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.flee": [
+"\u26a0\ufe0f _You cannot flee a raid._",
+[],
+[]
+],
+"state:raid|.foo": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.heal": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.next": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.party": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:raid|.status": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:raid|.swap 1": [
+"\u26a0\ufe0f _Raids are not yet available._",
+[],
+[]
+],
+"state:tutorial|.fight": [
+null,
+[],
+[]
+],
+"state:tutorial|.flee": [
+null,
+[],
+[]
+],
+"state:tutorial|.foo": [
+null,
+[],
+[]
+],
+"state:tutorial|.heal": [
+null,
+[],
+[]
+],
+"state:tutorial|.next": [
+null,
+[],
+[]
+],
+"state:tutorial|.party": [
+null,
+[],
+[]
+],
+"state:tutorial|.reset": [
+"\ud83d\udd04 _State reset._",
+[],
+[]
+],
+"state:tutorial|.status": [
+null,
+[],
+[]
+],
+"state:tutorial|.swap 1": [
+null,
+[],
+[]
+],
+"static|.1": [
+null,
+[],
+[]
+],
+"static|.buy x": [
+null,
+[],
+[]
+],
+"static|.foo": [
+null,
+[],
+[]
+],
+"static|.status": [
+null,
+[],
+[]
+],
+"static|.yes": [
+null,
+[],
+[]
+],
+"static|hi": [
+null,
+[],
+[]
+],
+"unreg|.accept": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.addlegacy": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.advance": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ambush": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.arena": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.atk": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.bag": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.bal": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.betmenu": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.board": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.buy": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.buy potion 1": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.card": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.cardv": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.catch": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.cds": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.cf": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.challenge": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.db": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.decline": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.delete": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.di": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.dig": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.dive": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.end": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.explore": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ff": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ffd": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ffi": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ffp": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.fight": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.fish": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.flee": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.font": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.forfeit": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.giveup": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.goback": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.goto": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.goto x": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.groupid": [
+"*Your JID:* `333@s.whatsapp.net`",
+[],
+[]
+],
+"unreg|.gym": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.gyms": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.hatch": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.heal": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.hidetag": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.home": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.hud": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.hunt": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.info": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.inv": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.inventory": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.lb": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.leave": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.legacylist": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.location": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.look": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.me": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.med": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.mine": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.name": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.name Foo": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.next": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.no": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.nonsense": [
+null,
+[],
+[]
+],
+"unreg|.owner": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.party": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.pheal": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ping": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.player": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.pokedex": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.quest": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.quests": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.quicktravel": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.ranks": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.rankup": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.redeem": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.reject": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.reset": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.resetprofile": [
+"\ud83d\uddd1\ufe0f *Profile fully wiped.*\n_Character, registration, NPC/Ariel affinity, quest claims, and site login all cleared. Legacy status and rank preserved._\n\n_Type *.start* to begin anew._",
+[],
+[]
+],
+"unreg|.roulette": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.rules": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.run": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.sell": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.sell potion": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.setage": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.setbio": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.setskill": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.setskill a": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.setstage": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.shop": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.skill": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.skills": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.skip": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.slots": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.start": [
+"\u2744\ufe0f *Welcome to Niflheim.*\n\nPlease register on the site to begin your adventure:\nhttps://ariel-og.vercel.app/",
+[],
+[]
+],
+"unreg|.stats": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.status": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.stop": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.swap": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.swap 1": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.switch": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.tagall": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.talk": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.task": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.tasks": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.tp": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.trap": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.tutorial": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.unsetskill": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.uptime": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.use": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.warnings": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.whois": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.yes": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|.zone": [
+"_You haven't awakened yet. Type *.start* to begin._",
+[],
+[]
+],
+"unreg|1": [
+null,
+[],
+[]
+],
+"unreg|north": [
+null,
+[],
+[]
+],
+"unreg|w": [
+null,
+[],
+[]
+]
+}

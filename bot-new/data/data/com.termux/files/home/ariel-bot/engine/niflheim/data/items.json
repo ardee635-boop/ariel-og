@@ -1,0 +1,15 @@
+{
+  "_note": "Session 1 catalogue. buy=0 means drop-only. Percent bonuses are whole numbers (10 = +10%). 'session' gates staged shop stock (Session 2+ = add entries with a higher session).",
+  "items": [
+    {"name": "Small HP Potion", "category": "consumable", "heal": 30,     "buy": 150,  "sell": 60,  "session": 1},
+    {"name": "HP Potion",       "category": "consumable", "heal": 60,     "buy": 300,  "sell": 120, "session": 1},
+    {"name": "Iron Sword",      "category": "weapon",     "atk_pct": 10,  "buy": 1500, "sell": 600, "session": 1},
+    {"name": "Leather Armor",   "category": "armour",     "hp_pct": 10,   "buy": 1200, "sell": 480, "session": 1},
+    {"name": "Slime Core",      "category": "material",                   "buy": 0,    "sell": 100, "session": 1},
+    {"name": "Wolf Fang",       "category": "material",                   "buy": 0,    "sell": 150, "session": 1},
+    {"name": "Goblin Charm",    "category": "accessory",  "hp_pct": 5,    "buy": 0,    "sell": 500, "session": 1},
+    {"name": "Boar Tusk",       "category": "material",                   "buy": 0,    "sell": 200, "session": 1},
+    {"name": "Frost Giant Core", "category": "material",                  "buy": 0,    "sell": 1500, "session": 2},
+    {"name": "Ashen Fang Crown", "category": "material",                  "buy": 0,    "sell": 1000, "session": 2}
+  ]
+}
