@@ -308,6 +308,31 @@ body.sh #sheet{transform:none}
 .edmsg{min-height:16px;font-size:12px;margin-top:8px;color:var(--muted)}.edmsg.bad{color:#ff8a8a}.edmsg.ok{color:#7FE0A8}
 .go[disabled]{opacity:.5;pointer-events:none}
 .go[hidden]{display:none}
+/* ===== STATS + ASCENSION ===== */
+.bar2 i.mp{background:linear-gradient(90deg,#3b82f6,#8FE3FF)}
+.pts{display:flex;gap:8px;padding:14px 20px 0}.pts .pt{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--border);border-radius:8px;background:var(--panel)}
+.pts .pt b{display:block;font:600 18px 'Cinzel',serif;color:var(--frost)}.pts .pt span{font-size:9.5px;letter-spacing:.16em;color:var(--muted)}
+.pgrp{margin:14px 20px 0;padding:14px}.pgrp h3{font:600 12px 'Cinzel',serif;letter-spacing:.14em;margin:0 0 10px;color:var(--ice)}
+.arow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(35,66,88,.5)}.arow:last-child{border:0}
+.arow .an{width:42px;font:600 13px 'Cinzel',serif}.arow .am{flex:1;font-size:10.5px;color:var(--muted)}
+.arow .av2{min-width:62px;text-align:right;font-weight:600;font-size:13px}.arow .av2 em{font-style:normal;color:var(--green)}
+.arow button{width:30px;height:30px;border-radius:6px;border:1px solid var(--ice-dim);background:none;color:var(--ice);font:600 16px 'Inter';cursor:pointer}
+.arow button[disabled]{opacity:.3;cursor:default}
+.sgrid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:11.5px}.sgrid2 div{display:flex;justify-content:space-between;color:var(--muted)}.sgrid2 b{color:var(--text);font-weight:600}
+.atabs{display:flex;gap:6px;padding:12px 20px 0;overflow-x:auto}.atabs button{flex:none;background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font:600 11px 'Inter';letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;cursor:pointer}
+.atabs button.on{border-color:var(--ice);color:var(--ice);background:rgba(143,227,255,.08)}
+.crow{margin:12px 20px 0;padding:14px}.crow h4{font:600 15px 'Cinzel',serif;margin:0 0 2px}.crow .sp{font-size:11px;color:var(--ice)}.crow p{font-size:12px;color:var(--muted);margin:8px 0;line-height:1.55}
+.chip{display:inline-block;font:600 9.5px 'Inter';letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--border);color:var(--muted);margin-right:4px}
+.chip.ok{border-color:var(--green);color:var(--green)}.chip.av{border-color:var(--ice);color:var(--ice)}
+.tcols{display:flex;gap:10px;padding:12px 20px 0;overflow-x:auto;align-items:flex-start}.tcol{flex:1 0 148px;display:flex;flex-direction:column;align-items:stretch}
+.tcol h5{font:600 11px 'Cinzel',serif;letter-spacing:.14em;text-align:center;color:var(--ice);margin:0 0 8px}.tcol h5 small{display:block;font:500 9px 'Inter';color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.tn{position:relative;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--panel);font-size:11px;margin-bottom:18px;text-align:center}
+.tn:not(:last-child):after{content:'';position:absolute;left:50%;bottom:-18px;width:2px;height:18px;background:var(--border)}
+.tn.unlocked{border-color:var(--green);box-shadow:0 0 14px rgba(74,222,128,.15)}.tn.unlocked:not(:last-child):after{background:var(--green)}
+.tn.available,.tn.buyable{border-color:var(--ice);box-shadow:0 0 14px rgba(143,227,255,.18)}.tn.locked{opacity:.6}
+.tn b{display:block;font:600 12.5px 'Cinzel',serif;margin-bottom:3px}.tn .m{color:var(--muted);font-size:10px;line-height:1.45}.tn .why{color:var(--red);font-size:9.5px;margin-top:4px}
+.tn button{width:100%;margin-top:7px;padding:6px;border-radius:5px;border:1px solid var(--ice);background:rgba(143,227,255,.1);color:var(--ice);font:600 10.5px 'Inter';letter-spacing:.08em;cursor:pointer}
+.pips{display:flex;gap:4px;justify-content:center;margin:4px 0}.pips i{width:14px;height:5px;border-radius:2px;background:var(--border)}.pips i.f{background:var(--green)}
 </style></head>
 <body>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -487,6 +512,18 @@ body.sh #sheet{transform:none}
   <p class="note">Sample items for now. Buy for real on WhatsApp with .shop and .buy.</p>
  </div>
 
+ <div class="view" id="v-stats">
+  <div class="lb-page-head"><h1>STATS</h1><p>Your character and attribute points</p></div>
+  <div id="stBody"></div>
+ </div>
+
+ <div class="view" id="v-asc">
+  <div class="lb-page-head"><h1>ASCENSION</h1><p>Classes, class tree, skills and skills tree</p></div>
+  <div class="pts" id="ascPts"></div>
+  <div class="atabs" id="ascTabs"><button data-t="classes">Classes</button><button data-t="ctree">Class Tree</button><button data-t="skills">Skills</button><button data-t="stree">Skills Tree</button></div>
+  <div id="ascBody"></div>
+ </div>
+
  <div class="view" id="v-map">
   <canvas id="mapc"></canvas><div class="mholo"></div><div class="mshade"></div>
   <div class="mhead"><h1>MAP</h1><div class="mchip" id="mcur">Locating…</div></div>
@@ -512,6 +549,8 @@ body.sh #sheet{transform:none}
 <aside id="drawer" aria-label="Menu">
  <div class="dh"><div class="avatar-frame"><div class="swirl"></div></div><div><b id="dn">Korii</b><span id="dlv">Level 12 Adventurer</span></div></div>
  <button class="di" id="editBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
+ <button class="di" id="statsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
+ <button class="di" id="ascBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3 6 6 1-4.500 4.500L18 21l-6-3-6 3 1.500-6.500L3 10l6-1z"/></svg>Ascension</button>
  <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
  <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
 </aside>
@@ -536,11 +575,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-soon]');if
 const API='https://ariel-bot-38kh.onrender.com';
 const TICKET=new URLSearchParams(location.search).get('t');
 const DUELTOK=new URLSearchParams(location.search).get('duel');
-const GOMAP=new URLSearchParams(location.search).get('go')==='map';
+const GO=new URLSearchParams(location.search).get('go')||'';const GOMAP=GO==='map';
 async function api(path,opt){const r=await fetch(API+path,{credentials:'include',...opt});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct=(a,b)=>Math.max(0,Math.min(100,b>0?a/b*100:0))+'%';
-const pretty=k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+const pretty=k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).replace(/\b(Hp|Mp|Atk|Def)\b/g,m=>m.toUpperCase());
 function fill(username,p){
  const n=(p&&p.name)||username||'Adventurer';ME=p||null;setAvatar(p&&p.avatar||null);$('edNm').textContent=n;$('edName').value=n;
  ['pn','dn','wn2','wname'].forEach(id=>$(id).textContent=n);
@@ -575,7 +614,7 @@ async function enter(username,withBoot){
  let seen=false;const k='nif_welcomed_'+(username||'');try{seen=!!localStorage.getItem(k);localStorage.setItem(k,'1')}catch(e){}
  if(seen)toHome();else openWelcome((p&&p.name)||username);
  if(window.nifRestore)window.nifRestore();
- if(GOMAP&&!window.__gomapDone){window.__gomapDone=true;try{history.replaceState(null,'',location.pathname)}catch(e){}scene('home');tab('map')}
+ if(GO&&!window.__gomapDone){window.__gomapDone=true;try{history.replaceState(null,'',location.pathname)}catch(e){}scene('home');if(GOMAP)tab('map');else if(window.nifGo)window.nifGo(GO)}
 }
 $('form').addEventListener('submit',async e=>{
  e.preventDefault();const err=$('lerr'),btn=$('sub');err.textContent='';
@@ -706,6 +745,95 @@ function paintBtn(){const p=pcur,b=$('ppa'),r=rel[p.n]||'none',n=$('ppnote');b.d
  else{b.textContent='Add friend';b.onclick=()=>{rel[p.n]='sent';paintBtn();toast('Friend request sent to '+p.n)};n.textContent='Or send .friendreq '+p.n+' on WhatsApp.'}}
 $('pback').onclick=()=>tab(pfrom);
 renderSocial();
+// ===== STATS + ASCENSION (Parts 2.11, 2.12) =====
+const ATTRS=['STR','VIT','AGI','INT','DEX','WIS'];
+const ATTR_HINT={STR:'Physical power',VIT:'Health and defence',AGI:'Speed and evasion',INT:'Magic power and mana',DEX:'Accuracy and crits',WIS:'Magic defence and resist'};
+const asum=o=>Object.values(o).reduce((a,b)=>a+b,0);
+let alloc={};
+const jpost=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+async function refreshMe(){const r=await api('/api/niflheim/me');if(r.ok&&r.j.player)fill((ME&&ME.name)||'',r.j.player);return ME}
+function ptsBar(){const p=ME;$('ascPts').innerHTML=p?['AP|ap','CP|cp','SP|sp'].map(x=>{const[l,k]=x.split('|');return`<div class="pt"><b>${p[k]||0}</b><span>${l}</span></div>`}).join(''):''}
+function statsOpen(){alloc={};tab('stats');refreshMe().then(renderStats)}
+function renderStats(){
+ const p=ME,b=$('stBody');if(!p){b.innerHTML='<p class="note">Your character is not ready yet. Refresh in a moment.</p>';return}
+ const left=(p.ap||0)-asum(alloc),a=p.attributes||{},sec=p.secondary||{};
+ const mp=p.mp==null?0:p.mp,mmp=sec.max_mp||0;
+ b.innerHTML=`<div class="card pgrp"><h3>${esc(p.name)} · LEVEL ${p.level}${p.class?' · '+esc(pretty(p.class)):''}</h3>
+  <div class="bar2"><span class="k">HP</span><div class="t"><i class="hp" style="width:${pct(p.hp,p.max_hp)}"></i></div><span class="n">${p.hp} / ${p.max_hp}</span></div>
+  <div class="bar2" style="margin-top:8px"><span class="k">MP</span><div class="t"><i class="mp" style="width:${pct(mp,mmp)}"></i></div><span class="n">${mp} / ${mmp}</span></div>
+  <div class="bar2" style="margin-top:8px"><span class="k">XP</span><div class="t"><i class="xp" style="width:${pct(p.xp,p.xp_needed)}"></i></div><span class="n">${p.xp} / ${p.xp_needed}</span></div></div>
+  <div class="pts"><div class="pt"><b>${left}</b><span>AP</span></div><div class="pt"><b>${p.cp||0}</b><span>CP</span></div><div class="pt"><b>${p.sp||0}</b><span>SP</span></div></div>
+  <div class="card pgrp"><h3>ATTRIBUTES</h3>${ATTRS.map(k=>{const add=alloc[k]||0;return`<div class="arow"><span class="an">${k}</span><span class="am">${ATTR_HINT[k]}</span>
+   <button data-a="${k}" data-d="-1" ${add<1?'disabled':''}>−</button><span class="av2">${a[k]}${add?` → <em>${a[k]+add}</em>`:''}</span><button data-a="${k}" data-d="1" ${left<1?'disabled':''}>+</button></div>`}).join('')}
+   <button class="go" id="apGo" ${asum(alloc)?'':'disabled'}>${asum(alloc)?'Review '+asum(alloc)+' point'+(asum(alloc)>1?'s':''):(left?'Choose attributes to raise':'No attribute points to spend')}</button>
+   <div class="hint">You earn 1 AP per level and for class requirements. AP only raises attributes.</div></div>
+  <div class="card pgrp"><h3>SECONDARY STATS</h3><div class="sgrid2">${Object.entries(sec).map(([k,v])=>`<div><span>${esc(pretty(k))}</span><b>${v}</b></div>`).join('')}</div></div>
+  <p class="note">Class: <b>${p.class?esc(pretty(p.class)):'none yet (unlocks at Level 5)'}</b>. Open Ascension from the menu for classes and skills.</p>`;
+}
+$('stBody').addEventListener('click',async e=>{
+ const bt=e.target.closest('button');if(!bt||!ME)return;
+ if(bt.dataset.a){const k=bt.dataset.a,d=+bt.dataset.d;alloc[k]=Math.max(0,(alloc[k]||0)+d);if(!alloc[k])delete alloc[k];renderStats();return}
+ if(bt.id==='apGo'){
+  bt.disabled=true;const r=await jpost('/api/niflheim/ap/preview',{allocation:alloc});
+  if(!r.ok){toast(r.j.error||'Could not preview that.');renderStats();return}
+  const i=r.j.info||r.j,bf=i.before||{},af=i.after||{};
+  const txt=ATTRS.filter(k=>af[k]!==bf[k]).map(k=>k+' '+bf[k]+' → '+af[k]).join(' · ');
+  sheet({e:'Confirm allocation',t:(i.spent||asum(alloc))+' AP',p:txt+'. You will have '+(i.ap_left!=null?i.ap_left:'')+' AP left.',b:[
+   {l:'Confirm',f:async()=>{const c=await jpost('/api/niflheim/ap/allocate',{allocation:alloc});
+     if(!c.ok){toast(c.j.error||'Allocation failed. No points were spent.');return}
+     alloc={};await refreshMe();renderStats();toast('Attributes updated')}},
+   {l:'Cancel',ghost:1,f:renderStats}]});
+ }
+});
+// ----- Ascension -----
+let ascT='classes';
+function ascOpen(t){ascT=t||ascT;tab('asc');document.querySelectorAll('#ascTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===ascT));
+ ptsBar();refreshMe().then(ptsBar);ascLoad()}
+document.querySelectorAll('#ascTabs button').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
+const modTxt=m=>{const o=[];for(const[k,v]of Object.entries((m&&m.flat)||{}))o.push('+'+v+' '+pretty(k));for(const[k,v]of Object.entries((m&&m.pct)||{}))o.push('+'+v+'% '+pretty(k));return o.join(', ')||'Passive bonus'};
+const needClass=()=>{$('ascBody').innerHTML='<p class="note">Choose a class first (unlocks at Level 5).</p><div style="padding:0 20px"><button class="go" id="toCls">Go to Classes</button></div>';$('toCls').onclick=()=>ascOpen('classes')};
+async function ascLoad(){
+ const B=$('ascBody');B.innerHTML='<p class="note">Loading…</p>';
+ try{
+  if(ascT==='classes'){
+   const r=await api('/api/niflheim/classes');if(!r.ok){B.innerHTML='<p class="note">'+esc(r.j.error||'Could not load classes.')+'</p>';return}
+   const j=r.j;
+   B.innerHTML=(j.unlocked?'':`<p class="note">Classes unlock at Level <b>${j.unlock_level}</b>. You are Level ${ME?ME.level:'?'}.</p>`)+
+    j.classes.map(c=>`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.specialization)}</div><p>${esc(c.description)}</p>
+     <div>${c.paths.map(x=>`<span class="chip">${esc(x.name)}</span>`).join('')}</div>
+     <div style="margin-top:8px">${c.current?'<span class="chip ok">Your class</span>':(j.current?'<span class="chip">Locked in</span>':(j.unlocked?`<button class="go" data-pick="${c.id}">Choose ${esc(c.name)}</button>`:'<span class="chip">Locked</span>'))}</div></div>`).join('');
+   B.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>sheet({e:'First class',t:pretty(b.dataset.pick),p:'You can only choose your first class once.',b:[
+    {l:'Choose',f:async()=>{const c=await jpost('/api/niflheim/classes/choose',{class:b.dataset.pick});if(!c.ok)return toast(c.j.error||'Could not choose that class.');await refreshMe();ptsBar();toast('Class chosen');ascLoad()}},{l:'Cancel',ghost:1}]}));
+  }else if(ascT==='ctree'){
+   const r=await api('/api/niflheim/classes/tree');if(!r.ok){needClass();return}
+   const t=r.j;
+   B.innerHTML=`<div class="tcols">${t.paths.map(pa=>`<div class="tcol"><h5>${esc(pa.name)}<small>${esc(t.name)} path</small></h5>${t.nodes.filter(n=>n.path===pa.id).sort((a,b)=>a.tier-b.tier).map(n=>`
+     <div class="tn ${n.state}"><b>${esc(n.name)}</b><div class="m">Tier ${n.tier} · ${n.cost} CP · Lv ${n.min_level}+<br>${esc(modTxt(n.mods))}${n.requires_quest?'<br>Quest: '+esc(pretty(n.requires_quest)):''}</div>
+     ${n.state==='unlocked'?'<span class="chip ok">Unlocked</span>':n.state==='available'?`<button data-n="${n.id}">Unlock · ${n.cost} CP</button>`:`<div class="why">${esc(n.blocked_by||'Locked')}</div>`}</div>`).join('')}</div>`).join('')}</div>
+    <p class="note">Class Points: <b>${t.cp}</b>. Upgrades unlock in order within each path.</p>`;
+   B.querySelectorAll('[data-n]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/classes/buy',{node:b.dataset.n});if(!c.ok){toast(c.j.error||'Could not unlock. No points spent.');b.disabled=false;return}toast('Upgrade unlocked');await refreshMe();ptsBar();ascLoad()});
+  }else{
+   const r=await api('/api/niflheim/skills');if(!r.ok){needClass();return}
+   const t=r.j;
+   if(ascT==='skills'){
+    B.innerHTML=t.skills.map(s=>`<div class="card crow"><h4>${esc(s.name)}</h4><div class="sp">${esc(pretty(s.branch))} · Level ${s.level}/${s.max_level}</div>
+     <div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>
+     <p>${esc(s.effect||s.function)}</p><div>${s.level?'<span class="chip ok">Unlocked</span>':'<span class="chip">Locked</span>'}${s.state==='maxed'?'<span class="chip ok">Max</span>':`<span class="chip">Next: ${s.next_cost} SP · Lv ${s.next_min_level}+</span>`}</div>
+     ${s.blocked_by&&s.state!=='buyable'&&s.state!=='maxed'?`<div class="hint" style="color:var(--red)">${esc(s.blocked_by)}</div>`:''}</div>`).join('')+'<p class="note">Upgrade skills in the Skills Tree tab.</p>';
+   }else{
+    B.innerHTML=`<div class="tcols">${t.branches.map(br=>`<div class="tcol"><h5>${esc(br.name)}<small>${br.sp_invested} SP invested</small></h5>${t.skills.filter(s=>s.branch===br.id).map(s=>`
+     <div class="tn ${s.state}"><b>${esc(s.name)}</b><div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>
+     <div class="m">${esc(s.function)}${s.requires&&s.requires.length?'<br>Needs: '+s.requires.map(x=>esc(pretty(x))).join(', '):''}</div>
+     ${s.state==='maxed'?'<span class="chip ok">Max</span>':s.state==='buyable'?`<button data-s="${s.id}">${s.level?'Upgrade':'Unlock'} · ${s.next_cost} SP</button>`:`<div class="why">${esc(s.blocked_by||'Locked')}</div>`}</div>`).join('')}</div>`).join('')}</div>
+     <p class="note">Skill Points: <b>${t.sp}</b>. Higher levels cost more SP.</p>`;
+    B.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/skills/buy',{skill:b.dataset.s});if(!c.ok){toast(c.j.error||'Could not unlock. No points spent.');b.disabled=false;return}toast('Skill upgraded');await refreshMe();ptsBar();ascLoad()});
+   }
+  }
+ }catch(x){B.innerHTML='<p class="note">Server unreachable. Try again in a moment.</p>'}
+}
+// ?go=profile|classes|skills|bestiary links from WhatsApp
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='classes')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree')};
+$('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
 // Explore: find a wild fight; the arena only appears once a fight starts
 const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
 $('goExplore').onclick=()=>tab('map');
