@@ -340,6 +340,18 @@ body.sh #sheet{transform:none}
 .bc .bd{margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6}.bc .bd p{margin:6px 0}.bc .bd b{color:var(--text)}
 .grp{font:600 10px Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ice-dim);margin:16px 20px 6px}
 #goMap{margin:10px 20px 0;width:calc(100% - 40px)}
+
+/* ---- Stage 8: class system ---- */
+.tn.current{border-color:var(--gold);box-shadow:0 0 16px rgba(251,211,77,.25)}.tn.past{opacity:.75;border-style:dashed}.tn.discovered{opacity:.5}
+.ftree{position:relative;overflow:auto;margin:12px 12px 0;border:1px solid var(--border);border-radius:10px;background:var(--panel);height:58vh;touch-action:pan-x pan-y}
+.fwrap{position:relative;transform-origin:0 0;padding:16px;display:flex;flex-direction:column;gap:44px;width:max-content;min-width:100%}
+.frow{display:flex;gap:18px;justify-content:center}.fn{width:128px;cursor:pointer}.fn .tn{margin:0}.fn .tn:after{display:none}
+.fsvg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.zbar{display:flex;gap:6px;justify-content:flex-end;padding:8px 20px 0}.zbar button{width:32px;height:28px;border:1px solid var(--ice-dim);background:var(--panel);color:var(--ice);border-radius:6px}
+.filt{display:flex;gap:8px;padding:12px 20px 0}.filt select,.filt input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font:500 12px 'Inter'}
+.rk{display:inline-block;font:700 9px 'Inter';letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0}.sk{padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--panel);text-align:left;color:var(--text);cursor:pointer}.sk b{display:block;font:600 12.5px 'Cinzel',serif;margin:4px 0}.sk.off{opacity:.55}
+.gr{font-size:10.5px;color:var(--muted);margin:4px 0}.gr b{color:var(--ice)}
 </style></head>
 <body>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -528,9 +540,9 @@ body.sh #sheet{transform:none}
  </div>
 
  <div class="view" id="v-asc">
-  <div class="lb-page-head"><h1>ASCENSION</h1><p>Classes, class tree, skills and skills tree</p></div>
+  <div class="lb-page-head"><h1>ASCENSION</h1><p>Classes, class tree, skills and the class compendium</p></div>
   <div class="pts" id="ascPts"></div>
-  <div class="atabs" id="ascTabs"><button data-t="classes">Classes</button><button data-t="ctree">Class Tree</button><button data-t="skills">Skills</button><button data-t="stree">Skills Tree</button></div>
+  <div class="atabs" id="ascTabs"><button data-t="classes">Classes</button><button data-t="ctree">Class Tree</button><button data-t="skills">Skills</button><button data-t="comp">Compendium</button></div>
   <div id="ascBody"></div>
  </div>
 
@@ -781,7 +793,8 @@ function renderStats(){
    <button class="go" id="apGo" ${asum(alloc)?'':'disabled'}>${asum(alloc)?'Review '+asum(alloc)+' point'+(asum(alloc)>1?'s':''):(left?'Choose attributes to raise':'No attribute points to spend')}</button>
    <div class="hint">You earn 1 AP per level and for class requirements. AP only raises attributes.</div></div>
   <div class="card pgrp"><h3>SECONDARY STATS</h3><div class="sgrid2">${Object.entries(sec).map(([k,v])=>`<div><span>${esc(pretty(k))}</span><b>${v}</b></div>`).join('')}</div></div>
-  <p class="note">Class: <b>${p.class?esc(pretty(p.class)):'none yet (unlocks at Level 5)'}</b>. Open Ascension from the menu for classes and skills.</p>`;
+  <p class="note">Class: <b>${p.class?esc(pretty(p.class)):'none yet (unlocks at Level 5)'}</b>. Open Ascension from the menu for classes and skills.</p>
+  <p class="note">SKILLS — <b>${p.skills_count||0}</b></p>`;
 }
 $('stBody').addEventListener('click',async e=>{
  const bt=e.target.closest('button');if(!bt||!ME)return;
@@ -845,7 +858,7 @@ async function ascLoad(){
  }catch(x){B.innerHTML='<p class="note">Server unreachable. Try again in a moment.</p>'}
 }
 // ?go=profile|classes|skills|bestiary links from WhatsApp
-window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='classes')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree')};
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree')};
 $('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
 // Explore: find a wild fight; the arena only appears once a fight starts
 const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
@@ -1093,5 +1106,110 @@ $('goExplore').onclick=async()=>{
 const ng=$('mneedle');
 (function spin(){const g=window.mapGet&&window.mapGet();if(g&&$('v-map').classList.contains('show'))ng.setAttribute('transform',`rotate(${(g.angle*180/Math.PI).toFixed(1)} 32 32)`);requestAnimationFrame(spin)})();
 })();
+
+// ===== Stage 8: class selection, family-tree Class Tree, Skills filters, Compendium, notices =====
+const RANKC={common:'#9aa0a6',uncommon:'#4caf50',rare:'#3b82f6',epic:'#a855f7'};   // same table as engine/niflheim/ranks.py (Legendary not used yet)
+const rk=r=>`<span class="rk" style="color:${RANKC[r]||RANKC.common};border-color:${RANKC[r]||RANKC.common}">${esc(r)}</span>`;
+const gro=g=>Object.entries(g||{}).map(([k,v])=>`${k} +${v}`).join(' · ');
+const nbody=h=>{$('ascBody').innerHTML=h};
+const NOTE=t=>'<p class="note">'+t+'</p>';
+let classGo=null;
+// --- notices: shown one at a time, each with its own Go button; acknowledged when seen ---
+async function showNotices(){
+ const r=await api('/api/niflheim/notices');if(!r.ok||!(r.j.notices||[]).length)return;
+ const n=r.j.notices[0];
+ const next=async()=>{await jpost('/api/niflheim/notices/ack',{id:n.id});showNotices()};
+ const to=n.go_to==='skills'?'skills':n.go_to==='class_tree'?'ctree':n.go_to==='class_select'?'classes':'classes';
+ sheet({e:'Notice',t:n.title,p:n.body,b:[{l:n.button||'OK',f:async()=>{await jpost('/api/niflheim/notices/ack',{id:n.id});ascOpen(to);setTimeout(showNotices,400)}},{l:'Later',ghost:1,f:next}]});
+}
+window.addEventListener('load',()=>setTimeout(()=>{if(ME)showNotices()},2500));
+// --- awakening: a short sequence, then Profile, then the unlock notices ---
+function awaken(a){
+ const lines=a.lines||[];let i=0;
+ const step=()=>{if(i>=lines.length){statsOpen();setTimeout(showNotices,500);return}
+  sheet({e:a.title||'Awakening',t:lines[i],p:'',b:[{l:i<lines.length-1?'Continue':'Enter Niflheim',f:()=>{i++;step()}}]})};
+ step();
+}
+// --- Classes: four cards -> detail + confirm -> awakening ---
+async function loadClasses(){
+ const r=await api('/api/niflheim/classes/select');if(!r.ok)return nbody(NOTE(esc(r.j.error||'Could not load classes.')));
+ const s=r.j.selection;
+ const head=s.available?NOTE('Choose the path you will walk. Nothing is chosen until you confirm.'):s.current?NOTE('Your class: <b>'+esc(s.current)+'</b>'):NOTE('Classes unlock at Level <b>'+s.unlock_level+'</b>. You are Level '+s.level+'.');
+ nbody(head+s.cards.map(c=>`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.weight)} · ${esc(c.range)} · ${esc(c.damage_type)}</div><p>${esc(c.summary)}</p>
+  <div class="gr">Affinities <b>${c.affinities.join(' · ')}</b></div><p><i>${esc(c.philosophy)}</i></p>
+  ${s.current===c.id?'<span class="chip ok">Your class</span>':s.available?`<button class="go" data-pick="${c.id}">Inspect ${esc(c.name)}</button>`:'<span class="chip">Locked</span>'}</div>`).join(''));
+ $('ascBody').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>inspect(b.dataset.pick));
+}
+async function inspect(id){
+ const r=await jpost('/api/niflheim/classes/preview',{class:id});if(!r.ok)return toast(r.j.error||'Cannot inspect that class.');
+ const c=r.j.class;
+ nbody(`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.weight)} · ${esc(c.range)} · ${esc(c.damage_type)}</div><p>${esc(c.description)}</p><p><i>${esc(c.philosophy)}</i></p>
+  <div class="gr">Primary affinities <b>${c.affinities.join(' · ')}</b></div><div class="gr">Natural growth per level <b>${esc(gro(c.natural_growth))}</b></div>
+  <div class="gr">Characteristics: ${(c.characteristics||[]).map(esc).join(' · ')}</div><div class="gr">Skill categories: ${(c.categories||[]).map(esc).join(' · ')}</div>
+  <button class="go" id="cfm">Confirm ${esc(c.name)}</button><button class="go ghost" id="cnc">Cancel</button></div>`);
+ $('cnc').onclick=loadClasses;
+ $('cfm').onclick=async()=>{$('cfm').disabled=true;const k=await jpost('/api/niflheim/classes/choose',{class:id,confirm:true});
+  if(!k.ok){toast(k.j.error||'Could not choose that class.');return loadClasses()}
+  await refreshMe();awaken(k.j.awakening||{lines:['You awaken as a '+id+'.']})};
+}
+// --- Class Tree: family tree (generations top to bottom), pan by scrolling, zoom buttons ---
+let zoom=1;
+async function loadCTree(){
+ const r=await api('/api/niflheim/classes/genealogy');if(!r.ok)return needClass();
+ const t=r.j,tiers={};t.nodes.forEach(n=>(tiers[n.tier]=tiers[n.tier]||[]).push(n));
+ const rows=Object.keys(tiers).sort((a,b)=>a-b).map(k=>`<div class="frow">${tiers[k].map(n=>`<div class="fn" data-c="${n.id}"><div class="tn ${n.state}"><b>${esc(n.name)}</b><div class="m">Tier ${n.tier} ${rk(n.rank)}${n.special?'<br>Special':''}${n.cp_cost?'<br>'+n.cp_cost+' CP':''}${n.min_level?' · Lv '+n.min_level+'+':''}</div>
+  <span class="chip ${n.state==='current'?'ok':n.state==='available'?'av':''}">${esc(n.state)}</span></div></div>`).join('')}</div>`).join('');
+ nbody(`<div class="zbar"><button id="zo">−</button><button id="zi">+</button></div><div class="ftree" id="ftree"><div class="fwrap" id="fwrap">${rows}<svg class="fsvg" id="fsvg"></svg></div></div>${NOTE('Class Points: <b>'+t.cp+'</b>. Tap a class for details.')}`);
+ const wrap=$('fwrap'),svg=$('fsvg'),draw=()=>{const wr=wrap.getBoundingClientRect(),z=zoom;svg.setAttribute('width',wrap.scrollWidth);svg.setAttribute('height',wrap.scrollHeight);
+  svg.innerHTML=t.edges.map(e=>{const a=wrap.querySelector(`[data-c="${e.from}"] .tn`),b=wrap.querySelector(`[data-c="${e.to}"] .tn`);if(!a||!b)return'';
+   const A=a.getBoundingClientRect(),B=b.getBoundingClientRect(),x1=(A.left+A.width/2-wr.left)/z,y1=(A.bottom-wr.top)/z,x2=(B.left+B.width/2-wr.left)/z,y2=(B.top-wr.top)/z;
+   return`<path d="M${x1} ${y1}C${x1} ${y1+22},${x2} ${y2-22},${x2} ${y2}" fill="none" stroke="#3E7A94" stroke-width="2"/>`}).join('')};
+ const zset=v=>{zoom=Math.min(1.6,Math.max(.5,v));wrap.style.transform=`scale(${zoom})`;draw()};
+ $('zi').onclick=()=>zset(zoom+.15);$('zo').onclick=()=>zset(zoom-.15);zset(zoom);
+ wrap.querySelectorAll('.fn').forEach(el=>el.onclick=()=>{const n=t.nodes.find(x=>x.id===el.dataset.c);
+  const need=(n.requirements||[]).map(q=>(q.met?'✓ ':'✗ ')+q.label).join('\n');
+  sheet({e:'Tier '+n.tier+' · '+n.rank+(n.placeholder?' · placeholder':''),t:n.name,p:(n.summary||'')+(need?'\n\n'+need:''),
+   b:(n.state==='available'?[{l:'Evolve · '+n.cp_cost+' CP',f:()=>evolve(n)}]:[]).concat([{l:'Close',ghost:1}])})});
+}
+function evolve(n){sheet({e:'Evolve',t:'Become '+n.name+'?',p:'Costs '+n.cp_cost+' CP. Your attributes stay; future growth follows the new class.',b:[
+ {l:'Confirm',f:async()=>{const k=await jpost('/api/niflheim/classes/evolve',{class:n.id,confirm:true});if(!k.ok)return toast(k.j.error||'Could not evolve.');await refreshMe();ptsBar();awaken(k.j.awakening||{lines:['You evolved.']})}},{l:'Cancel',ghost:1}]})}
+// --- Skills: category + rank dropdowns + name search, all combined; one card per skill; each skill opens its own info + tree ---
+async function loadSkills(){
+ const r=await api('/api/niflheim/skills');if(!r.ok)return needClass();
+ const t=r.j,all=t.skills||[],cat=s=>s.category||s.branch||'',rank=s=>(s.rank||'').toLowerCase();
+ const cats=[...new Set(all.map(cat).filter(Boolean))];
+ nbody(`<div class="pts" style="margin-top:8px"><div class="pt"><b>${all.filter(s=>s.level>0).length}</b><span>SKILLS</span></div></div>
+  <div class="filt"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option value="${esc(c)}">${esc(pretty(c))}</option>`).join('')}</select>
+  <select id="fr"><option value="">All ranks</option>${['common','uncommon','rare','epic'].map(x=>`<option value="${x}">${pretty(x)}</option>`).join('')}</select></div>
+  <div class="filt"><input id="fq" placeholder="Search skills by name"></div><div class="sgrid" id="sg"></div>${NOTE('Skill Points: <b>'+(t.sp||0)+'</b>')}`);
+ const paint=()=>{const c=$('fc').value,k=$('fr').value,q=$('fq').value.trim().toLowerCase();
+  const rows=all.filter(s=>(!c||cat(s)===c)&&(!k||rank(s)===k)&&(!q||s.name.toLowerCase().includes(q)));
+  $('sg').innerHTML=rows.length?rows.map(s=>`<button class="sk ${s.level?'':'off'}" data-s="${esc(s.id||s.name)}">${rank(s)?rk(rank(s)):''}<b>${esc(s.name)}</b><span class="m">${esc(pretty(cat(s)))}${s.level?' · Lv '+s.level:' · Locked'}</span></button>`).join(''):'<p class="note" style="grid-column:1/-1">No skills here yet.</p>';
+  $('sg').querySelectorAll('.sk').forEach(b=>b.onclick=()=>skillInfo(rows.find(x=>String(x.id||x.name)===b.dataset.s)))};
+ ['fc','fr'].forEach(i=>$(i).onchange=paint);$('fq').oninput=paint;paint();
+}
+function skillInfo(s){   // the skill's own page + its own Skill Tree (there is no separate Skills Tree page)
+ const next=s.state==='buyable'?[{l:(s.level?'Upgrade':'Unlock')+' · '+s.next_cost+' SP',f:async()=>{const c=await jpost('/api/niflheim/skills/buy',{skill:s.id||s.name});if(!c.ok)return toast(c.j.error||'No points spent.');toast('Skill upgraded');await refreshMe();ptsBar();ascLoad()}}]:[];
+ const tree=s.max_level?'\n\nSkill Tree: level '+s.level+' of '+s.max_level+(s.next_cost?' · next '+s.next_cost+' SP':''):'';
+ sheet({e:(s.rank?s.rank+' · ':'')+pretty(s.category||s.branch||''),t:s.name,p:(s.effect||s.function||'')+tree+(s.blocked_by&&s.state!=='buyable'?'\n'+s.blocked_by:''),b:next.concat([{l:'Close',ghost:1}])});
+}
+// --- Compendium: tier picker -> discovered classes grouped by rank, rank dropdown jumps to a section ---
+async function loadComp(tier){
+ if(!tier){const r=await api('/api/niflheim/compendium');if(!r.ok)return nbody(NOTE('Could not load the Compendium.'));
+  return nbody(NOTE('Every class you discover is recorded here, chosen or not.')+r.j.tiers.map(x=>`<div class="card crow"><h4>${esc(x.label)}</h4><div class="sp">${x.discovered} discovered</div><button class="go" data-t="${x.tier}">Open</button></div>`).join(''))||$('ascBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>loadComp(+b.dataset.t))}
+ const r=await api('/api/niflheim/compendium/tier?tier='+tier);if(!r.ok)return nbody(NOTE(esc(r.j.error||'Error')));
+ const v=r.j.compendium;
+ nbody(`<div class="filt"><button class="go" id="cb" style="margin:0">← Tiers</button><select id="cj"><option value="">Jump to rank</option>${v.rank_options.map(o=>`<option value="${o.rank}">${esc(o.label)} (${o.count})</option>`).join('')}</select></div>
+  ${v.empty?NOTE('Nothing discovered in this tier yet.'):v.sections.map(sec=>`<div id="sec-${sec.rank}"><p class="note" style="text-align:left">${rk(sec.rank)}</p>${sec.classes.map(c=>`<div class="card crow" data-c="${c.id}"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.status)}</div><p>${esc(c.summary)}</p></div>`).join('')}</div>`).join('')}`);
+ $('cb').onclick=()=>loadComp();
+ $('cj').onchange=e=>{const el=$('sec-'+e.target.value);el?el.scrollIntoView({behavior:'smooth'}):toast('Nothing of that rank discovered yet.')};
+ $('ascBody').querySelectorAll('[data-c]').forEach(el=>el.onclick=async()=>{const d=await jpost('/api/niflheim/compendium/class',{class:el.dataset.c});if(!d.ok)return;const c=d.j.class;
+  sheet({e:'Tier '+c.tier+' · '+c.rank,t:c.name,p:(c.description||'')+'\n'+(c.philosophy||''),b:[{l:'Close',ghost:1}]})});
+}
+ascLoad=async function(){
+ const B=$('ascBody');B.innerHTML=NOTE('Loading…');
+ try{ascT==='classes'?await loadClasses():ascT==='ctree'?await loadCTree():ascT==='skills'?await loadSkills():ascT==='comp'?await loadComp():await loadSkills()}
+ catch(x){B.innerHTML=NOTE('Server unreachable. Try again in a moment.')}
+};
 </script>
 </body></html>
