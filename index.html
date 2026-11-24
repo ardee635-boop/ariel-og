@@ -554,6 +554,7 @@ body.sh #sheet{transform:none}
 
  <div class="view" id="v-inv"></div>
  <div class="view" id="v-bestiary"></div>
+ <div class="view" id="v-weapons"></div>
  <div class="view" id="v-shop">
   <div class="lb-page-head"><h1>SHOP</h1><p>Your coins: <span style="color:var(--yellow);font-weight:600">1,240</span></p></div>
   <div class="lb-list">
@@ -615,6 +616,7 @@ body.sh #sheet{transform:none}
  <button class="di" id="ascBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3 6 6 1-4.500 4.500L18 21l-6-3-6 3 1.500-6.500L3 10l6-1z"/></svg>Ascension</button>
  <button class="di" id="invBtn" type="button"><span style="width:20px;text-align:center">🎒</span>Inventory</button>
  <button class="di" id="bestBtn" type="button"><span style="width:20px;text-align:center">📖</span>Bestiary</button>
+ <button class="di" id="wepBtn" type="button"><span style="width:20px;text-align:center">⚔️</span>Weapons</button>
  <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
  <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
 </aside>
@@ -655,7 +657,7 @@ function fill(username,p){
  $('plv').textContent=p.level;$('ploc').textContent=p.location||'';$('dlv').textContent='Level '+p.level+' Adventurer';
  $('hpi').style.width=pct(p.hp,p.max_hp);$('hpt').textContent=p.hp+' / '+p.max_hp;
  $('xpi').style.width=pct(p.xp,p.xp_needed);$('xpt').textContent=p.xp+' / '+p.xp_needed;
- $('sd').textContent=p.damage;$('sc').textContent=(+p.coins).toLocaleString();
+ $('sd').innerHTML=(+p.damage||0)+(p.damage_flat?` <small class="gearbonus" style="font-size:.6em;color:var(--ice)">+${+p.damage_flat}</small>`:'')+(p.damage_pct?` <small class="gearbonus" style="font-size:.6em;color:var(--ice)">+${+p.damage_pct}%</small>`:'');$('sc').textContent=(+p.coins).toLocaleString();
  const inv=Object.entries(p.inventory||{}).filter(([k,v])=>+v>0);
  $('si').textContent=inv.reduce((a,[k,v])=>a+(+v),0);
  $('sloc').textContent=p.location||'-';$('snx').textContent=Math.max(0,p.xp_needed-p.xp)+' XP';
@@ -869,7 +871,7 @@ function ascOpen(t){
 document.querySelectorAll('#ascHub .atile').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
 $('ascBack').onclick=()=>ascOpen();
 // ?go=profile|classes|skills|bestiary links from WhatsApp
-window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library')};
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library');else if(g==='weapons'||g==='weapon'){tab('weapons');window.wepOpen&&window.wepOpen()}};
 $('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
 // Explore: find a wild fight; the arena only appears once a fight starts
 const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
@@ -1123,6 +1125,24 @@ async function best(){
  const L=r.j.monsters,at=a=>Object.entries(a||{}).map(([k,v])=>`${k} ${v}`).join(' · ');
  B.innerHTML=hd('BESTIARY',L.length+' creatures recorded')+L.map(m=>`<details class="card crow bc"><summary><div class="art">${esc(m.name[0])}</div><div style="flex:1"><h4 style="margin:0">${esc(m.name)}</h4><div class="sp">${esc(m.race||'?')} · ${esc(m.element||'?')} · ${esc(m.rarity||'?')}</div></div><div><span class="chip">Rank ${esc(m.rank)}</span> <span class="chip">${esc(m.classification)}</span></div></summary><div class="bd"><div class="sgrid2"><div><span>Level</span><b>${m.level}</b></div><div><span>HP</span><b>${m.hp}</b></div><div><span>MP</span><b>${m.mp}</b></div></div><p><b>Attributes</b> ${at(m.attributes)}</p><p><b>Abilities</b> ${esc((m.abilities||[]).join(' '))}</p><p>${esc(m.description||'')}</p><p><b>Drops</b> ${esc((m.drops||[]).join(' '))||'—'}</p><p>Base HP ${m.base.HP} × rank ${m.rank_mult} × ${esc(m.classification)} ${m.class_mult}.</p></div></details>`).join('');
 }
+async function wep(sel){
+ const B=$('v-weapons');B.innerHTML=hd('WEAPONS','Loading…');
+ const r=await api('/api/niflheim/weapons');if(!r.ok)return fail('v-weapons','WEAPONS',r,'The weapons couldn’t be loaded.');
+ const j=r.j,cur=j.bases.find(b=>b.id===sel)||j.bases.find(b=>b.variants.some(v=>v.equipped))||j.bases[0];
+ const RC={Common:'#9fb2c8',Uncommon:'#6fd18a',Rare:'#6aa8ff',Epic:'#c58bff',Divine:'#ffe38a'};
+ const sk=cur.skill,tot=sk.total;
+ const tl=sk.phases.map(p=>`<div style="flex:${p.seconds};background:linear-gradient(#244867,#1b3552);border:1px solid #3d6a92;padding:6px 4px;text-align:center;font-size:11px;min-width:0"><b>${esc(p.name)}</b><br>${p.seconds.toFixed(2)}s</div>`).join('');
+ const rows=cur.variants.map((v,i)=>`<div class="gym-row" style="cursor:default;opacity:${v.owned?1:.62}"><div class="inv-icon" style="color:${RC[v.rarity]}">${i+1}</div><div class="gym-meta"><div class="name" style="color:${RC[v.rarity]}">${esc(v.name)}${v.equipped?' <span class="chip ok">Equipped</span>':v.owned?' <span class="chip ok">Owned</span>':''}</div><div class="sub">+${v.damage} damage · +${v.per_round} per round · ${esc(v.rarity)} · ${esc(v.obtain)}</div></div><a class="chip" style="text-decoration:none" target="_blank" rel="noopener" href="/niflheim-weapon-atelier.html?weapon=${cur.id}&tier=${v.tier}">3D</a></div>`).join('');
+ const f=j.forge;
+ B.innerHTML=hd('WEAPONS','Four weapon types, ten variants each. Variants change damage only.')
+  +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">${j.bases.map(b=>`<button class="go${b.id===cur.id?'':' ghost'}" data-w="${b.id}">${esc(b.label)}</button>`).join('')}</div>`
+  +`<div class="card crow"><h4>${esc(cur.label)} — ${esc(sk.name)}</h4><div class="sp">${esc(cur.identity)} · ${esc(cur.damage_type)} · ${esc(cur.range)}</div><p>${esc(sk.description)}</p><div style="display:flex;gap:3px;margin:8px 0">${tl}</div><div class="gr">${esc(sk.execution)} · ${esc(sk.target)} · ${tot.toFixed(2)}s · fits <b>${cur.strikes_per_round}</b> in a ${j.round_budget}s fight round</div></div>`
+  +`<div class="lb-list">${rows}</div>`
+  +(f?`<p class="note">Divine weapons are forged: the Celestial weapon of the same type, ${Object.entries(f.materials).map(([k,q])=>q+'× '+esc(k)).join(', ')} and ${f.coins.toLocaleString()} coins. Use .forge in WhatsApp.</p>`:'');
+ B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>wep(b.dataset.w));
+}
+window.wepOpen=wep;
+$('wepBtn').onclick=()=>{drawer(false);tab('weapons');wep()};
 $('invBtn').onclick=()=>{drawer(false);tab('inv');inv()};
 $('bestBtn').onclick=()=>{drawer(false);tab('bestiary');best()};
 $('goMap').onclick=()=>tab('map');
