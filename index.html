@@ -333,6 +333,13 @@ body.sh #sheet{transform:none}
 .tn b{display:block;font:600 12.5px 'Cinzel',serif;margin-bottom:3px}.tn .m{color:var(--muted);font-size:10px;line-height:1.45}.tn .why{color:var(--red);font-size:9.5px;margin-top:4px}
 .tn button{width:100%;margin-top:7px;padding:6px;border-radius:5px;border:1px solid var(--ice);background:rgba(143,227,255,.1);color:var(--ice);font:600 10.5px 'Inter';letter-spacing:.08em;cursor:pointer}
 .pips{display:flex;gap:4px;justify-content:center;margin:4px 0}.pips i{width:14px;height:5px;border-radius:2px;background:var(--border)}.pips i.f{background:var(--green)}
+.mcomp{position:absolute;top:74px;right:12px;width:62px;height:62px;z-index:5;pointer-events:none;filter:drop-shadow(0 0 6px rgba(143,227,255,.35))}
+.mcomp text{fill:var(--ice);font:700 8px Inter,system-ui,sans-serif}.mcomp text.n{fill:#ff8a8a}
+.bc summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:space-between}.bc summary::-webkit-details-marker{display:none}
+.bc .art{width:46px;height:46px;border:1px solid var(--ice-dim);border-radius:8px;display:grid;place-items:center;font:700 18px Inter,system-ui,sans-serif;color:var(--ice);background:#081420;flex:none}
+.bc .bd{margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6}.bc .bd p{margin:6px 0}.bc .bd b{color:var(--text)}
+.grp{font:600 10px Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ice-dim);margin:16px 20px 6px}
+#goMap{margin:10px 20px 0;width:calc(100% - 40px)}
 </style></head>
 <body>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -435,6 +442,7 @@ body.sh #sheet{transform:none}
     <b>DUEL</b><span class="s on" id="duelSub">Challenge a friend · 2 online</span>
    </button>
   </div>
+  <button class="go ghost" id="goMap" type="button">OPEN MAP</button>
 
   <div class="status">
    <div class="tab-bar"><button class="tab-btn active">Status</button><button class="tab-btn">Inventory</button><button class="tab-btn">Badges</button></div>
@@ -501,6 +509,8 @@ body.sh #sheet{transform:none}
   </div>
  </div>
 
+ <div class="view" id="v-inv"></div>
+ <div class="view" id="v-bestiary"></div>
  <div class="view" id="v-shop">
   <div class="lb-page-head"><h1>SHOP</h1><p>Your coins: <span style="color:var(--yellow);font-weight:600">1,240</span></p></div>
   <div class="lb-list">
@@ -528,6 +538,7 @@ body.sh #sheet{transform:none}
   <canvas id="mapc"></canvas><div class="mholo"></div><div class="mshade"></div>
   <div class="mhead"><h1>MAP</h1><div class="mchip" id="mcur">Locating…</div></div>
   <div class="mhint">ONE FINGER: MOVE · TWO FINGERS: ROTATE &amp; ZOOM</div>
+  <div class="mcomp" id="mcomp" aria-label="Compass"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="rgba(5,10,18,.6)" stroke="#3E7A94" stroke-width="1.2"/><g id="mneedle"><path d="M32 12l6 20H26z" fill="#ff8a8a"/><path d="M32 52l6-20H26z" fill="#8FE3FF" opacity=".55"/><text class="n" x="32" y="9" text-anchor="middle">N</text><text x="58" y="35" text-anchor="middle">E</text><text x="32" y="61" text-anchor="middle">S</text><text x="6" y="35" text-anchor="middle">W</text></g></svg></div>
   <div class="mjour" id="mjour" hidden></div>
   <div id="mlabels"></div>
   <div class="mview"><small>VERTICAL VIEW</small><span class="e">TOP</span><input id="mtilt" type="range" min="0.18" max="1.12" step="0.01" value="0.58" aria-label="Vertical view angle"><span class="e">LOW</span></div>
@@ -551,6 +562,8 @@ body.sh #sheet{transform:none}
  <button class="di" id="editBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
  <button class="di" id="statsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
  <button class="di" id="ascBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3 6 6 1-4.500 4.500L18 21l-6-3-6 3 1.500-6.500L3 10l6-1z"/></svg>Ascension</button>
+ <button class="di" id="invBtn" type="button"><span style="width:20px;text-align:center">🎒</span>Inventory</button>
+ <button class="di" id="bestBtn" type="button"><span style="width:20px;text-align:center">📖</span>Bestiary</button>
  <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
  <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
 </aside>
@@ -1035,6 +1048,50 @@ window.mapSet=q=>{pending=q};
   hold=false;ready=true;save();
  };
  window.nifClearState=()=>{try{sessionStorage.removeItem(KEY)}catch(x){}};
+})();
+
+// ===== Niflheim website pages: Explore summon, Shop, Inventory, Bestiary, compass =====
+(()=>{
+const hd=(h,t)=>`<div class="lb-page-head"><h1>${h}</h1><p>${t}</p></div>`;
+const ico=c=>({consumable:'🧪',weapon:'🗡️',armour:'🛡️',accessory:'💍',material:'🔹'}[c]||'◆');
+const fail=(id,h,r,m)=>{$(id).innerHTML=hd(h,'')+`<p class="note">${esc((r.j&&r.j.error)||m)}</p>`};
+const _tab=tab;tab=function(t){_tab(t);if(t==='shop')shop()};
+async function shop(){
+ const B=$('v-shop');B.innerHTML=hd('SHOP','Loading…');
+ const r=await api('/api/niflheim/shop');if(!r.ok)return fail('v-shop','SHOP',r,'The shop couldn’t be loaded.');
+ const j=r.j;
+ B.innerHTML=hd('SHOP',`Your coins: <span style="color:var(--yellow);font-weight:600">${j.coins.toLocaleString()}</span>`)+`<div class="lb-list">${j.items.map(i=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(i.category)}</div><div class="gym-meta"><div class="name">${esc(i.name)}</div><div class="sub">${esc(i.desc||'')}</div></div><button class="mini buy" data-b="${esc(i.name)}" ${j.coins<i.buy?'disabled':''}>${i.buy.toLocaleString()}</button></div>`).join('')}</div><p class="note">Same items and prices as .shop on WhatsApp.</p>`;
+ B.querySelectorAll('[data-b]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/shop/buy',{name:b.dataset.b,qty:1});if(!c.ok){toast(c.j.error||'Purchase failed. No coins spent.');b.disabled=false;return}toast(c.j.message||'Purchased');shop()});
+}
+async function inv(){
+ const B=$('v-inv');B.innerHTML=hd('INVENTORY','Loading…');
+ const r=await api('/api/niflheim/inventory');if(!r.ok)return fail('v-inv','INVENTORY',r,'Your inventory couldn’t be loaded.');
+ const j=r.j,G={consumables:'Consumables',equipment:'Equipment',other:'Other'};
+ B.innerHTML=hd('INVENTORY',`HP ${j.hp} / ${j.max_hp} · Coins ${j.coins.toLocaleString()}`)+(j.items.length?Object.keys(G).map(g=>{const rows=j.items.filter(x=>x.group===g);return rows.length?`<div class="grp">${G[g]}</div><div class="lb-list">${rows.map(x=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(x.category)}</div><div class="gym-meta"><div class="name">${esc(x.name)} ×${x.qty}</div><div class="sub">${esc(x.desc||'')}</div></div>${x.usable?`<button class="mini buy" data-u="${esc(x.name)}">Use</button>`:''}</div>`).join('')}</div>`:''}).join(''):'<p class="note">Your bag is empty. Visit the Shop.</p>');
+ B.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/inventory/use',{name:b.dataset.u});if(!c.ok){toast(c.j.error||'You can’t use that now.');b.disabled=false;return}toast(c.j.message||'Used');await refreshMe();inv()});
+}
+async function best(){
+ const B=$('v-bestiary');B.innerHTML=hd('BESTIARY','Loading…');
+ const r=await api('/api/niflheim/bestiary');if(!r.ok)return fail('v-bestiary','BESTIARY',r,'The bestiary couldn’t be loaded.');
+ const L=r.j.monsters,at=a=>Object.entries(a||{}).map(([k,v])=>`${k} ${v}`).join(' · ');
+ B.innerHTML=hd('BESTIARY',L.length+' creatures recorded')+L.map(m=>`<details class="card crow bc"><summary><div class="art">${esc(m.name[0])}</div><div style="flex:1"><h4 style="margin:0">${esc(m.name)}</h4><div class="sp">${esc(m.race||'?')} · ${esc(m.element||'?')} · ${esc(m.rarity||'?')}</div></div><div><span class="chip">Rank ${esc(m.rank)}</span> <span class="chip">${esc(m.classification)}</span></div></summary><div class="bd"><div class="sgrid2"><div><span>Level</span><b>${m.level}</b></div><div><span>HP</span><b>${m.hp}</b></div><div><span>MP</span><b>${m.mp}</b></div></div><p><b>Attributes</b> ${at(m.attributes)}</p><p><b>Abilities</b> ${esc((m.abilities||[]).join(' '))}</p><p>${esc(m.description||'')}</p><p><b>Drops</b> ${esc((m.drops||[]).join(' '))||'—'}</p><p>Base HP ${m.base.HP} × rank ${m.rank_mult} × ${esc(m.classification)} ${m.class_mult}.</p></div></details>`).join('');
+}
+$('invBtn').onclick=()=>{drawer(false);tab('inv');inv()};
+$('bestBtn').onclick=()=>{drawer(false);tab('bestiary');best()};
+$('goMap').onclick=()=>tab('map');
+// Explore summons a monster: show its appraisal, then fight it in the arena (Player vs Monster).
+$('goExplore').onclick=async()=>{
+ const b=$('goExplore');if(b.disabled)return;b.disabled=true;
+ const r=await jpost('/api/niflheim/battle/start',{});b.disabled=false;
+ if(!r.ok)return toast(r.j.error||'Nothing answered the call. Try again.');
+ const t=r.j,f=t.foe;let m=null;
+ try{const x=await api('/api/niflheim/bestiary');m=((x.j&&x.j.monsters)||[]).find(z=>z.id===f.id)}catch(e){}
+ sheet({e:'A monster appears',t:`${f.name} · Lv ${f.level}`,p:[m&&`Rank ${m.rank} ${m.classification} · ${m.race} · ${m.element} · ${m.rarity}`,`HP ${f.hp} · Damage about ${f.damage}`,m&&(m.abilities||[]).join(' '),m&&m.description].filter(Boolean).join(' · '),b:[
+  {l:'Fight',f:()=>{location.href='arena.html?t='+encodeURIComponent(t.ticket)}},{l:'Flee',ghost:1}]});
+};
+// Compass: follows the map’s rotation (mapGet().angle); north is the red tip.
+const ng=$('mneedle');
+(function spin(){const g=window.mapGet&&window.mapGet();if(g&&$('v-map').classList.contains('show'))ng.setAttribute('transform',`rotate(${(g.angle*180/Math.PI).toFixed(1)} 32 32)`);requestAnimationFrame(spin)})();
 })();
 </script>
 </body></html>
