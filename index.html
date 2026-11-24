@@ -350,8 +350,39 @@ body.sh #sheet{transform:none}
 .zbar{display:flex;gap:6px;justify-content:flex-end;padding:8px 20px 0}.zbar button{width:32px;height:28px;border:1px solid var(--ice-dim);background:var(--panel);color:var(--ice);border-radius:6px}
 .filt{display:flex;gap:8px;padding:12px 20px 0}.filt select,.filt input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font:500 12px 'Inter'}
 .rk{display:inline-block;font:700 9px 'Inter';letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0}.sk{padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--panel);text-align:left;color:var(--text);cursor:pointer}.sk b{display:block;font:600 12.5px 'Cinzel',serif;margin:4px 0}.sk.off{opacity:.55}
+.sk{padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--panel);text-align:left;color:var(--text);cursor:pointer}.sk b{display:block;font:600 12.5px 'Cinzel',serif;margin:4px 0}.sk.off{opacity:.55}
 .gr{font-size:10.5px;color:var(--muted);margin:4px 0}.gr b{color:var(--ice)}
+
+/* ---- Ascension hub + Skills (class system stage 4) ---- */
+.ahub[hidden],#ascSub[hidden]{display:none}
+.ahub{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px 0}
+.atile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:150px;padding:16px 14px 14px;text-align:left;color:var(--text);font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--ice-dim);background:linear-gradient(160deg,#0D1F30,#081420 78%);box-shadow:0 0 0 1px rgba(143,227,255,.05),0 0 26px rgba(143,227,255,.07);transition:transform .15s,border-color .2s,box-shadow .2s}
+.atile:active{transform:scale(.97)}.atile:hover{border-color:var(--ice);box-shadow:0 0 22px rgba(143,227,255,.2)}
+.atile .ai{width:46px;height:46px;border-radius:10px;border:1px solid var(--ice-dim);background:rgba(143,227,255,.07);display:grid;place-items:center;color:var(--ice);margin-bottom:4px}
+.atile .ai svg{width:24px;height:24px}
+.atile b{font:600 15px 'Cinzel',serif;letter-spacing:.06em}
+.atile span{font-size:11px;color:var(--muted);line-height:1.45}
+.atile em{margin-top:auto;font-style:normal;font:600 10px 'Inter';letter-spacing:.1em;text-transform:uppercase;color:var(--ice)}
+.atile:after{content:'›';position:absolute;right:12px;top:12px;font-size:20px;color:var(--ice-dim)}
+.atile.hot{border-color:var(--gold);box-shadow:0 0 24px rgba(251,211,77,.22);animation:hotp 2s ease-in-out infinite}.atile.hot em{color:var(--gold)}
+@keyframes hotp{50%{box-shadow:0 0 34px rgba(251,211,77,.38)}}
+.ahead{display:flex;align-items:center;gap:12px;padding:16px 20px 0}.ahead h2{font:600 17px 'Cinzel',serif;letter-spacing:.1em;margin:0}
+.skhead{display:flex;align-items:baseline;justify-content:space-between;padding:14px 20px 0}.skhead h3{font:600 15px 'Cinzel',serif;letter-spacing:.12em;margin:0}.skhead h3 b{color:var(--ice)}.skhead span{font-size:11.5px;color:var(--muted)}
+.skgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0}
+.skc{position:relative;display:flex;flex-direction:column;gap:3px;padding:12px 10px 10px;text-align:left;color:var(--text);font:inherit;cursor:pointer;border-radius:10px;border:1.5px solid var(--border);border-top:3px solid var(--rc,var(--border));background:var(--panel);opacity:.62}
+.skc.on{opacity:1;border-color:var(--rc);box-shadow:0 0 14px color-mix(in srgb,var(--rc) 30%,transparent)}
+.skc b{font:600 12.5px 'Cinzel',serif;margin-top:4px}.skc .m{font-size:10px;color:var(--muted)}.skc .m2{font-size:10.5px;color:var(--muted)}.skc.on .m2{color:var(--frost)}
+.skt{display:flex;justify-content:space-between;align-items:center}.ski{font-size:26px;line-height:1}.ski.big{font-size:42px}
+.skc .pips{justify-content:flex-start}.skc .pips i.f,.sn .pips i.f{background:var(--rc)}
+.skp{margin:12px 20px 0;padding:16px}.skp h4{font:600 18px 'Cinzel',serif;margin:0 0 4px}.skp .sp{font-size:11px;color:var(--ice);margin-bottom:6px}.skp p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.skph{display:flex;gap:14px;align-items:center}
+.stree{margin:4px 20px 0;padding-left:6px}
+.sn{position:relative;display:flex;gap:14px;padding-bottom:18px}.sn:not(:last-child):before{content:'';position:absolute;left:7px;top:18px;bottom:0;width:2px;background:var(--border)}
+.sn .sdot{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:var(--bg);margin-top:2px;z-index:1}
+.sn.owned .sdot{background:var(--rc);border-color:var(--rc);box-shadow:0 0 10px var(--rc)}.sn.owned:not(:last-child):before{background:var(--rc)}
+.sn.next .sdot{border-color:var(--ice);box-shadow:0 0 10px rgba(143,227,255,.5)}.sn.locked{opacity:.6}
+.sn .sbody{flex:1;min-width:0}.sn b{display:block;font:600 13px 'Cinzel',serif}.sn .m{display:block;font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px}
+.sn .go{margin-top:8px;padding:9px;font-size:12px}.sn .why{color:var(--red);font-size:10.5px;margin-top:5px}
 </style></head>
 <body>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -540,10 +571,18 @@ body.sh #sheet{transform:none}
  </div>
 
  <div class="view" id="v-asc">
-  <div class="lb-page-head"><h1>ASCENSION</h1><p>Classes, class tree, skills and the class compendium</p></div>
+  <div class="lb-page-head"><h1>ASCENSION</h1><p>Your class, your path, your power</p></div>
   <div class="pts" id="ascPts"></div>
-  <div class="atabs" id="ascTabs"><button data-t="classes">Classes</button><button data-t="ctree">Class Tree</button><button data-t="skills">Skills</button><button data-t="comp">Compendium</button></div>
-  <div id="ascBody"></div>
+  <div class="ahub" id="ascHub">
+   <button class="atile" type="button" data-t="classes"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><b>Classes</b><span>Choose the path you will walk</span><em></em></button>
+   <button class="atile" type="button" data-t="ctree"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-6 5M12 12l6 5"/></svg></div><b>Class Tree</b><span>Your ancestry and evolutions</span><em></em></button>
+   <button class="atile" type="button" data-t="skills"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div><b>Skills</b><span>Unlock and sharpen your techniques</span><em></em></button>
+   <button class="atile" type="button" data-t="library"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/><path d="M9 7h6M9 11h4"/></svg></div><b>Library</b><span>Every class you have discovered</span><em></em></button>
+  </div>
+  <div id="ascSub" hidden>
+   <div class="ahead"><button class="mini" id="ascBack" type="button">‹ Ascension</button><h2 id="ascTitle"></h2></div>
+   <div id="ascBody"></div>
+  </div>
  </div>
 
  <div class="view" id="v-map">
@@ -811,54 +850,26 @@ $('stBody').addEventListener('click',async e=>{
    {l:'Cancel',ghost:1,f:renderStats}]});
  }
 });
-// ----- Ascension -----
-let ascT='classes';
-function ascOpen(t){ascT=t||ascT;tab('asc');document.querySelectorAll('#ascTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===ascT));
- ptsBar();refreshMe().then(ptsBar);ascLoad()}
-document.querySelectorAll('#ascTabs button').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
-const modTxt=m=>{const o=[];for(const[k,v]of Object.entries((m&&m.flat)||{}))o.push('+'+v+' '+pretty(k));for(const[k,v]of Object.entries((m&&m.pct)||{}))o.push('+'+v+'% '+pretty(k));return o.join(', ')||'Passive bonus'};
+// ----- Ascension: a hub of four buttons (Classes, Class Tree, Skills, Library); each opens its own page -----
+let ascT=null,ascLoad=async()=>{};
+const ASC={classes:'Classes',ctree:'Class Tree',skills:'Skills',library:'Library'};
 const needClass=()=>{$('ascBody').innerHTML='<p class="note">Choose a class first (unlocks at Level 5).</p><div style="padding:0 20px"><button class="go" id="toCls">Go to Classes</button></div>';$('toCls').onclick=()=>ascOpen('classes')};
-async function ascLoad(){
- const B=$('ascBody');B.innerHTML='<p class="note">Loading…</p>';
- try{
-  if(ascT==='classes'){
-   const r=await api('/api/niflheim/classes');if(!r.ok){B.innerHTML='<p class="note">'+esc(r.j.error||'Could not load classes.')+'</p>';return}
-   const j=r.j;
-   B.innerHTML=(j.unlocked?'':`<p class="note">Classes unlock at Level <b>${j.unlock_level}</b>. You are Level ${ME?ME.level:'?'}.</p>`)+
-    j.classes.map(c=>`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.specialization)}</div><p>${esc(c.description)}</p>
-     <div>${c.paths.map(x=>`<span class="chip">${esc(x.name)}</span>`).join('')}</div>
-     <div style="margin-top:8px">${c.current?'<span class="chip ok">Your class</span>':(j.current?'<span class="chip">Locked in</span>':(j.unlocked?`<button class="go" data-pick="${c.id}">Choose ${esc(c.name)}</button>`:'<span class="chip">Locked</span>'))}</div></div>`).join('');
-   B.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>sheet({e:'First class',t:pretty(b.dataset.pick),p:'You can only choose your first class once.',b:[
-    {l:'Choose',f:async()=>{const c=await jpost('/api/niflheim/classes/choose',{class:b.dataset.pick});if(!c.ok)return toast(c.j.error||'Could not choose that class.');await refreshMe();ptsBar();toast('Class chosen');ascLoad()}},{l:'Cancel',ghost:1}]}));
-  }else if(ascT==='ctree'){
-   const r=await api('/api/niflheim/classes/tree');if(!r.ok){needClass();return}
-   const t=r.j;
-   B.innerHTML=`<div class="tcols">${t.paths.map(pa=>`<div class="tcol"><h5>${esc(pa.name)}<small>${esc(t.name)} path</small></h5>${t.nodes.filter(n=>n.path===pa.id).sort((a,b)=>a.tier-b.tier).map(n=>`
-     <div class="tn ${n.state}"><b>${esc(n.name)}</b><div class="m">Tier ${n.tier} · ${n.cost} CP · Lv ${n.min_level}+<br>${esc(modTxt(n.mods))}${n.requires_quest?'<br>Quest: '+esc(pretty(n.requires_quest)):''}</div>
-     ${n.state==='unlocked'?'<span class="chip ok">Unlocked</span>':n.state==='available'?`<button data-n="${n.id}">Unlock · ${n.cost} CP</button>`:`<div class="why">${esc(n.blocked_by||'Locked')}</div>`}</div>`).join('')}</div>`).join('')}</div>
-    <p class="note">Class Points: <b>${t.cp}</b>. Upgrades unlock in order within each path.</p>`;
-   B.querySelectorAll('[data-n]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/classes/buy',{node:b.dataset.n});if(!c.ok){toast(c.j.error||'Could not unlock. No points spent.');b.disabled=false;return}toast('Upgrade unlocked');await refreshMe();ptsBar();ascLoad()});
-  }else{
-   const r=await api('/api/niflheim/skills');if(!r.ok){needClass();return}
-   const t=r.j;
-   if(ascT==='skills'){
-    B.innerHTML=t.skills.map(s=>`<div class="card crow"><h4>${esc(s.name)}</h4><div class="sp">${esc(pretty(s.branch))} · Level ${s.level}/${s.max_level}</div>
-     <div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>
-     <p>${esc(s.effect||s.function)}</p><div>${s.level?'<span class="chip ok">Unlocked</span>':'<span class="chip">Locked</span>'}${s.state==='maxed'?'<span class="chip ok">Max</span>':`<span class="chip">Next: ${s.next_cost} SP · Lv ${s.next_min_level}+</span>`}</div>
-     ${s.blocked_by&&s.state!=='buyable'&&s.state!=='maxed'?`<div class="hint" style="color:var(--red)">${esc(s.blocked_by)}</div>`:''}</div>`).join('')+'<p class="note">Upgrade skills in the Skills Tree tab.</p>';
-   }else{
-    B.innerHTML=`<div class="tcols">${t.branches.map(br=>`<div class="tcol"><h5>${esc(br.name)}<small>${br.sp_invested} SP invested</small></h5>${t.skills.filter(s=>s.branch===br.id).map(s=>`
-     <div class="tn ${s.state}"><b>${esc(s.name)}</b><div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>
-     <div class="m">${esc(s.function)}${s.requires&&s.requires.length?'<br>Needs: '+s.requires.map(x=>esc(pretty(x))).join(', '):''}</div>
-     ${s.state==='maxed'?'<span class="chip ok">Max</span>':s.state==='buyable'?`<button data-s="${s.id}">${s.level?'Upgrade':'Unlock'} · ${s.next_cost} SP</button>`:`<div class="why">${esc(s.blocked_by||'Locked')}</div>`}</div>`).join('')}</div>`).join('')}</div>
-     <p class="note">Skill Points: <b>${t.sp}</b>. Higher levels cost more SP.</p>`;
-    B.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/skills/buy',{skill:b.dataset.s});if(!c.ok){toast(c.j.error||'Could not unlock. No points spent.');b.disabled=false;return}toast('Skill upgraded');await refreshMe();ptsBar();ascLoad()});
-   }
-  }
- }catch(x){B.innerHTML='<p class="note">Server unreachable. Try again in a moment.</p>'}
+function paintHub(){
+ const p=ME||{},unl=(p.level||1)>=5;
+ const st={classes:p.class?pretty(p.class):unl?'Choose your class':'Unlocks at Level 5',ctree:p.class?(p.cp||0)+' CP to spend':'Needs a class',
+  skills:'SKILLS — '+(p.skills_count||0),library:'Discovery catalogue'};
+ document.querySelectorAll('#ascHub .atile').forEach(b=>{b.querySelector('em').textContent=st[b.dataset.t];b.classList.toggle('hot',b.dataset.t==='classes'&&unl&&!p.class)});
 }
+function ascOpen(t){
+ ascT=ASC[t]?t:null;tab('asc');ptsBar();paintHub();
+ $('ascHub').hidden=!!ascT;$('ascSub').hidden=!ascT;
+ if(ascT){$('ascTitle').textContent=ASC[ascT];ascLoad()}
+ refreshMe().then(()=>{ptsBar();paintHub()});
+}
+document.querySelectorAll('#ascHub .atile').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
+$('ascBack').onclick=()=>ascOpen();
 // ?go=profile|classes|skills|bestiary links from WhatsApp
-window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree')};
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library')};
 $('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
 // Explore: find a wild fight; the arena only appears once a fight starts
 const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
@@ -1012,12 +1023,35 @@ window.mapSet=q=>{pending=q};
 (()=>{
  const soon=(id,h,t,p)=>{$(id).innerHTML=`<div class="lb-page-head"><h1>${h}</h1><p>${t}</p></div><p class="note">${p}</p>`};
  soon('v-friends','FRIENDS','Coming soon.','For now, challenge someone with <b>.duel @player</b> on WhatsApp.');
- soon('v-rank','RANKINGS','Coming soon.','The leaderboard is on its way.');
  soon('v-shop','SHOP','Coming soon.','Use <b>.shop</b> and <b>.buy</b> on WhatsApp for now.');
  $('fbadge').style.display='none';
  $('duelSub').textContent='Send .duel @player on WhatsApp';$('duelSub').classList.remove('on');
  $('goDuel').onclick=()=>sheet({e:'Duel',t:'Duels are on WhatsApp',p:'Friends and site duels are coming. For now send .duel @player in the group.',b:[{l:'Okay',ghost:1}]});
  $('logout').onclick=async()=>{drawer(false);closeSheet();try{await api('/api/auth/logout',{method:'POST'})}catch(e){}if(window.nifClearState)window.nifClearState();tab('home');$('form').reset();$('lerr').textContent='';setMode('login');scene('login')};
+})();
+
+// ===== Rankings: live leaderboard (public /api/niflheim/leaderboard) =====
+(()=>{
+const BOARDS=[['level','Level','Lv'],['coins','Coins','coins'],['kills','Kills','kills'],['xp','XP','XP']];
+let cur='level',data=null;
+const hd=(t)=>`<div class="lb-page-head"><h1>RANKINGS</h1><p>${t}</p></div>`;
+const ini=n=>String(n).slice(0,2).toUpperCase();
+function paint(){
+ const B=$('v-rank'),b=BOARDS.find(x=>x[0]===cur),rows=(data&&data[cur])||[];
+ const me=(typeof ME!=='undefined'&&ME&&ME.name)?String(ME.name).toLowerCase():'';
+ B.innerHTML=hd('Top adventurers across Niflheim · '+(data?data.total:0)+' players')
+  +`<div class="lb-list" style="padding-bottom:0;display:flex;gap:6px;flex-wrap:wrap">${BOARDS.map(x=>`<button class="mini" data-b="${x[0]}" style="${x[0]===cur?'background:var(--ice-dim);color:#fff':''}">${x[1]}</button>`).join('')}</div>`
+  +`<div class="lb-list">${rows.length?rows.map(r=>`<div class="lr${me&&String(r.name).toLowerCase()===me?' me':''}" style="cursor:default"><div class="rk ${r.rank<=3?'t':''}">${r.rank}</div><div class="av">${esc(ini(r.name))}</div><div class="mid"><b>${esc(r.name)}${me&&String(r.name).toLowerCase()===me?' (you)':''}</b><span>Level ${r.level}</span></div><span class="sm">${Number(r.value).toLocaleString()} ${b[2]}</span></div>`).join(''):'<p class="note" style="margin:0">No adventurers ranked yet.</p>'}</div>`;
+ B.querySelectorAll('[data-b]').forEach(x=>x.onclick=()=>{cur=x.dataset.b;paint()});
+}
+async function load(){
+ const B=$('v-rank');
+ if(!data)B.innerHTML=hd('Loading…');
+ const r=await api('/api/niflheim/leaderboard');
+ if(!r.ok){if(!data)B.innerHTML=hd('')+'<p class="note">The leaderboard couldn’t be loaded. Try again in a moment.</p>';return}
+ data=r.j;paint();
+}
+const _t=tab;tab=function(t){_t(t);if(t==='rank')load()};
 })();
 
 // ===== session continuity =====
@@ -1173,29 +1207,46 @@ async function loadCTree(){
 }
 function evolve(n){sheet({e:'Evolve',t:'Become '+n.name+'?',p:'Costs '+n.cp_cost+' CP. Your attributes stay; future growth follows the new class.',b:[
  {l:'Confirm',f:async()=>{const k=await jpost('/api/niflheim/classes/evolve',{class:n.id,confirm:true});if(!k.ok)return toast(k.j.error||'Could not evolve.');await refreshMe();ptsBar();awaken(k.j.awakening||{lines:['You evolved.']})}},{l:'Cancel',ghost:1}]})}
-// --- Skills: category + rank dropdowns + name search, all combined; one card per skill; each skill opens its own info + tree ---
+// --- Skills: category + rank dropdowns + name search, all combined; one card per skill; each skill opens its own page + Skill Tree ---
+const rcol=s=>s.rank_color||RANKC[s.rank]||RANKC.common;
+const rkb=s=>`<span class="rk" style="color:${rcol(s)};border-color:${rcol(s)}">${esc(s.rank_name||pretty(s.rank))}</span>`;
+const pipsH=s=>`<div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>`;
+let skF={c:'',r:'',q:''};
 async function loadSkills(){
- const r=await api('/api/niflheim/skills');if(!r.ok)return needClass();
- const t=r.j,all=t.skills||[],cat=s=>s.category||s.branch||'',rank=s=>(s.rank||'').toLowerCase();
- const cats=[...new Set(all.map(cat).filter(Boolean))];
- nbody(`<div class="pts" style="margin-top:8px"><div class="pt"><b>${all.filter(s=>s.level>0).length}</b><span>SKILLS</span></div></div>
-  <div class="filt"><select id="fc"><option value="">All categories</option>${cats.map(c=>`<option value="${esc(c)}">${esc(pretty(c))}</option>`).join('')}</select>
-  <select id="fr"><option value="">All ranks</option>${['common','uncommon','rare','epic'].map(x=>`<option value="${x}">${pretty(x)}</option>`).join('')}</select></div>
-  <div class="filt"><input id="fq" placeholder="Search skills by name"></div><div class="sgrid" id="sg"></div>${NOTE('Skill Points: <b>'+(t.sp||0)+'</b>')}`);
- const paint=()=>{const c=$('fc').value,k=$('fr').value,q=$('fq').value.trim().toLowerCase();
-  const rows=all.filter(s=>(!c||cat(s)===c)&&(!k||rank(s)===k)&&(!q||s.name.toLowerCase().includes(q)));
-  $('sg').innerHTML=rows.length?rows.map(s=>`<button class="sk ${s.level?'':'off'}" data-s="${esc(s.id||s.name)}">${rank(s)?rk(rank(s)):''}<b>${esc(s.name)}</b><span class="m">${esc(pretty(cat(s)))}${s.level?' · Lv '+s.level:' · Locked'}</span></button>`).join(''):'<p class="note" style="grid-column:1/-1">No skills here yet.</p>';
-  $('sg').querySelectorAll('.sk').forEach(b=>b.onclick=()=>skillInfo(rows.find(x=>String(x.id||x.name)===b.dataset.s)))};
+ const r=await api('/api/niflheim/skills');if(!r.ok)return nbody(NOTE(esc(r.j.error||'Could not load skills.')));
+ const t=r.j,all=t.skills||[];
+ const head=`<div class="skhead"><h3>SKILLS — <b>${t.unlocked_count||0}</b></h3><span>🔺 SP ${t.sp||0}</span></div>`;
+ if(!t.class)return nbody(head+NOTE('Your skills appear here once you choose a class at Level 5.')+'<div style="padding:0 20px"><button class="go" id="toCls">Go to Classes</button></div>'),$('toCls').onclick=()=>ascOpen('classes');
+ const opt=(v,l,sel)=>`<option value="${esc(v)}"${sel?' selected':''}>${esc(l)}</option>`;
+ nbody(head+`<div class="filt"><select id="fc">${opt('','All categories',!skF.c)}${t.categories.map(c=>opt(c,c,skF.c===c)).join('')}</select>
+  <select id="fr">${opt('','All ranks',!skF.r)}${t.ranks.map(x=>opt(x.id,x.name,skF.r===x.id)).join('')}</select></div>
+  <div class="filt"><input id="fq" placeholder="Search skills by name" value="${esc(skF.q)}"></div><div class="skgrid" id="sg"></div>`);
+ const paint=()=>{skF={c:$('fc').value,r:$('fr').value,q:$('fq').value.trim()};const q=skF.q.toLowerCase();
+  const rows=all.filter(s=>(!skF.c||s.category===skF.c)&&(!skF.r||s.rank===skF.r)&&(!q||s.name.toLowerCase().includes(q)));
+  $('sg').innerHTML=rows.length?rows.map(s=>`<button class="skc ${s.unlocked?'on':''}" data-s="${esc(s.id)}" style="--rc:${rcol(s)}"><div class="skt"><span class="ski">${s.icon||'✦'}</span>${rkb(s)}</div>
+   <b>${esc(s.name)}</b><span class="m">${esc(s.category)}</span>${pipsH(s)}<span class="m2">${s.unlocked?'Level '+s.level+(s.state==='maxed'?' · Max':''):'Locked'}</span></button>`).join(''):'<p class="note" style="grid-column:1/-1">No skills match.</p>';
+  $('sg').querySelectorAll('.skc').forEach(b=>b.onclick=()=>skillPage(b.dataset.s))};
  ['fc','fr'].forEach(i=>$(i).onchange=paint);$('fq').oninput=paint;paint();
 }
-function skillInfo(s){   // the skill's own page + its own Skill Tree (there is no separate Skills Tree page)
- const next=s.state==='buyable'?[{l:(s.level?'Upgrade':'Unlock')+' · '+s.next_cost+' SP',f:async()=>{const c=await jpost('/api/niflheim/skills/buy',{skill:s.id||s.name});if(!c.ok)return toast(c.j.error||'No points spent.');toast('Skill upgraded');await refreshMe();ptsBar();ascLoad()}}]:[];
- const tree=s.max_level?'\n\nSkill Tree: level '+s.level+' of '+s.max_level+(s.next_cost?' · next '+s.next_cost+' SP':''):'';
- sheet({e:(s.rank?s.rank+' · ':'')+pretty(s.category||s.branch||''),t:s.name,p:(s.effect||s.function||'')+tree+(s.blocked_by&&s.state!=='buyable'?'\n'+s.blocked_by:''),b:next.concat([{l:'Close',ghost:1}])});
+async function skillPage(id){   // the skill's own page + its own Skill Tree (there is no separate Skills Tree page)
+ const r=await api('/api/niflheim/skills/'+encodeURIComponent(id));if(!r.ok)return toast(r.j.error||'Could not open that skill.');
+ const s=r.j;
+ nbody(`<div class="ahead" style="padding-top:8px"><button class="mini" id="skBack" type="button">‹ Skills</button></div>
+  <div class="card skp" style="--rc:${rcol(s)}"><div class="skph"><span class="ski big">${s.icon||'✦'}</span><div><h4>${esc(s.name)}</h4><div class="sp">${esc(s.class)} · ${esc(s.category)}</div>${rkb(s)}</div></div>
+   <p>${esc(s.description)}</p>${s.effect?`<div class="gr" style="margin-top:10px">Current effect <b>${esc(s.effect)}</b></div>`:''}
+   ${(s.requires||[]).length?`<div class="gr">Requires skill: <b>${s.requires.map(esc).join(', ')}</b></div>`:''}</div>
+  <div class="grp">SKILL TREE</div>
+  <div class="stree" style="--rc:${rcol(s)}">${s.tree.map(n=>`<div class="sn ${n.state}"><div class="sdot"></div><div class="sbody"><b>${esc(n.name)}</b><span class="m">${esc(n.effect)}</span><span class="m">${n.sp_cost} SP · Lv ${n.min_level}+</span>
+   ${n.state==='owned'?'<span class="chip ok" style="margin-top:6px">Unlocked</span>':n.state==='next'&&s.in_class?`<button class="go" data-buy="1">${s.level?'Upgrade':'Unlock'} · ${n.sp_cost} SP</button>`:`<div class="why">${esc(s.in_class?(n.blocked_by||'Locked'):'Not in your class')}</div>`}</div></div>`).join('')}</div>
+  ${NOTE('Skill Points: <b>'+s.sp+'</b>')}`);
+ $('skBack').onclick=loadSkills;
+ const bb=$('ascBody').querySelector('[data-buy]');
+ if(bb)bb.onclick=async()=>{bb.disabled=true;const c=await jpost('/api/niflheim/skills/buy',{skill:id});if(!c.ok){toast(c.j.error||'No points spent.');bb.disabled=false;return}
+  toast(c.j.message||'Done');await refreshMe();ptsBar();paintHub();skillPage(id)};
 }
-// --- Compendium: tier picker -> discovered classes grouped by rank, rank dropdown jumps to a section ---
+// --- Library (the class compendium): tier picker -> discovered classes grouped by rank, rank dropdown jumps to a section ---
 async function loadComp(tier){
- if(!tier){const r=await api('/api/niflheim/compendium');if(!r.ok)return nbody(NOTE('Could not load the Compendium.'));
+ if(!tier){const r=await api('/api/niflheim/compendium');if(!r.ok)return nbody(NOTE('Could not load the Library.'));
   return nbody(NOTE('Every class you discover is recorded here, chosen or not.')+r.j.tiers.map(x=>`<div class="card crow"><h4>${esc(x.label)}</h4><div class="sp">${x.discovered} discovered</div><button class="go" data-t="${x.tier}">Open</button></div>`).join(''))||$('ascBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>loadComp(+b.dataset.t))}
  const r=await api('/api/niflheim/compendium/tier?tier='+tier);if(!r.ok)return nbody(NOTE(esc(r.j.error||'Error')));
  const v=r.j.compendium;
@@ -1208,7 +1259,7 @@ async function loadComp(tier){
 }
 ascLoad=async function(){
  const B=$('ascBody');B.innerHTML=NOTE('Loading…');
- try{ascT==='classes'?await loadClasses():ascT==='ctree'?await loadCTree():ascT==='skills'?await loadSkills():ascT==='comp'?await loadComp():await loadSkills()}
+ try{ascT==='classes'?await loadClasses():ascT==='ctree'?await loadCTree():ascT==='skills'?await loadSkills():ascT==='library'?await loadComp():0}
  catch(x){B.innerHTML=NOTE('Server unreachable. Try again in a moment.')}
 };
 </script>
