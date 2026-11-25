@@ -103,9 +103,9 @@ h1{margin:0 0 2px;font-size:20px}.sub{opacity:.75;font-size:12px;margin-bottom:1
  <div class="grid">
   <button class="card" data-k="ai"><b>⚔ Vs AI</b><span>Rival Knight. Blocks and dashes.</span></button>
   <button class="card" data-k="wolf"><b>🐺 Vs Wolf</b><span>Fast. Dodge the lunge after the crouch.</span></button>
-  <button class="card" data-k="boss"><b>❄ Vs Boss</b><span>Red ring = slam. Jump the ice waves.</span></button>
+  <button class="card" data-k="boss"><b>❄ Vs Boss</b><span>Red ring = slam. Jump both ice waves.</span></button>
   <button class="card" data-k="slime"><b>🟦 Vs Slime</b><span>Hops at you. Jump or block the bash.</span></button>
-  <button class="card" data-k="giant_slime"><b>🟢 Vs Giant Slime</b><span>Red ring = belly flop. Jump the acid globs.</span></button>
+  <button class="card" data-k="giant_slime"><b>🟢 Vs Giant Slime</b><span>Lv 20 boss. Red ring = belly flop. Jump all three acid globs.</span></button>
  </div>
  <div class="hint"><a href="index.html" style="color:var(--ice)">← Niflheim home</a></div><div class="hint">Keys: A/D move · J fight · K jump (×2) · L dash · I block.</div>
 </div></div>
@@ -208,25 +208,20 @@ function boss(){
  [.4,-.4].forEach(z=>{mesh(new T.ConeGeometry(.14,.9,4),0xe9f6ff,0,3.2,z,t).rotation.x=-z*1.2;mesh(new T.ConeGeometry(.3,.9,4),Lc,0,2.3,z*2.2,t);bx(.1,.1,.1,0xff4a4a,.62,2.65,z*.8,t)});
  const arm=z=>{const p=pivot(0,1.85,z,t);bx(.6,1.8,.6,I,0,-.9,0,p);bx(.9,.9,.9,Lc,0,-2,0,p);return p};
  r.armL=arm(-1);r.armR=arm(1);return r}
-function slime(big){
+function slime(sc){
  /* jelly slime: two translucent shells, a glowing core, squash and stretch driven in animate(). Faces +x. */
- const g=new T.Group(),r={g,ty:0};g.scale.setScalar(big?2.5:.9);
+ const g=new T.Group(),r={g,ty:0};g.scale.setScalar(sc||.9);
  const t=r.torso=pivot(0,0,0,g),j=r.jel=pivot(0,0,0,t);
  const jm=(c,o,s)=>{const m=new T.MeshStandardMaterial({color:c,roughness:.15,transparent:true,opacity:o,side:s||0,depthWrite:false});m.userData.c0=c;return m};
  const bm=(c,o)=>{const m=new T.MeshBasicMaterial({color:c,transparent:o<1,opacity:o});m.userData.c0=c;return m};
  const geo=new T.SphereGeometry(.8,24,16);
- [[big?0x1f8f3a:0x0a86d8,.55,1],[big?0x6bff7a:0x5cd0ff,.6,0]].forEach(([c,o,s],i)=>{const m=new T.Mesh(geo,jm(c,o,s));m.position.y=.64;m.scale.set(1,.8,1);m.renderOrder=i+1;j.add(m)});
+ [[0x0a86d8,.55,1],[0x5cd0ff,.6,0]].forEach(([c,o,s],i)=>{const m=new T.Mesh(geo,jm(c,o,s));m.position.y=.64;m.scale.set(1,.8,1);m.renderOrder=i+1;j.add(m)});
  const sp=(rad,c,o,x,y,z)=>{const m=new T.Mesh(new T.SphereGeometry(rad,12,10),bm(c,o));m.position.set(x,y,z);j.add(m);return m};
- sp(.22,big?0xfff27a:0xb8f0ff,.9,-.05,.5,0);                       /* the core */
+ sp(.22,0xb8f0ff,.9,-.05,.5,0);                       /* the core */
  [.28,-.28].forEach(z=>{sp(.1,0x06101c,1,.68,.78,z);sp(.03,0xffffff,1,.74,.84,z+(z>0?-.03:.03))});
  [[-.35,.35,.3,.07],[-.1,.2,-.38,.05],[.3,.3,-.2,.045]].forEach(([x,y,z,q])=>sp(q,0xffffff,.55,x,y,z));
- if(big){
-  [[-.4,.28,.3],[.05,.9,-.25],[-.2,.62,-.42],[.28,.35,.4],[-.5,.75,.1]].forEach(([x,y,z],i)=>{const c=new T.Mesh(new T.CylinderGeometry(.09,.09,.025,10),bm(0xffd24a,1));c.position.set(x,y,z);c.rotation.set(i,i*1.7,0);j.add(c)});
-  const bl=new T.Mesh(new T.BoxGeometry(.8,.06,.1),bm(0x8c8f99,1));bl.position.set(-.1,.3,-.05);bl.rotation.z=.5;j.add(bl);
-  const gd=new T.Mesh(new T.BoxGeometry(.06,.26,.1),bm(0x6b4a33,1));gd.position.set(.14,.42,-.05);gd.rotation.z=.5;j.add(gd);
-  const sk=sp(.15,0xe8e2d0,1,-.55,.45,-.18);sk.scale.set(1,.9,1)}
  return r}
-const makeRig=k=>k==='p'?humanoid(ST.P,ST.hd):k==='ai'?humanoid(ST.R,ST.hd):k==='wolf'?wolf():k==='slime'?slime(0):k==='giant_slime'?slime(1):boss();
+const makeRig=k=>k==='p'?humanoid(ST.P,ST.hd):k==='ai'?humanoid(ST.R,ST.hd):k==='wolf'?wolf():k==='slime'?slime():k==='giant_slime'?slime(2.7):boss();
 const collect=g=>{const a=[];g.traverse(m=>m.isMesh&&!m.userData.skip&&a.push(m.material));return a};
 const rcol=e=>e.kind==='p'?ST.P.rc:ST.R.rc;
 function reskin(e){e.w.remove(e.rig.g);e.rig=makeRig(e.kind);e.w.add(e.rig.g);e.mats=collect(e.rig.g);e.fl=false;e.ringM.material.color.setHex(rcol(e))}
@@ -234,9 +229,9 @@ function reskin(e){e.w.remove(e.rig.g);e.rig=makeRig(e.kind);e.w.add(e.rig.g);e.
 const FOES={
  ai:{n:'Rival Knight',hp:110,dmg:10,spd:3,reach:1.45,h:1.8,xp:40,c:25,tl:99,bw:.45},
  wolf:{n:'Frost Wolf',hp:60,dmg:7,spd:3.4,reach:1.1,h:1,xp:25,c:15,tl:60,bw:.75},
- boss:{n:'Hrimthurs, Frost Giant',hp:320,dmg:16,spd:1.5,reach:2.4,h:3.3,xp:150,c:120,tl:150,bw:1.4,arm:true,boss:true},
+ boss:{n:'Hrimthurs, Frost Giant',hp:420,dmg:20,spd:1.8,enrAt:.65,tgm:.85,pace:.85,volley:2,wd:.7,reach:2.4,h:3.3,xp:150,c:120,tl:150,bw:1.4,arm:true,boss:true},
  slime:{n:'Slime',hp:40,dmg:6,spd:2.2,reach:1.2,h:1.2,xp:10,c:10,tl:60,bw:.8},
- giant_slime:{n:'Giant Slime',hp:300,dmg:14,spd:1.2,reach:3,h:3.6,xp:60,c:80,tl:150,bw:2,arm:true,boss:true,aoeX:2,aoeR:3.3}};
+ giant_slime:{n:'Giant Slime',hp:600,dmg:30,spd:1.7,enrAt:.65,tgm:.8,pace:.8,volley:3,wd:.6,reach:3,h:3.6,xp:60,c:80,tl:150,bw:2,arm:true,boss:true,aoeX:2,aoeR:3.3}};
 function ent(k,o){
  const rig=makeRig(k),w=new T.Group();w.add(rig.g);scene.add(w);const bw=o.bw;
  const blob=new T.Mesh(new T.CircleGeometry(bw,12),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.35}));blob.rotation.x=-Math.PI/2;blob.position.y=.03;scene.add(blob);
@@ -266,11 +261,11 @@ function strike(e){if(PVP){if(e!==P||PVP.phase!=='fight'||E.dead)return;const dx
 function jump(e){if(e.dead||e.stun>0||e.jumps>=2)return;e.vy=e.jumps?7.4:8.2;e.jumps++;if(e.jumps===2)pop(e,'✦','#8fdcff')}
 function dash(e,dir){if(e.dead||e.dashCd>0||e.stun>0||e.st<14||e.tele>0)return;e.vx=dir*15;e.inv=.22;e.dash=.22;e.dashCd=.7;e.st-=14;e.atk=0}
 function aoe(e){const cx=e.x+e.face*(e.aoeX||1.4);if(!P.dead&&Math.abs(P.x-cx)<(e.aoeR||2.2)&&P.y<.8)hurt(P,e,e.dmg*1.4,5)}
-function spawnWave(e){const gl=e.kind==='giant_slime',x=e.x+e.face*(gl?2.6:1.5),m=new T.Mesh(gl?new T.SphereGeometry(.4,10,8):new T.ConeGeometry(.3,.9,4),mat(gl?0x7dff5a:0x9be4ff));m.position.set(x,gl?.4:.35,0);m.rotation.z=gl?0:-e.face*Math.PI/2;scene.add(m);waves.push({m,x,v:e.face*(gl?(e.enr?6.5:5):(e.enr?8:6))})}
+function spawnWave(e,i){i=i||0;const gl=e.kind==='giant_slime',x=e.x+e.face*((gl?2.6:1.5)+i*2.1),m=new T.Mesh(gl?new T.SphereGeometry(.4,10,8):new T.ConeGeometry(.3,.9,4),mat(gl?0x7dff5a:0x9be4ff));m.position.set(x,gl?.4:.35,0);m.rotation.z=gl?0:-e.face*Math.PI/2;scene.add(m);waves.push({d:Math.max(1,Math.round(e.dmg*(e.wd||.7))),m,x,v:e.face*(gl?(e.enr?6.5:5):(e.enr?8:6))})}
 function telEnd(e){
  if(e.next==='lunge'){e.vx=e.face*11;e.vy=3;e.lung=.3;e.hitDone=false;e.rec=.9}
  if(e.next==='slam'){aoe(e);e.pose=1.4;e.rec=e.enr?.5:.8;shake=.4}
- if(e.next==='wave'){spawnWave(e);e.pose=1;e.rec=.6}
+ if(e.next==='wave'){for(let i=0;i<(e.volley||1);i++)spawnWave(e,i);e.pose=1;e.rec=e.enr?.45:.6}
  e.next=null}
 function think(e,dt){
  if(e.dead||P.dead)return;const dx=P.x-e.x,ad=Math.abs(dx),sg=Math.sign(dx)||1;
@@ -292,12 +287,12 @@ function think(e,dt){
   if(ad<1.1&&e.cd<=0){startAtk(e);e.cd=1}
   else if(e.mt<=0){e.mt=.8+Math.random();e.next='lunge';e.teleDur=e.tele=.35;e.mx=0}}
  else{
-  if(!e.enr&&e.hp<e.max*.5){e.enr=true;e.spd*=1.4;pop(e,'ENRAGED','#ff6a6a')}
+  if(!e.enr&&e.hp<e.max*(e.enrAt||.5)){e.enr=true;e.spd*=1.4;pop(e,'ENRAGED','#ff6a6a')}
   if(e.tele<=0)e.face=sg;
   if(busy){e.mx=0;return}
   if(e.rec>0){e.rec-=dt;e.mx=0;return}
   e.mx=ad>(e.aoeX?e.aoeX+.9:1.9)?sg:0;e.mt-=dt;
-  if(e.mt<=0){e.mt=(e.enr?1:1.6)+Math.random()*.6;e.next=ad<(e.aoeX?e.aoeX+1.6:2.6)&&!(e.aoeX&&Math.random()<.3)?'slam':'wave';e.teleDur=e.tele=e.next==='slam'?(e.enr?.7:1):.6;e.mx=0}}}
+  if(e.mt<=0){e.mt=((e.enr?1:1.6)+Math.random()*.6)*(e.pace||1);e.next=ad<(e.aoeX?e.aoeX+1.6:2.6)&&!(e.aoeX&&Math.random()<.3)?'slam':'wave';e.teleDur=e.tele=(e.next==='slam'?(e.enr?.7:1):.6)*(e.tgm||1);e.mx=0}}}
 function phys(e,dt){
  if(e.dead){e.dy=Math.min(1,e.dy+dt*2);e.vy-=26*dt;e.y=Math.max(0,e.y+e.vy*dt);return}
  ['stun','inv','dash','dashCd','cd','flash','pulse'].forEach(k=>{if(e[k]>0)e[k]-=dt});
@@ -442,7 +437,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
   phys(P,dt);if(PVP)remotePhys(E,dt);else phys(E,dt);
   waves=waves.filter(w=>{w.x+=w.v*dt;w.m.position.x=w.x;w.m.rotation.x+=dt*10;
    let gone=Math.abs(w.x)>ARENA+4;
-   if(!gone&&!P.dead&&Math.abs(P.x-w.x)<.6&&P.y<.8){hurt(P,{x:P.x-Math.sign(w.v)},12,3);gone=true}
+   if(!gone&&!P.dead&&Math.abs(P.x-w.x)<.6&&P.y<.8){hurt(P,{x:P.x-Math.sign(w.v)},w.d||12,3);gone=true}
    if(gone)scene.remove(w.m);return !gone});
   ring.visible=S==='fight'&&!E.dead&&!!E.boss&&E.tele>0&&E.next==='slam';
   if(ring.visible){ring.scale.setScalar((E.aoeR||2.2)/3);ring.position.x=E.x+E.face*(E.aoeX||1.4);ring.material.opacity=.25+.2*Math.sin(time*18)}
