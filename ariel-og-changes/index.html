@@ -657,6 +657,7 @@ body.sh #sheet{transform:none}
  <div class="view" id="v-inv"></div>
  <div class="view" id="v-bestiary"></div>
  <div class="view" id="v-weapons"></div>
+ <div class="view" id="v-pshop"></div>
  <div class="view" id="v-shop">
   <div class="lb-page-head"><h1>SHOP</h1><p>Your coins: <span style="color:var(--yellow);font-weight:600">1,240</span></p></div>
   <div class="lb-list">
@@ -732,6 +733,7 @@ body.sh #sheet{transform:none}
  <button class="di" id="invBtn" type="button"><span style="width:20px;text-align:center">🎒</span>Inventory</button>
  <button class="di" id="bestBtn" type="button"><span style="width:20px;text-align:center">📖</span>Bestiary</button>
  <button class="di" id="wepBtn" type="button"><span style="width:20px;text-align:center">⚔️</span>Weapons</button>
+  <button class="di" id="pshopBtn" type="button"><span style="width:20px;text-align:center">🏪</span>PShop</button>
  <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
  <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
 </aside>
@@ -987,7 +989,7 @@ function ascOpen(t){
 document.querySelectorAll('#ascHub .atile').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
 $('ascBack').onclick=()=>ascOpen();
 // ?go=profile|classes|skills|bestiary links from WhatsApp
-window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library');else if(g==='weapons'||g==='weapon'){tab('weapons');window.wepOpen&&window.wepOpen()}};
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library');else if(g==='weapons'||g==='weapon'){tab('weapons');window.wepOpen&&window.wepOpen()}else if(g==='pshop'||g==='market'){tab('pshop');window.pshopOpen&&window.pshopOpen()}};
 $('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
 // Explore: find a wild fight; the arena only appears once a fight starts
 const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
@@ -1258,6 +1260,67 @@ async function wep(sel){
  B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>wep(b.dataset.w));
 }
 window.wepOpen=wep;
+// ===== PShop: player marketplace (browse / sell / my listings). Rules and tax live on the server. =====
+const PSC={Weapons:'weapon',Armour:'armour',Materials:'material',Consumables:'consumable',Accessories:'accessory'};
+const PS={view:'browse',q:'',cat:'',sort:'new'};
+const psLeft=e=>{const t=e>1e12?e/1000:e,s=Math.max(0,t-Date.now()/1000),h=Math.floor(s/3600);return h>=24?Math.floor(h/24)+'d '+h%24+'h':h>0?h+'h':Math.max(1,Math.ceil(s/60))+'m'};
+const psRow=(L,right)=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(PSC[L.category])}</div><div class="gym-meta"><div class="name">${L.qty.toLocaleString()}× ${esc(L.item)} <span class="chip">${esc(L.category)}</span></div><div class="sub">🪙 ${L.price.toLocaleString()} each · by ${esc(L.seller)}${L.details?' · '+esc(L.details):''} · ${psLeft(L.expires)} left · #${esc(L.short)}</div></div>${right}</div>`;
+async function ps(v){
+ if(v)PS.view=v;
+ const B=$('v-pshop');B.innerHTML=hd('PSHOP','Loading…');
+ const r=await api('/api/niflheim/pshop/state');if(!r.ok)return fail('v-pshop','PSHOP',r,'The marketplace couldn’t be loaded.');
+ const S=r.j,R=S.rules;
+ const nav=[['browse','Browse'],['sell','Sell'],['mine','My listings']].map(([k,l])=>`<button class="go${PS.view===k?'':' ghost'}" data-pv="${k}">${l}</button>`).join('');
+ B.innerHTML=hd('PSHOP',`Your coins: <span style="color:var(--yellow);font-weight:600">${S.coins.toLocaleString()}</span> · ${R.tax_pct}% sale tax`)+`<div class="edrow" style="padding:0 20px 6px">${nav}</div><div id="psb"></div>`;
+ B.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>ps(b.dataset.pv));
+ const P=$('psb');
+ if(PS.view==='browse')await psBrowse(P,S);else if(PS.view==='sell')psSell(P,S);else await psMine(P,S);
+}
+async function psBrowse(P,S){
+ const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+ P.innerHTML=`<div class="filt"><input id="psq" placeholder="Search items" value="${esc(PS.q)}"><select id="psc">${opt('','All categories',!PS.cat)}${S.categories.map(c=>opt(c,c,PS.cat===c)).join('')}</select><select id="pss">${opt('new','Newest',PS.sort==='new')}${opt('price','Price: low',PS.sort==='price')}${opt('price_desc','Price: high',PS.sort==='price_desc')}</select></div><div id="psl" style="margin-top:12px"><p class="note">Loading…</p></div>`;
+ let tm;const load=async()=>{
+  const r=await api('/api/niflheim/pshop/browse?'+new URLSearchParams({q:PS.q,category:PS.cat,sort:PS.sort}));
+  const L=$('psl');if(!L)return;
+  if(!r.ok){L.innerHTML=`<p class="note">${esc((r.j&&r.j.error)||'Listings couldn’t be loaded.')}</p>`;return}
+  const rows=r.j.listings;
+  L.innerHTML=rows.length?`<div class="lb-list">${rows.map(x=>psRow(x,x.mine?'<span class="chip ok">Yours</span>':`<div style="display:flex;gap:6px;align-items:center">${x.qty>1?`<input type="number" min="1" max="${x.qty}" value="1" data-n="${esc(x.id)}" style="width:54px;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px">`:''}<button class="mini buy" data-b="${esc(x.id)}" ${S.coins<x.price?'disabled':''}>Buy</button></div>`)).join('')}</div>`:'<p class="note">No listings match. Be the first to sell something.</p>';
+  L.querySelectorAll('[data-b]').forEach(b=>b.onclick=async()=>{
+   const id=b.dataset.b,ni=L.querySelector(`[data-n="${id}"]`),qty=ni?Math.max(1,parseInt(ni.value)||1):1;b.disabled=true;
+   const c=await jpost('/api/niflheim/pshop/buy',{id,qty});
+   if(!c.ok){toast((c.j&&c.j.error)||'Purchase failed. No coins spent.');b.disabled=false;return}
+   toast(`Bought ${c.j.qty}× ${c.j.item} for ${c.j.total.toLocaleString()} coins`);refreshMe&&refreshMe();ps('browse')});
+ };
+ $('psq').oninput=e=>{PS.q=e.target.value;clearTimeout(tm);tm=setTimeout(load,300)};
+ $('psc').onchange=e=>{PS.cat=e.target.value;load()};$('pss').onchange=e=>{PS.sort=e.target.value;load()};
+ load();
+}
+function psSell(P,S){
+ const inv=Object.entries(S.inventory||{}).map(([n,q])=>[n,typeof q==='object'&&q?(q.qty||q.count||0):Number(q)||0]).filter(x=>x[1]>0);
+ if(!inv.length){P.innerHTML='<p class="note">Your bag is empty. Hunt or buy something first, then list it here.</p>';return}
+ const fld='width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font:inherit';
+ P.innerHTML=`<div class="card crow" style="margin:12px 20px"><h4>List an item</h4><div style="display:grid;gap:10px;margin-top:8px"><select id="psi" style="${fld}">${inv.map(([n,q])=>`<option value="${esc(n)}" data-max="${q}">${esc(n)} (×${q})</option>`).join('')}</select><div style="display:flex;gap:10px"><input id="psn" type="number" min="1" value="1" placeholder="Quantity" style="${fld}"><input id="psp" type="number" min="${R_MIN(S)}" placeholder="Price each" style="${fld}"></div><input id="psd" maxlength="80" placeholder="Details (optional)" style="${fld}"><div class="sp" id="pss2">Pick a price to see what you’ll earn.</div><button class="go" id="psgo" style="margin:0">List item</button></div></div><p class="note">The item leaves your bag while listed and comes back if you cancel or it expires (${S.rules.expire_hours}h). Up to ${S.rules.max_active} active listings${S.rules.listing_fee?`, ${S.rules.listing_fee} coins per listing`:''}. ${S.rules.tax_pct}% tax is taken from each sale.</p>`;
+ const sum=()=>{const n=parseInt($('psn').value)||0,p=parseInt($('psp').value)||0,t=n*p,tax=Math.floor(t*S.rules.tax_pct/100);$('pss2').textContent=t?`Total ${t.toLocaleString()} · tax ≈ ${tax.toLocaleString()} · you receive ≈ ${(t-tax).toLocaleString()} coins if it all sells`:'Pick a price to see what you’ll earn.'};
+ $('psn').oninput=sum;$('psp').oninput=sum;
+ $('psi').onchange=()=>{const m=+$('psi').selectedOptions[0].dataset.max;if(+$('psn').value>m)$('psn').value=m;sum()};
+ $('psgo').onclick=async()=>{
+  const b=$('psgo'),qty=parseInt($('psn').value),price=parseInt($('psp').value);
+  if(!(qty>0)||!(price>0))return toast('Enter a quantity and a price.');
+  b.disabled=true;const c=await jpost('/api/niflheim/pshop/sell',{item:$('psi').value,qty,price,details:$('psd').value.trim()});
+  if(!c.ok){toast((c.j&&c.j.error)||'Couldn’t list that.');b.disabled=false;return}
+  toast('Listed. It’s live in the marketplace.');ps('mine')};
+}
+const R_MIN=S=>(S.rules&&S.rules.min_price)||1;
+async function psMine(P,S){
+ const r=await api('/api/niflheim/pshop/mine');if(!r.ok){P.innerHTML=`<p class="note">${esc((r.j&&r.j.error)||'Your listings couldn’t be loaded.')}</p>`;return}
+ const j=r.j,rp=j.reputation||{};
+ P.innerHTML=`<p class="note" style="margin-top:10px">${rp.sales||0} sold (earned ${(rp.earned||0).toLocaleString()} coins) · ${rp.purchases||0} bought (spent ${(rp.spent||0).toLocaleString()} coins)</p>`
+  +'<div class="grp">Active listings</div>'+(j.listings.length?`<div class="lb-list">${j.listings.map(x=>psRow(x,`<button class="mini no" data-c="${esc(x.id)}">Cancel</button>`)).join('')}</div>`:'<p class="note">You have nothing listed.</p>')
+  +'<div class="grp">History</div>'+(j.history.length?`<div class="lb-list">${j.history.map(h=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${h.side==='sold'?'💰':'🛒'}</div><div class="gym-meta"><div class="name">${h.side==='sold'?'Sold':'Bought'} ${h.qty}× ${esc(h.item)}</div><div class="sub">${h.side==='sold'?'to':'from'} ${esc(h.other)} · ${h.side==='sold'?'you received':'you paid'} ${h.net.toLocaleString()} coins</div></div></div>`).join('')}</div>`:'<p class="note">No sales or purchases yet.</p>');
+ P.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/pshop/cancel',{id:b.dataset.c});if(!c.ok){toast((c.j&&c.j.error)||'Couldn’t cancel.');b.disabled=false;return}toast(`Cancelled. ${c.j.qty}× ${c.j.item} is back in your bag.`);ps('mine')});
+}
+window.pshopOpen=()=>ps('browse');
+$('pshopBtn').onclick=()=>{drawer(false);tab('pshop');ps('browse')};
 $('wepBtn').onclick=()=>{drawer(false);tab('weapons');wep()};
 $('invBtn').onclick=()=>{drawer(false);tab('inv');inv()};
 $('bestBtn').onclick=()=>{drawer(false);tab('bestiary');best()};
