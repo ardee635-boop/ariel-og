@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Niflheim — Weapon Atelier</title>
+<style>
+:root{color-scheme:dark;--bg:#070b13;--panel:#101a29;--panel2:#0b1421;--line:#263951;--ink:#edf5ff;--muted:#91a7c1;--ice:#8ed5ff;--gold:#e6bd79}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#203a59 0,#0b1421 45%,#060910 100%);color:var(--ink);font:14px/1.45 Inter,system-ui,Segoe UI,sans-serif}
+header{max-width:1320px;margin:auto;padding:25px 22px 14px}.kicker{font-size:10px;font-weight:850;letter-spacing:.24em;color:var(--ice)}h1{font-size:clamp(27px,5vw,44px);letter-spacing:.04em;margin:5px 0}header p{color:var(--muted);margin:0}
+main{max-width:1320px;margin:auto;padding:12px 18px 32px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:15px}
+.panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#142236ed,#0a1220f2);box-shadow:0 20px 65px #0007;overflow:hidden}
+.stagehead{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);gap:10px}.stagehead b{font-size:11px;letter-spacing:.16em}.hint{font-size:11px;color:var(--muted)}
+#stage{height:590px;position:relative;background:radial-gradient(ellipse at 50% 55%,#203a56 0,#111e30 43%,#08101b 82%)}#stage canvas{width:100%;height:100%;display:block}
+.stagefoot{position:absolute;bottom:14px;left:16px;right:16px;display:flex;justify-content:space-between;pointer-events:none;color:#a6bdd7;font-size:10px;letter-spacing:.12em;text-shadow:0 2px 5px #000}
+.side{padding:19px}.tag{font-size:10px;letter-spacing:.17em;font-weight:850;color:var(--ice)}h2{font-size:27px;margin:3px 0 4px}.desc{min-height:54px;color:var(--muted);margin:7px 0 13px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#091321;border:1px solid #20334b;border-radius:10px;padding:10px}.metric small{display:block;color:#849bb7;font-size:9px;text-transform:uppercase;letter-spacing:.13em}.metric b{font-size:15px}
+.label{font-size:10px;font-weight:850;letter-spacing:.17em;color:#b7c9df;margin:18px 0 8px}
+.weapon-grid,.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;font-weight:750;color:#dcecff;background:#14263d;border:1px solid #2b4563;border-radius:10px;padding:11px;cursor:pointer;transition:.16s}
+button:hover{background:#1b3552;border-color:#81caff}button.active{background:#244867;border-color:#8ed5ff;box-shadow:inset 0 0 0 1px #8ed5ff55}button:focus-visible{outline:2px solid white;outline-offset:2px}
+#play{grid-column:1/-1;background:linear-gradient(110deg,#23577d,#24456b);border-color:#5f9ecb}
+#progress{height:4px;background:#20324a;border-radius:8px;margin-top:12px;overflow:hidden}#bar{height:100%;width:0;background:linear-gradient(90deg,#62baff,#d8f6ff)}
+.notes{font-size:12px;color:#91a8c3;border-top:1px solid var(--line);padding-top:13px;margin-top:15px}
+.legend{display:flex;gap:13px;flex-wrap:wrap;color:#91a8c3;font-size:10px;margin-top:9px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#85d9ff}
+@media(max-width:850px){main{grid-template-columns:1fr}#stage{height:440px}.side{order:2}}
+</style>
+</head>
+<body>
+<header><div class="kicker">NIFLHEIM · ARMAMENT GALLERY</div><h1>Weapon Atelier</h1><p>Four base weapons · detailed stylized 3D models · animated default skills</p></header>
+<main>
+<section class="panel">
+ <div class="stagehead"><b>3D MODEL & ANIMATION PREVIEW</b><span class="hint">Drag to orbit · scroll to zoom</span></div>
+ <div id="stage"><div class="stagefoot"><span>FANTASY GAME ASSET · 3D PREVIEW</span><span id="sceneState">IDLE DISPLAY</span></div></div>
+</section>
+<aside class="panel side">
+ <div class="tag" id="category">MELEE · PHYSICAL</div><h2 id="name">Sword</h2><div class="desc" id="desc">A balanced blade. One input performs one Slash; repeated inputs chain into a combo.</div>
+ <div class="metrics">
+  <div class="metric"><small>Default skill</small><b id="skill">Slash</b></div>
+  <div class="metric"><small>Damage type</small><b id="dtype">Physical</b></div>
+  <div class="metric"><small>Animation time</small><b id="time">2.20s combo</b></div>
+  <div class="metric"><small>Execution</small><b id="execution">3-hit chain</b></div>
+ </div>
+ <div class="label">CHOOSE A WEAPON</div><div class="weapon-grid">
+  <button class="active" data-pick="sword">Sword</button><button data-pick="dagger">Dagger</button><button data-pick="bow">Bow</button><button data-pick="staff">Staff</button>
+ </div>
+ <div class="label">VARIANT · <span id="tierName">Tier 1</span></div><input type="range" id="tier" min="1" max="10" value="1" step="1" style="width:100%" aria-label="Weapon variant tier"><div class="hint" id="tierInfo"></div>
+ <div class="label">ANIMATION PREVIEW</div><div class="action-grid"><button id="play">Play Slash Combo</button></div>
+ <div id="progress"><div id="bar"></div></div>
+ <div class="legend"><span><i class="dot"></i>Mana / magic glow</span><span>Animation preview, not cooldowns</span></div>
+ <div class="notes" id="notes">Three distinct Slash beats. Each Slash is a single attack; repeated inputs create the combo.</div>
+</aside>
+</main>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script>
+window.addEventListener('error', (event) => {
+  const host = document.querySelector('#stage');
+  if (!host || host.querySelector('.load-error')) return;
+  const panel = document.createElement('div');
+  panel.className = 'load-error';
+  panel.style.cssText = 'position:absolute;inset:18px;display:grid;place-content:center;text-align:center;padding:22px;color:#ffd6c9;background:#160f18dd;border:1px solid #754b55;border-radius:14px;z-index:5';
+  panel.innerHTML = '<strong>3D preview could not start</strong><span style="margin-top:8px;color:#d8b8b8">Check your internet connection and reload this page. The 3D engine is loaded from a CDN.</span>';
+  host.appendChild(panel);
+});
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const host=document.querySelector('#stage');
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x091321,9,22);
+const camera=new THREE.PerspectiveCamera(36,host.clientWidth/host.clientHeight,.1,100);camera.position.set(4.9,3.3,8.5);
+if (!window.WebGLRenderingContext && !window.WebGL2RenderingContext) {
+  throw new Error('WebGL is not available in this browser.');
+}
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(host.clientWidth,host.clientHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+const orbit=new OrbitControls(camera,renderer.domElement);orbit.enableDamping=true;orbit.target.set(0,1.75,0);orbit.minDistance=4;orbit.maxDistance=12;
+scene.add(new THREE.HemisphereLight(0xb9dcff,0x172032,2));
+const key=new THREE.DirectionalLight(0xffedcf,3.1);key.position.set(4,7,5);key.castShadow=true;scene.add(key);
+const rim=new THREE.PointLight(0x54aaff,34,12);rim.position.set(-4,3,-3);scene.add(rim);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(4.4,72),new THREE.MeshStandardMaterial({color:0x101d2c,metalness:.45,roughness:.6}));floor.rotation.x=-Math.PI/2;floor.position.y=-.05;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(8.5,28,0x36516c,0x1b2b40);grid.position.y=-.035;scene.add(grid);
+const base=new THREE.Mesh(new THREE.CylinderGeometry(1.22,1.34,.24,64),new THREE.MeshStandardMaterial({color:0x1b2d42,metalness:.8,roughness:.27}));base.position.y=.08;base.castShadow=true;scene.add(base);
+const halo=new THREE.Mesh(new THREE.TorusGeometry(1.16,.018,10,96),new THREE.MeshBasicMaterial({color:0x7ccfff}));halo.rotation.x=Math.PI/2;halo.position.y=.21;scene.add(halo);
+const M=(c,metal=.5,rough=.3,em=0)=>new THREE.MeshStandardMaterial({color:c,metalness:metal,roughness:rough,emissive:em,emissiveIntensity:.7});
+const steel=M(0xbacbd9,.9,.2),edge=M(0xe8f4ff,.85,.16),darksteel=M(0x344a61,.8,.25),gold=M(0xc69a58,.82,.23),leather=M(0x493127,.12,.75),wood=M(0x68452f,.22,.5),woodlight=M(0x9a7048,.25,.42),mana=M(0x76dfff,.25,.14,0x26aaff),manaBright=M(0xc5f7ff,.1,.12,0x70dfff);
+let rig=new THREE.Group(),model=new THREE.Group(),fx=new THREE.Group();scene.add(rig);rig.add(model);scene.add(fx);
+let selected='sword',playing=false,t0=0,span=2.2;
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+function add(parent,geo,mat,pos=[0,0,0],rot=[0,0,0]){const o=new THREE.Mesh(geo,mat);o.position.set(...pos);o.rotation.set(...rot);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function cylinder(parent,r1,r2,h,mat,pos,seg=20){return add(parent,new THREE.CylinderGeometry(r1,r2,h,seg),mat,pos)}
+function box(parent,w,h,d,mat,pos,rot=[0,0,0]){return add(parent,new THREE.BoxGeometry(w,h,d),mat,pos,rot)}
+function curveTube(parent,points,r,mat){return add(parent,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),48,r,10,false),mat)}
+function clearModel(){while(model.children.length){const o=model.children.pop();o.geometry?.dispose();}while(fx.children.length){const o=fx.children.pop();o.geometry?.dispose();}model.rotation.set(0,0,0);rig.rotation.set(0,0,0);rig.position.set(0,.15,0);}
+function sword(dagger=false){
+ const s=dagger?.72:1, bladeLen=dagger?1.25:1.95, y0=dagger?1.25:1.35;
+ // grip, pommel and crossguard
+ cylinder(model,.075*s,.09*s,.68*s,leather,[0,.78*s,0]);
+ cylinder(model,.12*s,.12*s,.13*s,gold,[0,.43*s,0]);
+ for(let i=0;i<5;i++){const wrap= new THREE.Mesh(new THREE.TorusGeometry(.079*s,.012*s,6,20),gold);wrap.rotation.x=Math.PI/2;wrap.position.set(0,(.58+i*.105)*s,0);model.add(wrap);}
+ const guard=box(model,dagger?.62:.95,.11,.18,gold,[0,1.18*s,0],[0,0,dagger?-.08:0]);
+ // tapered blade silhouette via extruded shape
+ const sh=new THREE.Shape();sh.moveTo(-.13,0);sh.lineTo(-.115,bladeLen*.78);sh.lineTo(0,bladeLen);sh.lineTo(.115,bladeLen*.78);sh.lineTo(.13,0);sh.closePath();
+ const geo=new THREE.ExtrudeGeometry(sh,{depth:.075,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.025,bevelThickness:.025});geo.computeVertexNormals();
+ add(model,geo,steel,[0,y0,0]);
+ box(model,.027,bladeLen*.72,.012,darksteel,[0,y0+bladeLen*.40,.052]);
+ // bright bevel edges
+ box(model,.018,bladeLen*.68,.014,edge,[-.105,y0+bladeLen*.39,.04]);
+ box(model,.018,bladeLen*.68,.014,edge,[.105,y0+bladeLen*.39,.04]);
+ // decorative guard gems
+ const gem=add(model,new THREE.OctahedronGeometry(.085),mana,[0,1.18*s,.105]);
+ if(dagger){model.rotation.z=-.10;}
+}
+let bowString,arrowGroup,arrowCurve;
+function bow(){
+ // recurved wooden bow with layered limbs
+ const pts=[V(0,.52,0),V(.48,.65,0),V(.75,1.3,0),V(.72,1.9,0),V(.42,2.55,0),V(0,3.05,0)];
+ curveTube(model,pts,.105,wood);
+ curveTube(model,pts.map(p=>V(p.x*.72,p.y,p.z+.075)),.028,woodlight);
+ // grip and decorative bands
+ cylinder(model,.105,.105,.55,leather,[0,1.78,.015]);
+ for(const y of [.48,1.52,2.06,3.08]){cylinder(model,.13,.13,.08,gold,[0,y,0]);}
+ // string is stylized, animated with a slight drawn curve
+ bowString=add(model,new THREE.BufferGeometry().setFromPoints([V(0,.52,.04),V(0,3.05,.04)]),new THREE.LineBasicMaterial({color:0xe7f4ff}));
+ // decorative nock detail
+ add(model,new THREE.OctahedronGeometry(.12),gold,[0,1.78,.04]);
+ // Arrow model displayed alongside bow: slender flexible shaft, fletching and luminous tip
+ arrowGroup=new THREE.Group();model.add(arrowGroup);
+ arrowCurve=new THREE.CatmullRomCurve3([V(0,0,0),V(0,.38,0),V(0,.78,0),V(0,1.18,0)]);
+ const shaft=add(arrowGroup,new THREE.TubeGeometry(arrowCurve,24,.025,8,false),woodlight,[0,0,0],[Math.PI/2,0,0]);
+ shaft.name='shaft';
+ const tip=add(arrowGroup,new THREE.ConeGeometry(.065,.22,8),steel,[0,1.29,0]);
+ const f1=box(arrowGroup,.13,.24,.025,edge,[.07,.12,0],[0,0,-.35]);
+ const f2=box(arrowGroup,.13,.24,.025,edge,[-.07,.12,0],[0,0,.35]);
+ arrowGroup.position.set(.95,1.45,.08);arrowGroup.rotation.z=-.12;
+}
+let staffOrb;
+function staff(){
+ // tapered darkwood shaft with metal foot, grip and collars
+ cylinder(model,.075,.12,3.0,wood,[0,1.55,0],16);
+ cylinder(model,.13,.09,.22,darksteel,[0,.16,0]);
+ cylinder(model,.12,.12,.1,gold,[0,.38,0]);
+ cylinder(model,.12,.12,.12,gold,[0,2.76,0]);
+ for(let i=0;i<4;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(.085,.018,8,24),leather);r.rotation.x=Math.PI/2;r.position.set(0,1.15+i*.12,0);model.add(r);}
+ // open crown prongs surrounding crystal
+ for(let i=0;i<3;i++){const a=i*Math.PI*2/3;const pts=[V(Math.cos(a)*.12,2.78,0),V(Math.cos(a)*.24,3.12,0),V(Math.cos(a)*.30,3.45,0)];curveTube(model,pts,.055,gold);}
+ staffOrb=add(model,new THREE.IcosahedronGeometry(.29,2),manaBright,[0,3.26,0]);
+ const inner=add(model,new THREE.OctahedronGeometry(.19),mana,[0,3.26,.015]);inner.name='innerCrystal';
+ const halo1=add(model,new THREE.TorusGeometry(.43,.018,8,48),gold,[0,3.26,0],[Math.PI/2,0,0]);
+ const halo2=add(model,new THREE.TorusGeometry(.38,.012,8,48),mana,[0,3.26,0],[.8,0,.5]);
+}
+function build(which){clearModel();if(which==='sword')sword(false);if(which==='dagger')sword(true);if(which==='bow')bow();if(which==='staff')staff();model.rotation.y=-.18;}
+const data={
+ sword:{category:'MELEE · PHYSICAL',desc:'A balanced blade. One input performs one Slash; repeated inputs chain into a three-hit combo.',skill:'Slash',type:'Physical',time:'2.20s combo',exec:'3-hit chain',note:'Slash 1: 0.65s · Slash 2: 0.70s · Slash 3: 0.85s. Each input is one individual Slash.'},
+ dagger:{category:'MELEE · PHYSICAL',desc:'A quick close-range blade. Each input is one Slash; repeated inputs create a faster three-hit combo.',skill:'Slash',type:'Physical',time:'1.20s combo',exec:'3-hit chain',note:'Slash 1: 0.35s · Slash 2: 0.40s · Slash 3: 0.45s. Each input is one individual Slash.'},
+ bow:{category:'RANGED · PHYSICAL',desc:'A flexible bow and flexible arrow shaft. The arrow visibly bends and oscillates as it flies, with a quick projectile flight.',skill:'Target Shot',type:'Physical',time:'1.60s sequence',exec:'Aimed shot',note:'Aim 0.45s · Draw 0.55s · Release 0.20s · Recovery 0.40s. Arrow flight is faster than Mana Bolt. The arrow shaft flexes visibly.'},
+ staff:{category:'MAGIC · RANGED',desc:'The staff gathers luminous mana-light around its crystal, then releases that gathered light as a Mana Bolt.',skill:'Mana Bolt',type:'Magic',time:'4.00s sequence',exec:'Gather → bolt',note:'Mana gathers visibly around the staff before release. Casting is a gathering animation, not an artificial slow-cast effect. Mana Bolt travels slower than an arrow.'}
+};
+function ui(){const d=data[selected];for(const [id,val] of Object.entries({category:d.category,name:selected[0].toUpperCase()+selected.slice(1),desc:d.desc,skill:d.skill,dtype:d.type,time:d.time,execution:d.exec,notes:d.note}))document.getElementById(id).textContent=val;document.querySelectorAll('[data-pick]').forEach(b=>b.classList.toggle('active',b.dataset.pick===selected));document.getElementById('play').textContent=selected==='sword'||selected==='dagger'?'Play Slash Combo':selected==='bow'?'Play Target Shot':'Gather Mana & Cast Bolt';document.getElementById('sceneState').textContent='IDLE DISPLAY';}
+document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{selected=b.dataset.pick;build(selected);ui();showTier();});
+function play(){if(playing)return;playing=true;t0=performance.now();span=selected==='sword'?2.2:selected==='dagger'?1.2:selected==='bow'?1.6:4;fx.clear();document.getElementById('bar').style.width='0%';}
+document.getElementById('play').onclick=play;
+function addFx(geo,mat,pos){const o=add(fx,geo,mat,pos);return o;}
+let arrowFlight=null;
+function frame(now){
+ requestAnimationFrame(frame);const t=(now-t0)/1000;
+ if(playing){
+  const p=Math.min(t/span,1);document.getElementById('bar').style.width=(p*100)+'%';
+  document.getElementById('sceneState').textContent='ANIMATION PLAYING';
+  if(selected==='sword'||selected==='dagger'){
+   const beat=span/3,local=(t%beat)/beat;const idx=Math.min(2,Math.floor(t/beat));
+   model.rotation.y=-.18+Math.sin(local*Math.PI)*.48*(idx%2? -1:1);
+   model.rotation.z=Math.sin(local*Math.PI)*.58*(idx===1?-1:1);
+   if(p>=1){model.rotation.set(0,-.18,0);playing=false;}
+  } else if(selected==='bow'){
+   const draw=Math.max(0,Math.min(1,(t-.45)/.55));
+   if(bowString){const pts=[V(0,.52,.04),V(0,1.78,-.46*draw),V(0,3.05,.04)];bowString.geometry.dispose();bowString.geometry=new THREE.BufferGeometry().setFromPoints(pts);}
+   if(arrowGroup){arrowGroup.position.z=.08-.38*draw;arrowGroup.position.x=.95-.10*draw;}
+   if(t>=1.2&&!arrowFlight){
+    arrowFlight={start:t,group:new THREE.Group()};fx.add(arrowFlight.group);
+    const shaftCurve=new THREE.CatmullRomCurve3([V(0,0,0),V(0,.38,0),V(0,.78,0),V(0,1.18,0)]);
+    add(arrowFlight.group,new THREE.TubeGeometry(shaftCurve,24,.022,8,false),woodlight,[0,0,0],[Math.PI/2,0,0]);
+    add(arrowFlight.group,new THREE.ConeGeometry(.06,.2,8),steel,[0,1.28,0]);
+    add(arrowFlight.group,new THREE.ConeGeometry(.09,.20,4),edge,[0,.08,0],[Math.PI,0,0]);
+    arrowFlight.group.position.set(.1,1.9,.4);arrowFlight.group.rotation.x=Math.PI/2;
+   }
+   if(arrowFlight){
+    const flight=t-arrowFlight.start,travel=flight*4.4;
+    arrowFlight.group.position.z=.4+travel;
+    // Flexible shaft: a gentle, visible bending wave travelling along the arrow during flight.
+    const shaft=arrowFlight.group.children[0];const pts=[];
+    for(let i=0;i<=12;i++){const u=i/12;pts.push(V(Math.sin(u*Math.PI*2-flight*18)*.075*u,u*1.18,0));}
+    const c=new THREE.CatmullRomCurve3(pts);shaft.geometry.dispose();shaft.geometry=new THREE.TubeGeometry(c,24,.022,8,false);
+    arrowFlight.group.rotation.z=Math.sin(flight*18)*.035;
+   }
+   if(p>=1){playing=false;arrowFlight=null;fx.clear();if(bowString){bowString.geometry.dispose();bowString.geometry=new THREE.BufferGeometry().setFromPoints([V(0,.52,.04),V(0,3.05,.04)]);}if(arrowGroup){arrowGroup.position.set(.95,1.45,.08);}}
+  } else if(selected==='staff'){
+   const gather=Math.min(1,t/1.45);
+   if(staffOrb){staffOrb.scale.setScalar(1+gather*.48+Math.sin(now*.009)*.035);}
+   // Mana motes spiral inward and brighten around the crystal during gathering.
+   if(t<1.48){
+    if(Math.random()<.34){const a=Math.random()*Math.PI*2,r=.65+Math.random()*.85,y=2.7+Math.random()*.9;const mote=addFx(new THREE.SphereGeometry(.025+Math.random()*.025,8,8),manaBright,[Math.cos(a)*r,y,Math.sin(a)*r]);mote.userData={mote:true,a,r,y,life:0};}
+    fx.children.forEach(o=>{if(o.userData.mote){o.userData.life+=.035;o.userData.a+=.08;o.userData.r*=.975;o.position.set(Math.cos(o.userData.a)*o.userData.r,3.25+(o.userData.y-3.25)*.96,Math.sin(o.userData.a)*o.userData.r);}});
+   }else if(t>=1.48&&t<1.72&&!fx.children.some(o=>o.userData.bolt)){
+    fx.clear();const bolt=addFx(new THREE.IcosahedronGeometry(.19,2),manaBright,[0,3.25,.1]);bolt.userData.bolt=true;
+    const aura=addFx(new THREE.SphereGeometry(.29,16,12),mana,[0,3.25,.1]);aura.userData.aura=true;
+   }else if(t>=1.72){
+    fx.children.forEach(o=>{if(o.userData.bolt||o.userData.aura){o.position.z+=.075; o.position.x+=.006; o.scale.multiplyScalar(1.009);}});
+   }
+   if(p>=1){playing=false;fx.clear();if(staffOrb)staffOrb.scale.setScalar(1);}
+  }
+  if(p>=1){document.getElementById('bar').style.width='100%';document.getElementById('sceneState').textContent='ANIMATION COMPLETE';}
+ }
+ halo.rotation.z+=.002;orbit.update();renderer.render(scene,camera);
+}
+requestAnimationFrame(frame);
+new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}).observe(host);
+// ---- Variants: same model, recoloured by tier (variants change damage only) ----
+const NAMES={sword:["Iron Sword","Steel Sword","Knight's Sword","Silver Sword","Runic Sword","Mithril Sword","Dragonsteel Sword","Demonbane Sword","Celestial Sword","Divine Sword"],dagger:["Iron Dagger","Steel Dagger","Assassin's Dagger","Silver Dagger","Runic Dagger","Mithril Dagger","Dragonfang Dagger","Shadow Dagger","Celestial Dagger","Divine Dagger"],bow:["Wooden Bow","Shortbow","Hunter's Bow","Longbow","Reinforced Bow","Runic Bow","Mithril Bow","Dragonbone Bow","Celestial Bow","Divine Bow"],staff:["Wooden Staff","Apprentice Staff","Oak Staff","Crystal Staff","Runic Staff","Arcane Staff","Mithril Staff","Dragonheart Staff","Celestial Staff","Divine Staff"]};
+const DMG={sword:[4,5,6,7,8,9,10,11,12,14],dagger:[2,3,3,4,5,5,6,7,8,9],bow:[3,4,5,6,7,8,9,10,11,13],staff:[8,9,10,11,13,15,17,19,21,22]};
+const PAL=[{m:0x8d959d,e:0xbfc7cf,d:0x2a333c,g:0x8a6a3c,c:0x76dfff,x:0x26aaff,h:0x7ccfff},{m:0xbacbd9,e:0xe8f4ff,d:0x344a61,g:0xc69a58,c:0x76dfff,x:0x26aaff,h:0x7ccfff},{m:0xc4d2e6,e:0xf0f7ff,d:0x2f4466,g:0xd0a24e,c:0x8ab4ff,x:0x2f6cff,h:0x8ab4ff},{m:0xe6ebf1,e:0xffffff,d:0x55657a,g:0xdfe6ee,c:0xbfe9ff,x:0x5fb6e8,h:0xcfeaff},{m:0xa3b3da,e:0xd4ccff,d:0x2c2f5a,g:0x9b8cff,c:0xa592ff,x:0x6a4cff,h:0xa592ff},{m:0x8fd6ff,e:0xd8f6ff,d:0x2d5f7a,g:0x5fb8d9,c:0x7ff0ff,x:0x22c8ee,h:0x7ff0ff},{m:0xc4655a,e:0xffb8a8,d:0x4a1f1c,g:0xd8863a,c:0xff8a4a,x:0xff4a10,h:0xff8a4a},{m:0x6e3b74,e:0xdcA6ee,d:0x2a1030,g:0x8a2f4f,c:0xff5fa8,x:0xc01060,h:0xff5fa8},{m:0xf3e6b8,e:0xfff7da,d:0x8a7a40,g:0xf0c75a,c:0xffe38a,x:0xffc83a,h:0xffe38a},{m:0xffffff,e:0xffffff,d:0xb8c4d6,g:0xfff2b0,c:0xffffff,x:0xaee4ff,h:0xffffff}];
+let tierNo=1;
+function applyTier(){const p=PAL[tierNo-1];steel.color.set(p.m);edge.color.set(p.e);darksteel.color.set(p.d);gold.color.set(p.g);mana.color.set(p.c);mana.emissive.set(p.x);manaBright.color.set(p.c);manaBright.emissive.set(p.x);halo.material.color.set(p.h);steel.emissive.set(tierNo>=9?0x3a3420:0x000000);gold.emissive.set(tierNo>=9?0x4a3a10:0x000000);}
+function showTier(){applyTier();const n=NAMES[selected][tierNo-1];document.getElementById('tier').value=tierNo;document.getElementById('tierName').textContent='Tier '+tierNo+'/10';document.getElementById('tierInfo').textContent=n+' · +'+DMG[selected][tierNo-1]+' damage · animation and skill are the same for every variant';document.getElementById('name').textContent=n;}
+document.getElementById('tier').oninput=e=>{tierNo=+e.target.value;showTier();};
+{const q=new URLSearchParams(location.search),w=q.get('weapon'),t=parseInt(q.get('tier'),10);if(NAMES[w])selected=w;if(t>=1&&t<=10)tierNo=t;}
+
+build(selected);ui();showTier();
+</script>
+</body></html>

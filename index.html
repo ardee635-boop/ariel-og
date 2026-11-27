@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="en"><head>
+<script>
+/* Login that survives phones blocking cross-site cookies: the API sends a token on login/signup,
+   we keep it and send it back as a Bearer header on every call to the API. */
+(function(){var API='https://ariel-bot-38kh.onrender.com',K='nif_token',of=window.fetch;
+window.fetch=function(u,o){o=o||{};var url=typeof u==='string'?u:((u&&u.url)||'');
+ var mine=url.indexOf(API)===0;
+ if(mine){var t=null;try{t=localStorage.getItem(K)}catch(e){}
+  if(t){var h=new Headers(o.headers||{});h.set('Authorization','Bearer '+t);o.headers=h}}
+ return of.call(this,u,o).then(function(r){
+  if(mine){try{
+   if(/\/api\/auth\/(login|signup)$/.test(url)&&r.ok){r.clone().json().then(function(j){if(j&&j.token)localStorage.setItem(K,j.token)}).catch(function(){})}
+   else if(/\/api\/auth\/logout$/.test(url)){localStorage.removeItem(K)}
+   else if(r.status===401&&/\/api\/auth\/me$/.test(url)){localStorage.removeItem(K)}
+  }catch(e){}}
+  return r})}})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Niflheim</title>
+<meta name="theme-color" content="#050a12">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050a12;--panel:#0A1420;--border:#234258;--ice:#8FE3FF;--ice-dim:#3E7A94;--frost:#C9F3FF;--text:#EAF6FF;--muted:#7FA0B8;--green:#4ADE80;--red:#ff8a8a;--gold:#FBD34D;--yellow:#FBD34D;--panel-2:#0E1B2B;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050a12}}
+:root[data-theme="dark"]{--bg:#050a12}
+*,*:before,*:after{box-sizing:inherit;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(ellipse 500px 300px at 20% 0%,rgba(143,227,255,.08),transparent 60%),radial-gradient(ellipse 400px 260px at 100% 30%,rgba(143,227,255,.05),transparent 60%),var(--bg)}
+.snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.flake{position:absolute;top:-10px;background:var(--frost);border-radius:50%;opacity:.5;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) translateX(20px)}}
+.scene{position:fixed;inset:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);opacity:0;pointer-events:none;overflow-y:auto;transition:opacity .4s ease;z-index:1}
+.scene.active{opacity:1;pointer-events:auto}
+.corner{position:fixed;width:26px;height:26px;border:1.5px solid rgba(143,227,255,.3);z-index:5;pointer-events:none;transition:opacity .4s}
+.corner.tl{top:calc(16px + env(safe-area-inset-top,0px));left:16px;border-right:0;border-bottom:0}.corner.tr{top:calc(16px + env(safe-area-inset-top,0px));right:16px;border-left:0;border-bottom:0}
+.corner.bl{bottom:calc(16px + env(safe-area-inset-bottom,0px));left:16px;border-right:0;border-top:0}.corner.br{bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;border-left:0;border-top:0}
+body.in .corner{opacity:0}
+/* login */
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:32px 20px}
+.eyebrow{font-size:11px;letter-spacing:.24em;color:var(--ice);text-transform:uppercase;opacity:.85;display:flex;align-items:center;gap:10px}
+.eyebrow:before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ice);box-shadow:0 0 8px var(--ice),0 0 16px var(--ice);animation:pd 1.6s ease-in-out infinite}
+@keyframes pd{50%{opacity:.3}}
+.auth-title{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(26px,7vw,36px);letter-spacing:.06em;text-align:center;text-shadow:0 0 24px rgba(143,227,255,.2)}
+.auth-title span,.wm span{color:var(--ice)}
+.card{position:relative;background:linear-gradient(160deg,#0D1F30,#081420 75%);border:1.5px solid var(--ice-dim);border-radius:10px;box-shadow:0 0 0 1px rgba(143,227,255,.06),0 0 30px rgba(143,227,255,.08)}
+.card:before,.card:after{content:"◆";position:absolute;top:10px;color:var(--ice);font-size:10px;opacity:.7}
+.card:before{left:10px}.card:after{right:10px}
+.auth{width:min(400px,92vw);padding:28px 24px 24px}
+.toggle{display:flex;gap:2px;margin:4px auto 22px;border:1px solid var(--border);padding:3px;width:fit-content}
+.toggle button{font:500 11px 'Inter';letter-spacing:.1em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:7px 18px;cursor:pointer;border-radius:4px;transition:.2s}
+.toggle button.on{background:rgba(143,227,255,.12);color:var(--ice)}
+.fg{margin-bottom:16px}
+.lb{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.row{display:flex;gap:8px}
+.in{width:100%;background:rgba(143,227,255,.03);border:1px solid var(--border);border-radius:6px;color:var(--text);font:14px 'Inter';padding:11px 13px;outline:none;transition:.2s}
+.in:focus{border-color:var(--ice);box-shadow:0 0 0 1px rgba(143,227,255,.3),0 0 16px rgba(143,227,255,.12);background:rgba(143,227,255,.05)}
+.in::placeholder{color:var(--muted);opacity:.6}
+.cc{flex:0 0 78px;position:relative}.cc i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted);font-size:14px}.cc .in{padding-left:24px}
+.hint{font-size:10px;color:var(--muted);margin-top:6px;opacity:.75}
+.pw{position:relative}.pw .in{padding-right:42px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;color:var(--muted);cursor:pointer}
+.pw svg{width:17px;height:17px;display:block}
+.go{width:100%;margin-top:6px;background:linear-gradient(135deg,rgba(143,227,255,.14),rgba(62,214,255,.08));border:1px solid var(--ice-dim);border-radius:6px;color:var(--ice);font:600 14px 'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase;padding:13px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;text-align:center;text-decoration:none;display:block}
+.go:hover{background:linear-gradient(135deg,rgba(143,227,255,.25),rgba(62,214,255,.16));box-shadow:0 0 24px rgba(143,227,255,.2);color:var(--frost)}
+.go:active{transform:translateY(1px)}
+.sw{text-align:center;margin-top:18px;font-size:12.5px;color:var(--muted)}
+.sw button{background:none;border:0;color:var(--ice);font:12.5px 'Inter';cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0}
+/* boot */
+#boot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.bl{font-size:12px;color:var(--ice);letter-spacing:.08em;opacity:0;text-align:center}
+.bl.show{animation:bf .5s ease forwards}
+@keyframes bf{0%{opacity:0;transform:translateY(4px)}30%{opacity:1}45%{opacity:.2}60%{opacity:1}100%{opacity:1;transform:none}}
+.track{width:240px;height:3px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden;border-radius:2px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--ice-dim),var(--ice));box-shadow:0 0 10px var(--ice);transition:width 2.2s linear}
+/* welcome */
+#welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:56px 22px 40px;text-align:center}
+.skip{position:fixed;top:calc(18px + env(safe-area-inset-top,0px));right:54px;background:none;border:0;color:var(--muted);font:500 11px 'Inter';letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:8px;z-index:6}
+.emblem{position:relative;width:132px;height:132px;display:grid;place-items:center}
+.emblem:before{content:"";position:absolute;inset:-26px;border-radius:50%;background:radial-gradient(circle,rgba(143,227,255,.28),transparent 66%);animation:glow 4s ease-in-out infinite}
+@keyframes glow{50%{opacity:.45;transform:scale(1.08)}}
+.emblem svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.r1{transform-origin:50% 50%;animation:spin 40s linear infinite}.r2{transform-origin:50% 50%;animation:spin 26s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rise{opacity:0;transform:translateY(12px)}
+.on-w .rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.wwm{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(38px,11vw,58px);letter-spacing:.12em;text-shadow:0 0 30px rgba(143,227,255,.35);margin:0}
+.wwm span{color:var(--ice)}
+.wsub{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:-8px}
+.wsub b{color:var(--frost);font-weight:600}
+.pager{width:min(440px,92vw);padding:26px 22px 22px;min-height:196px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pg{display:none}.pg.show{display:block;animation:flk .45s steps(1,end)}
+@keyframes flk{0%{opacity:0}6%{opacity:1;transform:translateX(-3px);filter:brightness(1.8)}12%{opacity:.3;transform:translateX(2px)}20%{opacity:1;transform:none;filter:none}}
+.pg .k{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ice);margin-bottom:8px}
+.pg h3{font-family:'Cinzel',serif;font-weight:600;font-size:21px;letter-spacing:.08em;margin:0 0 10px}
+.pg p{font-size:13.5px;line-height:1.75;color:var(--muted);margin:0}.pg p b{color:var(--ice);font-weight:600}
+.dots{display:flex;gap:10px;margin-top:20px}
+.dots button{width:8px;height:8px;border-radius:50%;border:1px solid var(--ice-dim);background:none;padding:0;cursor:pointer;transition:.25s}
+.dots button.on{background:var(--ice);box-shadow:0 0 10px var(--ice);width:22px;border-radius:99px}
+.wgo{width:min(440px,92vw)}
+/* ===== ORIGINAL-THEME HOME ===== */
+.screen{position:relative;min-height:100%;padding-bottom:110px}
+.home-header{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:22px 20px 0}
+.home-title{font-family:'Cinzel',serif;font-size:19px;letter-spacing:.08em;flex:1}.home-title span{color:var(--ice)}
+.icon-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);background:none;padding:0;cursor:pointer;position:relative;flex:none}
+.icon-btn svg{width:16px;height:16px}
+.bell.unread:after{content:"";position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:#ff8a8a;box-shadow:0 0 6px rgba(224,90,90,.8)}
+.view{display:none;position:relative;z-index:1}.view.show{display:block;animation:flk .45s steps(1,end)}
+.profile-wrap{padding:20px 20px 0;perspective:1200px}
+.profile-card{position:relative;width:100%;min-height:276px;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,.2,.2,1);cursor:pointer}
+.profile-card.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;background:linear-gradient(160deg,#0D1F30,#081420 70%);border:1.5px solid var(--ice-dim);box-shadow:0 0 0 1px rgba(143,227,255,.06),0 0 30px rgba(143,227,255,.08);padding:16px;overflow:hidden}
+.card-face:before,.card-face:after{content:"◆";position:absolute;color:var(--ice);font-size:10px;opacity:.7;top:10px}
+.card-face:before{left:10px}.card-face:after{right:10px}
+.card-front{display:flex;gap:14px}
+.avatar-frame{width:88px;height:88px;flex-shrink:0;border-radius:8px;border:1.5px solid var(--ice-dim);background:radial-gradient(circle at 50% 40%,#2a6f8c,#0a1622 75%);display:flex;align-items:center;justify-content:center;position:relative}
+.swirl{width:70%;height:70%;border-radius:50%;background:conic-gradient(from 90deg,#9FE8FF,#1B4A5C,#9FE8FF);filter:blur(.5px);box-shadow:0 0 18px rgba(143,227,255,.5) inset}
+.card-fields{flex:1;display:flex;flex-direction:column;gap:7px;padding-top:2px;min-width:0}
+.field-row{display:flex;gap:14px;font-size:12.5px;align-items:center}
+.field-row .k{color:var(--muted)}.field-row .v{color:var(--text);font-weight:600}
+.mbar{display:flex;align-items:center;gap:8px;font-size:11px}.mbar .k{color:var(--muted);width:26px}
+.mbar .t{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}.mbar .t i{display:block;height:100%;border-radius:3px}
+.mbar .hpf{background:linear-gradient(90deg,#4ADE80,#22C55E)}.mbar .xpf{background:linear-gradient(90deg,var(--ice-dim),var(--ice))}
+.mbar .n{font-size:10.5px;color:var(--text);min-width:64px;text-align:right;font-weight:600}
+.badge-strip{position:absolute;left:16px;right:16px;bottom:38px;height:34px;border:1px solid var(--ice-dim);border-radius:6px;background:rgba(143,227,255,.04);display:flex;align-items:center;gap:6px;padding:0 8px;overflow:hidden}
+.mini-badge{width:22px;height:22px;border-radius:50%;background:linear-gradient(160deg,#9FE8FF,#2C5F73);flex-shrink:0;box-shadow:0 0 6px rgba(143,227,255,.5)}
+.mini-badge.empty{background:none;border:1px dashed var(--border);box-shadow:none}
+.card-footer{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--ice);padding:8px 0;border-top:1px solid rgba(143,227,255,.15)}
+.card-back{transform:rotateY(180deg);display:flex;flex-direction:column;gap:12px;padding-top:22px}
+.back-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px}
+.back-row .k{color:var(--muted);letter-spacing:.05em;text-transform:uppercase;font-size:10.5px}.back-row .v{font-weight:600}
+.bio-block p{font-size:12px;line-height:1.6;color:var(--muted);margin:4px 0 0}
+.flip-hint{position:absolute;bottom:10px;right:14px;font-size:9px;letter-spacing:.1em;color:var(--muted);opacity:.6}
+.joined-line{text-align:center;font-size:10.5px;color:var(--muted);margin-top:8px;letter-spacing:.05em}
+.section-block{margin:26px 20px 0}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+.section-head h3{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.06em;margin:0;font-weight:600}.section-head h3 span{color:var(--ice)}
+.section-head em{font-style:normal;font-size:10px;color:var(--muted);letter-spacing:.1em}
+.gym-row{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s ease;width:100%;color:var(--text);font:inherit;text-align:left}
+.gym-row:active{border-color:rgba(143,227,255,.35)}
+.inv-icon{width:52px;height:52px;flex-shrink:0;border-radius:8px;border:1px solid var(--border);background:radial-gradient(circle at 40% 30%,#1c4c60,#081420 75%);display:flex;align-items:center;justify-content:center;font-size:24px}
+.inv-icon.sm{width:40px;height:40px;font-size:19px}
+.gym-meta{flex:1;min-width:0}.gym-meta .name{font-family:'Cinzel',serif;font-size:15px;font-weight:700}
+.gym-meta .sub{font-size:11.5px;color:var(--muted);margin-top:3px}.gym-meta .sub.open{color:#7FE0A8}.gym-meta .sub.locked{color:#E08A7F}
+.chev{width:16px;height:16px;color:var(--ice-dim);flex:none}
+.tab-rect-wrap{margin:26px 20px 0}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab-btn{flex:1;text-align:center;padding:10px 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:0;font-family:'Inter',sans-serif;cursor:pointer;position:relative}
+.tab-btn.active{color:var(--ice)}.tab-btn.active:after{content:"";position:absolute;left:20%;right:20%;bottom:-1px;height:2px;background:var(--ice);box-shadow:0 0 8px var(--ice)}
+.tab-scroll{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;scrollbar-width:none;-ms-overflow-style:none;align-items:flex-start}
+.tab-scroll::-webkit-scrollbar{display:none}
+.tab-pane{min-width:100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;flex-shrink:0}
+.stats-rect{border:1px solid var(--border);border-radius:8px;background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:6px 16px}
+.stat-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(143,227,255,.12);font-size:13px}
+.stat-line .k{color:var(--muted)}.stat-line .v{font-weight:700}.stat-line:last-child{border-bottom:none}
+.inv-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid rgba(143,227,255,.06)}
+.inv-row .nm{font-size:13px;font-weight:600}.inv-row .ds{font-size:11px;color:var(--muted);margin-top:2px}.inv-row .q{margin-left:auto;font-size:12px;color:var(--ice);font-weight:700}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.badge-tile{border:1px solid var(--border);border-radius:8px;background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.badge-tile.locked{opacity:.35;border-style:dashed}
+.badge-icon{width:44px;height:44px;border-radius:50%;background:linear-gradient(160deg,#9FE8FF,#245A70);box-shadow:0 0 14px rgba(143,227,255,.45)}
+.badge-tile.locked .badge-icon{background:none;border:1px dashed var(--border);box-shadow:none}
+.badge-name{font-size:11px;font-weight:600}
+.notice{display:flex;align-items:center;gap:12px;margin:22px 20px 0;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:linear-gradient(180deg,var(--panel-2),var(--panel))}
+.notice svg{width:20px;height:20px;color:var(--ice);flex:none}.notice b{font-size:12.5px;display:block}.notice span{font-size:12px;color:var(--muted)}.notice em{margin-left:auto;font-style:normal;font-size:10.5px;color:var(--muted);align-self:flex-start}
+.notice.flash{animation:nf .9s ease}@keyframes nf{30%{box-shadow:0 0 0 1px var(--ice),0 0 22px rgba(143,227,255,.4)}}
+.lb-page-head{padding:20px 20px 0}.lb-page-head h1{font-family:'Cinzel',serif;font-size:20px;letter-spacing:.08em;margin:0 0 4px;font-weight:600}.lb-page-head p{font-size:12px;color:var(--muted);margin:0}
+.lb-list{padding:16px 20px 0}
+.lr{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;margin-bottom:8px;border-radius:8px;border:1px solid var(--border);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.lr.me{border-color:var(--ice-dim)}
+.lr .rk{width:24px;text-align:center;font:700 13px 'Cinzel',serif;color:var(--muted);flex:none}.lr .rk.t{color:var(--yellow)}
+.lr .av{width:38px;height:38px;flex:none;border-radius:6px;border:1px solid var(--ice-dim);background:radial-gradient(circle at 50% 40%,#2a6f8c,#0a1622 75%);display:grid;place-items:center;font:600 13px 'Cinzel',serif;color:var(--frost);position:relative}
+.lr .av.on:after{content:"";position:absolute;right:-3px;bottom:-3px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid #081420}
+.lr .mid{flex:1;min-width:0}.lr .mid b{font-size:13px;font-weight:600;display:block}.lr .mid span,.lr .sm{font-size:11px;color:var(--muted)}
+.mini{flex:none;background:none;border:1px solid var(--ice-dim);border-radius:5px;color:var(--ice);font:600 11px 'Inter';letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;cursor:pointer}
+.mini.no{border-color:rgba(255,138,138,.4);color:var(--red)}.mini[disabled]{opacity:.5}
+.note{font-size:11.5px;color:var(--muted);text-align:center;margin:14px 20px 0;line-height:1.6}.note b{color:var(--ice);font-weight:600}
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font:500 11px 'Inter';letter-spacing:.14em;text-transform:uppercase;padding:20px 20px 0;cursor:pointer}.back svg{width:13px;height:13px}
+.pp{margin:16px 20px 0;text-align:center}.pp .avatar-frame{margin:0 auto 12px;width:96px;height:96px}
+.pp h2{font:600 22px 'Cinzel',serif;letter-spacing:.06em;margin:0}.pp .s2{font-size:12px;color:var(--muted);margin:4px 0 14px}.pp .stats-rect{text-align:left;margin-bottom:14px}
+.pp .go{margin-top:0}
+.ribbon{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:space-around;align-items:center;padding:14px 10px calc(14px + env(safe-area-inset-bottom,0px));background:rgba(5,10,18,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--border);opacity:0;pointer-events:none;transition:opacity .4s}
+body.in .ribbon{opacity:1;pointer-events:auto}
+.ribbon .item{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);font-size:10px;background:none;border:0;cursor:pointer;font-family:'Inter',sans-serif;padding:0;position:relative}
+.ribbon .item.active{color:var(--ice)}.ribbon .item svg{width:20px;height:20px}.ribbon .item.active svg{filter:drop-shadow(0 0 6px rgba(143,227,255,.7))}
+.ribbon .badge{position:absolute;top:-5px;right:calc(50% - 16px);min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:linear-gradient(135deg,#ff8a8a,#e05a5a);color:#1a0d0d;font-weight:700;font-size:9.5px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 6px rgba(224,90,90,.6)}
+#dim,#sheetdim{position:fixed;inset:0;background:rgba(2,6,12,.72);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+#sheetdim{z-index:30}
+body.dr #dim,body.sh #sheetdim{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(290px,80vw);z-index:21;transform:translateX(-102%);transition:transform .32s cubic-bezier(.2,.7,.2,1);background:linear-gradient(160deg,#0D1F30,#081420 80%);border-right:1.5px solid var(--ice-dim);padding:calc(22px + env(safe-area-inset-top,0px)) 18px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+body.dr #drawer{transform:none}
+.dh{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.dh .avatar-frame{width:50px;height:50px}.dh b{font-family:'Cinzel',serif;font-size:15px;letter-spacing:.04em;display:block}.dh span{font-size:11px;color:var(--muted)}
+.di{display:flex;align-items:center;gap:14px;width:100%;padding:14px 6px;background:none;border:0;border-bottom:1px dashed rgba(143,227,255,.12);color:var(--text);font:500 13.5px 'Inter';cursor:pointer;text-align:left}
+.di svg{width:19px;height:19px;color:var(--ice);flex:none}
+.di.out2{margin-top:auto;border:1px solid rgba(255,138,138,.35);border-radius:6px;justify-content:center;color:var(--red);font-family:'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase;font-size:12.5px}.di.out2 svg{color:var(--red)}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.7,.2,1);max-width:520px;margin:0 auto;padding:22px 20px calc(24px + env(safe-area-inset-bottom,0px));background:linear-gradient(160deg,#0D1F30,#081420 80%);border:1.5px solid var(--ice-dim);border-bottom:0;border-radius:14px 14px 0 0;text-align:center}
+body.sh #sheet{transform:none}
+#sheet h3{font:600 19px 'Cinzel',serif;letter-spacing:.08em;margin:6px 0}#sheet p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 0 4px}#sheet .eyebrow{justify-content:center}
+.sgrid{display:grid;gap:10px;margin-top:16px}.sgrid .go{margin:0}.go.ghost{background:none;border-color:var(--border);color:var(--muted)}
+#toast{position:fixed;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translate(-50%,-16px);background:rgba(15,35,26,.92);border:1px solid rgba(74,222,128,.4);padding:11px 18px;border-radius:8px;font-size:12.5px;color:#b9f5cf;opacity:0;pointer-events:none;z-index:60;transition:.35s;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== NIFLHEIM LOOK (welcome-screen language) ===== */
+.aurora{position:fixed;left:-10%;right:-10%;top:-12%;height:68vh;pointer-events:none;z-index:0;opacity:.55;filter:blur(38px);
+ background:radial-gradient(40% 60% at 20% 30%,rgba(60,200,255,.30),transparent 70%),radial-gradient(35% 55% at 65% 18%,rgba(110,130,255,.24),transparent 70%),radial-gradient(30% 50% at 92% 46%,rgba(70,255,220,.16),transparent 70%);animation:aur 14s ease-in-out infinite alternate}
+@keyframes aur{to{transform:translateX(6%) skewX(-6deg);opacity:.34}}
+.peaks{position:fixed;left:0;right:0;bottom:0;width:100%;height:36vh;pointer-events:none;z-index:0;opacity:.7}
+.home-header{padding-top:calc(20px + env(safe-area-inset-top,0px))}
+.home-title{flex:1;text-align:center;font-weight:700;font-size:22px;letter-spacing:.2em;text-shadow:0 0 22px rgba(143,227,255,.55)}
+.icon-btn{border-color:var(--ice-dim);color:var(--ice);box-shadow:0 0 14px rgba(143,227,255,.12)}
+.hero2{position:relative;padding:14px 20px 0;text-align:center}
+.emblem2{position:relative;width:156px;height:156px;margin:4px auto 2px;display:grid;place-items:center;cursor:pointer}
+.emblem2:before{content:"";position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(circle,rgba(143,227,255,.3),transparent 66%);animation:glow 4s ease-in-out infinite}
+.emblem2.pulse:before{animation:pls .9s ease}@keyframes pls{40%{transform:scale(1.4);opacity:1}}
+.emblem2>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.emblem2 .swirl{position:relative;width:84px;height:84px;box-shadow:0 0 26px rgba(143,227,255,.6) inset,0 0 30px rgba(143,227,255,.35)}
+.pname{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(34px,10.5vw,48px);letter-spacing:.12em;margin:10px 0 8px;text-transform:uppercase;line-height:1.05;text-shadow:0 0 30px rgba(143,227,255,.45);animation:flk .6s steps(1,end)}
+.pmeta{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.pmeta b{color:var(--frost);font-weight:600}.pmeta i{color:var(--ice);font-style:normal;font-size:7px}
+.bars2{margin:20px auto 0;max-width:340px;display:grid;gap:11px}
+.bar2{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.16em;color:var(--muted)}
+.bar2 .k{width:28px;text-align:left}.bar2 .n{min-width:70px;text-align:right;color:var(--text);font-weight:600;letter-spacing:.04em;font-size:11px}
+.bar2 .t{flex:1;height:9px;background:rgba(255,255,255,.05);border:1px solid var(--border);clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%);overflow:hidden}
+.bar2 .t i{display:block;height:100%}
+.bar2 .hp{background:linear-gradient(90deg,#1faa63,#4ADE80);box-shadow:0 0 12px rgba(74,222,128,.7)}
+.bar2 .xp{background:linear-gradient(90deg,#2d7f9c,var(--ice));box-shadow:0 0 12px rgba(143,227,255,.7)}
+.sec2{display:flex;align-items:center;gap:12px;margin:32px 20px 14px;font:600 12px 'Cinzel',serif;letter-spacing:.26em;color:var(--frost);text-transform:uppercase}
+.sec2:before,.sec2:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--ice-dim))}.sec2:after{transform:scaleX(-1)}
+.sec2 span{color:var(--ice)}
+.portals{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px}
+.portal{position:relative;padding:20px 10px 16px;text-align:center;color:var(--text);font:inherit;cursor:pointer;border-radius:10px;border:1.5px solid var(--ice-dim);background:linear-gradient(160deg,#0D1F30,#081420 75%);box-shadow:0 0 0 1px rgba(143,227,255,.06),0 0 26px rgba(143,227,255,.1);overflow:hidden}
+.portal:before,.portal:after{content:"◆";position:absolute;top:8px;color:var(--ice);font-size:9px;opacity:.7}.portal:before{left:9px}.portal:after{right:9px}
+.portal .ring{position:relative;width:78px;height:78px;margin:0 auto 12px;display:grid;place-items:center}
+.portal .ring:before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(143,227,255,.22),transparent 68%)}
+.portal .ring>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.portal .ic{position:relative;width:32px;height:32px;color:var(--frost);filter:drop-shadow(0 0 8px rgba(143,227,255,.8))}
+.portal b{display:block;font:700 15px 'Cinzel',serif;letter-spacing:.16em}
+.portal .s{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}.portal .s.on{color:#7FE0A8}
+.portal:active{transform:translateY(1px);box-shadow:0 0 34px rgba(143,227,255,.28)}
+.status{margin:30px 20px 0;padding:14px 14px 6px;border:1.5px solid var(--ice-dim);border-radius:10px;background:linear-gradient(160deg,#0D1F30,#081420 75%);box-shadow:0 0 0 1px rgba(143,227,255,.06),0 0 30px rgba(143,227,255,.08);position:relative}
+.status:before,.status:after{content:"◆";position:absolute;top:8px;color:var(--ice);font-size:9px;opacity:.7}.status:before{left:9px}.status:after{right:9px}
+.status .tab-bar{margin:6px 0 14px}.status .stats-rect{border:0;background:none;padding:0}
+.runes{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:6px}
+.rune{text-align:center;padding:8px 4px 12px;border-right:1px solid rgba(143,227,255,.14)}.rune:last-child{border-right:0}
+.rune b{display:block;font:700 24px 'Cinzel',serif;color:var(--frost);text-shadow:0 0 18px rgba(143,227,255,.55)}
+.rune span{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.notice{border-left:2px solid var(--ice);box-shadow:0 0 22px rgba(143,227,255,.06)}
+.lb-page-head{text-align:center;padding-top:22px}
+.lb-page-head h1{font-size:23px;letter-spacing:.2em;text-shadow:0 0 24px rgba(143,227,255,.45)}
+.lb-page-head:after{content:"◆";display:block;color:var(--ice);font-size:9px;margin-top:12px;opacity:.8}
+.gym-row,.lr{border-color:var(--ice-dim);box-shadow:0 0 20px rgba(143,227,255,.05)}
+.section-head h3{letter-spacing:.2em}
+.ribbon{box-shadow:0 -10px 30px rgba(0,0,0,.4)}
+.ribbon .item.active:before{content:"";position:absolute;top:-15px;left:50%;width:36px;height:2px;margin-left:-18px;background:var(--ice);box-shadow:0 0 10px var(--ice)}
+@media (max-width:360px){.portals{gap:8px}}
+/* ===== MAP ===== */
+#home.maplock{overflow:hidden}
+#v-map{position:fixed;left:0;right:0;top:calc(64px + env(safe-area-inset-top,0px));bottom:calc(72px + env(safe-area-inset-bottom,0px));overflow:hidden;background:#030a13;border-top:1px solid var(--border);animation:none!important}
+#mapc{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.mholo{position:absolute;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(55,135,255,.025) 0,rgba(55,135,255,.025) 1px,transparent 1px,transparent 5px),linear-gradient(rgba(25,105,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(25,105,255,.03) 1px,transparent 1px);background-size:auto,44px 44px,44px 44px;-webkit-mask-image:radial-gradient(ellipse at 50% 48%,#000 38%,rgba(0,0,0,.72) 75%,transparent 110%);mask-image:radial-gradient(ellipse at 50% 48%,#000 38%,rgba(0,0,0,.72) 75%,transparent 110%);mix-blend-mode:screen;overflow:hidden}
+.mholo:after{content:'';position:absolute;left:0;right:0;height:22%;top:-24%;background:linear-gradient(180deg,transparent,rgba(35,125,255,.12),rgba(35,125,255,.035),transparent);animation:mscan 9s linear infinite}
+@keyframes mscan{to{top:110%}}
+.mshade{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(2,9,18,.7),transparent 16%,transparent 66%,rgba(2,8,16,.82)),radial-gradient(ellipse at center,transparent 50%,rgba(0,8,18,.4) 100%)}
+.mhead{position:absolute;top:12px;left:16px;right:16px;z-index:4;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.mhead h1{font:700 26px 'Cinzel',serif;letter-spacing:.2em;margin:0;text-shadow:0 0 18px #168dff}
+.mchip{pointer-events:auto;border:1px solid var(--ice-dim);color:var(--ice);background:rgba(6,23,37,.85);border-radius:20px;padding:7px 13px;font:600 11px 'Inter';letter-spacing:.08em;max-width:55%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mhint{position:absolute;top:50px;left:0;right:0;text-align:center;z-index:4;color:#9bc8dd;font-size:10px;letter-spacing:.14em;text-shadow:0 0 10px #000;pointer-events:none}
+.mjour{position:absolute;top:72px;left:50%;transform:translateX(-50%);z-index:5;border:1px solid var(--ice);background:rgba(8,33,55,.92);color:var(--frost);font-size:11.5px;letter-spacing:.06em;padding:7px 14px;border-radius:18px;box-shadow:0 0 18px rgba(143,227,255,.25);white-space:nowrap}
+#mlabels{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.mlab{position:absolute;left:0;top:0;padding:5px 10px;border:1px solid #3c91bd;border-radius:16px;background:rgba(6,24,39,.88);color:#d9f5ff;font:500 11.5px 'Inter';white-space:nowrap;box-shadow:0 0 14px #0876c855;pointer-events:auto;cursor:pointer;will-change:transform}
+.mlab.cur{border-color:var(--ice);color:#fff;box-shadow:0 0 18px rgba(143,227,255,.5)}
+.mlab.unk{opacity:.6;color:#8daabd;border-style:dashed}
+.mlab.lock{border-color:#e6a455;color:#ffd9a0}
+.mlab.sel{border-color:#fff;box-shadow:0 0 20px rgba(143,227,255,.8)}
+.mlab em{font-style:normal;color:var(--ice);font-size:9px;letter-spacing:.12em;margin-left:6px}
+.mctl{position:absolute;right:12px;top:42%;z-index:5;display:grid;gap:5px}
+.mctl button{width:40px;height:40px;background:rgba(6,24,39,.88);border:1px solid #3d8bad;color:var(--ice);font-size:22px;border-radius:10px;cursor:pointer;padding:0}
+.mview{position:absolute;left:10px;top:34%;height:170px;width:44px;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 0;border:1px solid #28618c;border-radius:14px;background:rgba(4,20,37,.82);color:#8fc4ff}
+.mview small{font-size:8px;letter-spacing:.12em;writing-mode:vertical-rl;transform:rotate(180deg)}
+.mview .e{font-size:8px;color:#75a9db}
+.mview input{-webkit-appearance:none;appearance:none;width:100px;height:4px;transform:rotate(-90deg);background:#17496f;border-radius:4px;outline:none;margin:0}
+.mview input::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ice);box-shadow:0 0 10px var(--ice)}
+.mview input::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--ice)}
+.mcard{position:absolute;left:12px;right:12px;bottom:12px;z-index:5;min-height:84px;border:1px solid var(--ice-dim);border-radius:12px;background:linear-gradient(100deg,rgba(5,22,36,.97),rgba(5,30,49,.92));box-shadow:0 0 22px rgba(8,121,170,.25);display:flex;align-items:center;gap:12px;padding:12px}
+.mprev{width:54px;height:54px;flex:none;border-radius:9px;background:radial-gradient(circle at 50% 45%,#278ed5,#09243a 70%);border:1px solid #367a9b;display:grid;place-items:center;font-size:22px;color:#a4eaff}
+.minfo{flex:1;min-width:0}.minfo strong{font:700 17px 'Cinzel',serif;letter-spacing:.06em;display:block}
+.minfo small{display:block;color:var(--muted);margin-top:4px;font-size:12px;line-height:1.4}
+.minfo .tg{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ice);border:1px solid var(--ice-dim);border-radius:10px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+.minfo .tg.l{color:#ffc27a;border-color:#a56b2a}
+.mgo{flex:none;background:#0b3048;border:1px solid #4aa5cc;color:#c9f2ff;border-radius:9px;padding:11px 13px;font:700 12px 'Cinzel',serif;letter-spacing:.1em;cursor:pointer}
+.mgo[disabled]{opacity:.45;cursor:default}
+.mgo:not([disabled]):active{transform:translateY(1px)}
+.mmsg{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--muted);font-size:13px;line-height:1.7;background:rgba(3,10,19,.88)}
+.mmsg.on{display:flex}
+/* ===== profile edit (rename + picture) ===== */
+.swirl.has{background:var(--av) center/cover no-repeat;box-shadow:0 0 14px rgba(143,227,255,.45);filter:none}
+.avatar-frame .swirl.has{width:100%;height:100%;border-radius:inherit}
+.edc{padding:16px;margin-top:14px;text-align:left}
+.edc .lb{display:block;margin-bottom:8px}
+.edrow{display:flex;gap:10px}.edrow .go{margin:0;flex:1}
+.edc .hint{margin-top:8px}.edc>.go{margin-top:12px}
+.edmsg{min-height:16px;font-size:12px;margin-top:8px;color:var(--muted)}.edmsg.bad{color:#ff8a8a}.edmsg.ok{color:#7FE0A8}
+.go[disabled]{opacity:.5;pointer-events:none}
+.go[hidden]{display:none}
+/* ===== STATS + ASCENSION ===== */
+.bar2 i.mp{background:linear-gradient(90deg,#3b82f6,#8FE3FF)}
+.pts{display:flex;gap:8px;padding:14px 20px 0}.pts .pt{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--border);border-radius:8px;background:var(--panel)}
+.pts .pt b{display:block;font:600 18px 'Cinzel',serif;color:var(--frost)}.pts .pt span{font-size:9.5px;letter-spacing:.16em;color:var(--muted)}
+.pgrp{margin:14px 20px 0;padding:14px}.pgrp h3{font:600 12px 'Cinzel',serif;letter-spacing:.14em;margin:0 0 10px;color:var(--ice)}
+.arow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(35,66,88,.5)}.arow:last-child{border:0}
+.arow .an{width:42px;font:600 13px 'Cinzel',serif}.arow .am{flex:1;font-size:10.5px;color:var(--muted)}
+.arow .av2{min-width:62px;text-align:right;font-weight:600;font-size:13px}.arow .av2 em{font-style:normal;color:var(--green)}
+.arow button{width:30px;height:30px;border-radius:6px;border:1px solid var(--ice-dim);background:none;color:var(--ice);font:600 16px 'Inter';cursor:pointer}
+.arow button[disabled]{opacity:.3;cursor:default}
+.sgrid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:11.5px}.sgrid2 div{display:flex;justify-content:space-between;color:var(--muted)}.sgrid2 b{color:var(--text);font-weight:600}
+.atabs{display:flex;gap:6px;padding:12px 20px 0;overflow-x:auto}.atabs button{flex:none;background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font:600 11px 'Inter';letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;cursor:pointer}
+.atabs button.on{border-color:var(--ice);color:var(--ice);background:rgba(143,227,255,.08)}
+.crow{margin:12px 20px 0;padding:14px}.crow h4{font:600 15px 'Cinzel',serif;margin:0 0 2px}.crow .sp{font-size:11px;color:var(--ice)}.crow p{font-size:12px;color:var(--muted);margin:8px 0;line-height:1.55}
+.chip{display:inline-block;font:600 9.5px 'Inter';letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--border);color:var(--muted);margin-right:4px}
+.chip.ok{border-color:var(--green);color:var(--green)}.chip.av{border-color:var(--ice);color:var(--ice)}
+.tcols{display:flex;gap:10px;padding:12px 20px 0;overflow-x:auto;align-items:flex-start}.tcol{flex:1 0 148px;display:flex;flex-direction:column;align-items:stretch}
+.tcol h5{font:600 11px 'Cinzel',serif;letter-spacing:.14em;text-align:center;color:var(--ice);margin:0 0 8px}.tcol h5 small{display:block;font:500 9px 'Inter';color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.tn{position:relative;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--panel);font-size:11px;margin-bottom:18px;text-align:center}
+.tn:not(:last-child):after{content:'';position:absolute;left:50%;bottom:-18px;width:2px;height:18px;background:var(--border)}
+.tn.unlocked{border-color:var(--green);box-shadow:0 0 14px rgba(74,222,128,.15)}.tn.unlocked:not(:last-child):after{background:var(--green)}
+.tn.available,.tn.buyable{border-color:var(--ice);box-shadow:0 0 14px rgba(143,227,255,.18)}.tn.locked{opacity:.6}
+.tn b{display:block;font:600 12.5px 'Cinzel',serif;margin-bottom:3px}.tn .m{color:var(--muted);font-size:10px;line-height:1.45}.tn .why{color:var(--red);font-size:9.5px;margin-top:4px}
+.tn button{width:100%;margin-top:7px;padding:6px;border-radius:5px;border:1px solid var(--ice);background:rgba(143,227,255,.1);color:var(--ice);font:600 10.5px 'Inter';letter-spacing:.08em;cursor:pointer}
+.pips{display:flex;gap:4px;justify-content:center;margin:4px 0}.pips i{width:14px;height:5px;border-radius:2px;background:var(--border)}.pips i.f{background:var(--green)}
+.mcomp{position:absolute;top:74px;right:12px;width:62px;height:62px;z-index:5;pointer-events:none;filter:drop-shadow(0 0 6px rgba(143,227,255,.35))}
+.mcomp text{fill:var(--ice);font:700 8px Inter,system-ui,sans-serif}.mcomp text.n{fill:#ff8a8a}
+.bc summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:space-between}.bc summary::-webkit-details-marker{display:none}
+.bc .art{width:46px;height:46px;border:1px solid var(--ice-dim);border-radius:8px;display:grid;place-items:center;font:700 18px Inter,system-ui,sans-serif;color:var(--ice);background:#081420;flex:none}
+.bc .bd{margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6}.bc .bd p{margin:6px 0}.bc .bd b{color:var(--text)}
+.grp{font:600 10px Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ice-dim);margin:16px 20px 6px}
+#goMap{margin:10px 20px 0;width:calc(100% - 40px)}
+
+/* ---- Stage 8: class system ---- */
+.tn.current{border-color:var(--gold);box-shadow:0 0 16px rgba(251,211,77,.25)}.tn.past{opacity:.75;border-style:dashed}.tn.discovered{opacity:.5}
+.ftree{position:relative;overflow:auto;margin:12px 12px 0;border:1px solid var(--border);border-radius:10px;background:var(--panel);height:58vh;touch-action:pan-x pan-y}
+.fwrap{position:relative;transform-origin:0 0;padding:16px;display:flex;flex-direction:column;gap:44px;width:max-content;min-width:100%}
+.frow{display:flex;gap:18px;justify-content:center}.fn{width:128px;cursor:pointer}.fn .tn{margin:0}.fn .tn:after{display:none}
+.fsvg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.zbar{display:flex;gap:6px;justify-content:flex-end;padding:8px 20px 0}.zbar button{width:32px;height:28px;border:1px solid var(--ice-dim);background:var(--panel);color:var(--ice);border-radius:6px}
+.filt{display:flex;gap:8px;padding:12px 20px 0}.filt select,.filt input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font:500 12px 'Inter'}
+.rk{display:inline-block;font:700 9px 'Inter';letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid}
+.sk{padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--panel);text-align:left;color:var(--text);cursor:pointer}.sk b{display:block;font:600 12.5px 'Cinzel',serif;margin:4px 0}.sk.off{opacity:.55}
+.gr{font-size:10.5px;color:var(--muted);margin:4px 0}.gr b{color:var(--ice)}
+
+/* ---- Ascension hub + Skills (class system stage 4) ---- */
+.ahub[hidden],#ascSub[hidden]{display:none}
+.ahub{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px 0}
+.atile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:150px;padding:16px 14px 14px;text-align:left;color:var(--text);font:inherit;cursor:pointer;border-radius:12px;border:1.5px solid var(--ice-dim);background:linear-gradient(160deg,#0D1F30,#081420 78%);box-shadow:0 0 0 1px rgba(143,227,255,.05),0 0 26px rgba(143,227,255,.07);transition:transform .15s,border-color .2s,box-shadow .2s}
+.atile:active{transform:scale(.97)}.atile:hover{border-color:var(--ice);box-shadow:0 0 22px rgba(143,227,255,.2)}
+.atile .ai{width:46px;height:46px;border-radius:10px;border:1px solid var(--ice-dim);background:rgba(143,227,255,.07);display:grid;place-items:center;color:var(--ice);margin-bottom:4px}
+.atile .ai svg{width:24px;height:24px}
+.atile b{font:600 15px 'Cinzel',serif;letter-spacing:.06em}
+.atile span{font-size:11px;color:var(--muted);line-height:1.45}
+.atile em{margin-top:auto;font-style:normal;font:600 10px 'Inter';letter-spacing:.1em;text-transform:uppercase;color:var(--ice)}
+.atile:after{content:'›';position:absolute;right:12px;top:12px;font-size:20px;color:var(--ice-dim)}
+.atile.hot{border-color:var(--gold);box-shadow:0 0 24px rgba(251,211,77,.22);animation:hotp 2s ease-in-out infinite}.atile.hot em{color:var(--gold)}
+@keyframes hotp{50%{box-shadow:0 0 34px rgba(251,211,77,.38)}}
+.ahead{display:flex;align-items:center;gap:12px;padding:16px 20px 0}.ahead h2{font:600 17px 'Cinzel',serif;letter-spacing:.1em;margin:0}
+.skhead{display:flex;align-items:baseline;justify-content:space-between;padding:14px 20px 0}.skhead h3{font:600 15px 'Cinzel',serif;letter-spacing:.12em;margin:0}.skhead h3 b{color:var(--ice)}.skhead span{font-size:11.5px;color:var(--muted)}
+.skgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 0}
+.skc{position:relative;display:flex;flex-direction:column;gap:3px;padding:12px 10px 10px;text-align:left;color:var(--text);font:inherit;cursor:pointer;border-radius:10px;border:1.5px solid var(--border);border-top:3px solid var(--rc,var(--border));background:var(--panel);opacity:.62}
+.skc.on{opacity:1;border-color:var(--rc);box-shadow:0 0 14px color-mix(in srgb,var(--rc) 30%,transparent)}
+.skc b{font:600 12.5px 'Cinzel',serif;margin-top:4px}.skc .m{font-size:10px;color:var(--muted)}.skc .m2{font-size:10.5px;color:var(--muted)}.skc.on .m2{color:var(--frost)}
+.skt{display:flex;justify-content:space-between;align-items:center}.ski{font-size:26px;line-height:1}.ski.big{font-size:42px}
+.skc .pips{justify-content:flex-start}.skc .pips i.f,.sn .pips i.f{background:var(--rc)}
+.skp{margin:12px 20px 0;padding:16px}.skp h4{font:600 18px 'Cinzel',serif;margin:0 0 4px}.skp .sp{font-size:11px;color:var(--ice);margin-bottom:6px}.skp p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.skph{display:flex;gap:14px;align-items:center}
+.stree{margin:4px 20px 0;padding-left:6px}
+.sn{position:relative;display:flex;gap:14px;padding-bottom:18px}.sn:not(:last-child):before{content:'';position:absolute;left:7px;top:18px;bottom:0;width:2px;background:var(--border)}
+.sn .sdot{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:var(--bg);margin-top:2px;z-index:1}
+.sn.owned .sdot{background:var(--rc);border-color:var(--rc);box-shadow:0 0 10px var(--rc)}.sn.owned:not(:last-child):before{background:var(--rc)}
+.sn.next .sdot{border-color:var(--ice);box-shadow:0 0 10px rgba(143,227,255,.5)}.sn.locked{opacity:.6}
+.sn .sbody{flex:1;min-width:0}.sn b{display:block;font:600 13px 'Cinzel',serif}.sn .m{display:block;font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px}
+.sn .go{margin-top:8px;padding:9px;font-size:12px}.sn .why{color:var(--red);font-size:10.5px;margin-top:5px}
+
+/* ===== ASCENSION v2: frost-rune redesign (appended; overrides the older ascension styles above) ===== */
+@keyframes ascIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes ascSpin{to{transform:rotate(360deg)}}
+@keyframes ascAuro{to{transform:translateX(-16px) scaleY(1.1);opacity:.75}}
+@keyframes ascPulse{50%{opacity:.55;transform:scale(1.06)}}
+@keyframes ascFlow{to{stroke-dashoffset:-24}}
+@keyframes ascGold{50%{box-shadow:0 0 34px rgba(251,211,77,.55)}}
+@keyframes ascIce{50%{box-shadow:0 0 28px rgba(143,227,255,.5)}}
+#v-asc{position:relative;padding-bottom:40px}
+#v-asc:before{content:"";position:absolute;left:0;right:0;top:0;height:480px;z-index:-1;pointer-events:none;
+ background:radial-gradient(ellipse 330px 200px at 16% 6%,rgba(74,222,128,.16),transparent 70%),radial-gradient(ellipse 350px 230px at 88% 2%,rgba(143,227,255,.2),transparent 70%),radial-gradient(ellipse 280px 170px at 58% 32%,rgba(168,130,255,.11),transparent 70%);animation:ascAuro 9s ease-in-out infinite alternate}
+#v-asc .lb-page-head{display:none}
+.ahero[hidden]{display:none}
+.ahero{position:relative;text-align:center;padding:24px 20px 2px}
+.ahero .rune{position:relative;width:172px;height:172px;margin:0 auto}
+.ahero .rune svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ahero .rg1{transform-origin:86px 86px;animation:ascSpin 52s linear infinite}
+.ahero .rg2{transform-origin:86px 86px;animation:ascSpin 34s linear infinite reverse}
+.ahero .rg3{transform-origin:86px 86px;animation:ascPulse 4s ease-in-out infinite}
+.ahero .rune:before{content:"";position:absolute;inset:26px;border-radius:50%;background:radial-gradient(circle,rgba(143,227,255,.35),rgba(143,227,255,.06) 60%,transparent 72%);filter:blur(6px)}
+.ahero .ak{margin-top:12px;font:600 10px Inter,sans-serif;letter-spacing:.46em;color:var(--ice-dim);text-transform:uppercase}
+.ahero h1{margin:6px 0 4px;font:700 27px Cinzel,serif;letter-spacing:.14em;background:linear-gradient(180deg,#fff,var(--ice) 68%,#4aa3c8);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(143,227,255,.35))}
+.ahero .ahs{font-size:12px;color:var(--muted);letter-spacing:.05em}
+#ascPts{gap:10px;padding:18px 18px 0}
+#ascPts .pt{--ac:#4ADE80;position:relative;overflow:hidden;border-radius:12px;padding:10px 4px 11px;border:1px solid color-mix(in srgb,var(--ac) 42%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--ac) 14%,#0a1622),#07111c)}
+#ascPts .pt:nth-child(2){--ac:#8FE3FF}#ascPts .pt:nth-child(3){--ac:#FBD34D}
+#ascPts .pt b{font-size:23px;color:var(--ac);text-shadow:0 0 14px color-mix(in srgb,var(--ac) 65%,transparent)}
+#ascPts .pt span{letter-spacing:.32em;font-size:9px;color:var(--muted)}
+#ascPts .pt:after{content:"";position:absolute;left:20%;right:20%;bottom:0;height:2px;border-radius:2px;background:var(--ac);box-shadow:0 0 10px var(--ac)}
+#ascHub{gap:14px;padding:18px 18px 0}
+.atile{--ac:#8FE3FF;overflow:hidden;min-height:172px;border-radius:18px;border:1px solid color-mix(in srgb,var(--ac) 45%,#0b1a28);
+ background:linear-gradient(165deg,color-mix(in srgb,var(--ac) 15%,#0b1826),#07111c 62%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 12px 30px rgba(0,0,0,.38),0 0 26px color-mix(in srgb,var(--ac) 12%,transparent);animation:ascIn .55s both;transition:transform .18s,box-shadow .2s,border-color .2s}
+.atile[data-t=ctree]{--ac:#4ADE80;animation-delay:.07s}.atile[data-t=skills]{--ac:#FBD34D;animation-delay:.14s}.atile[data-t=library]{--ac:#b79cff;animation-delay:.21s}
+.atile:before{content:"";position:absolute;right:-26px;bottom:-26px;width:128px;height:128px;border-radius:50%;background:radial-gradient(circle,var(--ac),transparent 66%);opacity:.2;pointer-events:none}
+.atile:hover{transform:translateY(-2px);border-color:var(--ac);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 34px rgba(0,0,0,.45),0 0 30px color-mix(in srgb,var(--ac) 28%,transparent)}
+.atile:active{transform:scale(.97)}
+.atile .ai{width:54px;height:54px;border-radius:15px;border:1px solid color-mix(in srgb,var(--ac) 60%,transparent);color:var(--ac);
+ background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--ac) 40%,transparent),color-mix(in srgb,var(--ac) 8%,transparent));
+ box-shadow:0 0 20px color-mix(in srgb,var(--ac) 38%,transparent),inset 0 0 12px color-mix(in srgb,var(--ac) 20%,transparent)}
+.atile .ai svg{width:26px;height:26px;filter:drop-shadow(0 0 5px var(--ac))}
+.atile b{font-size:16.5px;letter-spacing:.08em;color:#fff;margin-top:2px}
+.atile span{font-size:11px;line-height:1.5}
+.atile em{display:inline-block;margin-top:auto;padding:5px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--ac) 50%,transparent);background:color-mix(in srgb,var(--ac) 10%,transparent);color:var(--ac);font:600 9.5px Inter,sans-serif;letter-spacing:.1em}
+.atile em:empty{display:none}
+.atile:after{color:var(--ac);opacity:.7}
+.atile.hot{--ac:#FBD34D;animation:ascIn .55s both,ascGold 2.2s ease-in-out .6s infinite}
+#ascSub .ahead{position:sticky;top:0;z-index:4;margin:12px 14px 0;padding:10px 12px;border:1px solid rgba(143,227,255,.2);border-radius:14px;background:rgba(7,14,24,.74);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#ascSub .ahead h2{font:700 17px Cinzel,serif;letter-spacing:.12em;background:linear-gradient(180deg,#fff,var(--ice));-webkit-background-clip:text;background-clip:text;color:transparent}
+#ascBody .ahead{position:static;margin:10px 14px 0;padding:8px 10px!important;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.mini{border-radius:99px;padding:7px 13px;background:rgba(143,227,255,.07)}
+#ascBody .go{border-radius:12px;color:#fff;border-color:var(--ice);background:linear-gradient(135deg,rgba(143,227,255,.3),rgba(62,214,255,.1));box-shadow:0 0 18px rgba(143,227,255,.16)}
+#ascBody .go.ghost{background:none;color:var(--muted);border-color:var(--border);box-shadow:none}
+#ascBody .crow{--ac:#8FE3FF;overflow:hidden;margin:14px 16px 0;padding:18px 16px 16px 22px;border-radius:16px;border:1px solid color-mix(in srgb,var(--ac) 32%,#0b1a28);background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 10%,#0e2132),#07111c 72%);animation:ascIn .5s both}
+#ascBody .crow:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--ac),transparent);box-shadow:0 0 16px var(--ac)}
+#ascBody .crow:after{content:"";position:absolute;right:-34px;top:-34px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ac) 22%,transparent),transparent 66%);pointer-events:none}
+#ascBody .crow:nth-of-type(4n+2){--ac:#ff9f6b}#ascBody .crow:nth-of-type(4n+3){--ac:#4ADE80}#ascBody .crow:nth-of-type(4n){--ac:#b79cff}
+#ascBody .crow h4{font:700 19px Cinzel,serif;letter-spacing:.08em;color:#fff;text-shadow:0 0 16px color-mix(in srgb,var(--ac) 50%,transparent)}
+#ascBody .crow .sp{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--ac) 40%,transparent);background:color-mix(in srgb,var(--ac) 9%,transparent);font-size:10.5px;letter-spacing:.06em;color:var(--ac)}
+#ascBody .crow .gr b{color:var(--ac)}
+#ascBody .crow .chip.ok{box-shadow:0 0 12px rgba(74,222,128,.35)}
+#ascBody :is(.crow,.skc,.sn):nth-child(2){animation-delay:.06s}#ascBody :is(.crow,.skc,.sn):nth-child(3){animation-delay:.12s}
+#ascBody :is(.crow,.skc,.sn):nth-child(4){animation-delay:.18s}#ascBody :is(.crow,.skc,.sn):nth-child(n+5){animation-delay:.24s}
+.ftree{border-radius:18px;border:1px solid rgba(143,227,255,.26);margin:12px 14px 0;
+ background:radial-gradient(circle at 50% 0,rgba(143,227,255,.12),transparent 55%),radial-gradient(circle at 50% 100%,rgba(168,130,255,.1),transparent 50%),
+ radial-gradient(1px 1px at 20px 30px,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 90px 120px,rgba(143,227,255,.5),transparent),#060e18;background-size:auto,auto,140px 140px,170px 170px,auto;
+ box-shadow:inset 0 0 70px rgba(0,0,0,.55),0 0 34px rgba(143,227,255,.09)}
+.fn .tn{border-radius:12px;padding:11px 8px;background:linear-gradient(170deg,#112538,#08131f);border:1px solid rgba(143,227,255,.32);transition:transform .15s}
+.fn:active .tn{transform:scale(.96)}
+.fn .tn b{font-size:12.5px;color:#fff}
+.tn.current{border-color:var(--gold);background:linear-gradient(170deg,#2a2410,#0c1118);animation:ascGold 2.4s ease-in-out infinite}
+.tn.available,.tn.buyable{border-color:var(--ice);animation:ascIce 2.4s ease-in-out infinite}
+.tn.unlocked{background:linear-gradient(170deg,#0f2a1e,#08131f)}
+.fsvg path{stroke:rgba(143,227,255,.6);stroke-dasharray:5 7;animation:ascFlow 1.4s linear infinite;filter:drop-shadow(0 0 4px rgba(143,227,255,.6))}
+.zbar button{border-radius:99px;width:36px;height:30px;background:rgba(143,227,255,.07)}
+.filt select,.filt input{border-radius:12px;background:rgba(10,20,32,.85);padding:11px 12px}
+.filt select:focus,.filt input:focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px rgba(143,227,255,.14)}
+.skhead span{padding:4px 11px;border-radius:99px;border:1px solid rgba(251,211,77,.4);color:var(--gold);background:rgba(251,211,77,.08)}
+.skgrid{gap:12px;padding:14px 16px 0}
+.skc{opacity:1;border-radius:15px;border:1px solid color-mix(in srgb,var(--rc) 38%,#10202f);overflow:hidden;animation:ascIn .45s both;
+ background:radial-gradient(circle at 88% 0,color-mix(in srgb,var(--rc) 22%,transparent),transparent 58%),linear-gradient(170deg,#0d1d2d,#07111c)}
+.skc:not(.on){filter:saturate(.3) brightness(.78)}
+.skc.on{box-shadow:0 0 22px color-mix(in srgb,var(--rc) 34%,transparent),inset 0 1px 0 rgba(255,255,255,.07)}
+.skc.on:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--rc),transparent)}
+.skc .ski{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;font-size:22px;background:color-mix(in srgb,var(--rc) 16%,#07111c);border:1px solid color-mix(in srgb,var(--rc) 45%,transparent)}
+.skc b{color:#fff}
+.pips i{height:6px;border-radius:3px;background:#14283a}.pips i.f{box-shadow:0 0 8px var(--rc,#4ADE80)}
+.skp{margin:12px 16px 0;padding:18px;border-radius:18px;border:1px solid color-mix(in srgb,var(--rc) 45%,#0b1a28);
+ background:radial-gradient(circle at 90% 0,color-mix(in srgb,var(--rc) 26%,transparent),transparent 60%),linear-gradient(165deg,#0f2133,#07111c);box-shadow:0 0 30px color-mix(in srgb,var(--rc) 20%,transparent)}
+.skp .ski.big{width:68px;height:68px;display:grid;place-items:center;border-radius:20px;font-size:38px;background:color-mix(in srgb,var(--rc) 18%,#07111c);border:1px solid color-mix(in srgb,var(--rc) 55%,transparent);box-shadow:0 0 26px color-mix(in srgb,var(--rc) 40%,transparent)}
+.skp h4{color:#fff;letter-spacing:.06em}
+.grp{display:flex;align-items:center;gap:12px;color:var(--ice);letter-spacing:.3em}
+.grp:before,.grp:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(143,227,255,.4))}.grp:after{transform:scaleX(-1)}
+.stree{margin:6px 20px 0}
+.sn .sdot{width:18px;height:18px;border-width:2px}
+.sn:not(:last-child):before{left:8px;top:20px}
+.sn.owned:not(:last-child):before{box-shadow:0 0 8px var(--rc)}
+.sn.next .sdot{animation:ascPulse 2s ease-in-out infinite}
+.sn .sbody{padding:10px 12px;border-radius:12px;background:rgba(10,20,32,.7);border:1px solid rgba(143,227,255,.12)}
+.sn.owned .sbody{border-color:color-mix(in srgb,var(--rc) 45%,transparent)}
+.sn{padding-bottom:12px;animation:ascIn .45s both}
+</style></head>
+<body>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div id="toast"></div>
+<div class="aurora"></div>
+<svg class="peaks" viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16364d"/><stop offset="1" stop-color="#050a12"/></linearGradient></defs>
+ <path d="M0 160V92l34-40 26 24 40-58 44 62 34-26 50 56 36-34 50 44 46-34 40 36v76z" fill="url(#pk)" opacity=".55"/>
+ <path d="M0 160V122l46-34 30 20 44-44 52 52 40-30 56 46 44-30 44 28 44-20v50z" fill="url(#pk)"/>
+ <path d="M120 64l12 14-10-3-6 8-6-12zM52 88l8 9-6-2-4 5-2-8z" fill="#8FE3FF" opacity=".25"/></svg>
+<div class="snow" id="snow"></div>
+
+<!-- LOGIN -->
+<div class="scene active" id="login">
+ <div class="eyebrow">NIFLHEIM // SYSTEM ACCESS</div>
+ <div class="auth-title">ADVENTURER <span>LOGIN</span></div>
+ <div class="card auth">
+  <div class="toggle"><button class="on" id="tl" type="button">Log In</button><button id="ts" type="button">Sign Up</button></div>
+  <form id="form" autocomplete="on">
+   <div id="su" hidden><div class="fg"><label class="lb" for="un">Username</label><input class="in" id="un" placeholder="Choose an adventurer name" maxlength="50" autocomplete="username"><div class="hint">up to 50 characters, this becomes your in-game name</div></div></div>
+   <div class="fg"><label class="lb" for="ph">Phone Number</label>
+    <div class="row"><div class="cc"><i>+</i><input class="in" id="co" inputmode="numeric" placeholder="234" maxlength="4" autocomplete="off"></div><input class="in" id="ph" inputmode="numeric" placeholder="8031234567" autocomplete="tel-national"></div>
+    <div class="hint">country code (e.g. 234), then number, leading 0 is stripped automatically</div></div>
+   <div class="fg"><label class="lb" for="pw">Password</label>
+    <div class="pw"><input class="in" id="pw" type="password" placeholder="••••••••" autocomplete="current-password"><button type="button" id="eye" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="hint">min. 5 characters</div></div>
+   <div class="hint" id="lerr" role="alert" style="color:var(--red);opacity:1;min-height:14px;margin:0 0 10px;font-size:11.5px"></div>
+   <button class="go" id="sub" type="submit">Log In</button>
+   <div class="sw" id="swl">New here? <button type="button" id="sw">Create an account</button></div>
+  </form>
+ </div>
+</div>
+
+<!-- BOOT -->
+<div class="scene" id="boot">
+ <div class="bl" id="b1">◈ VERIFYING CREDENTIALS</div><div class="bl" id="b2">◈ SYNCING ADVENTURER RECORD</div><div class="bl" id="b3">◈ WELCOME BACK</div>
+ <div class="track"><div class="fill" id="fill"></div></div>
+</div>
+
+<!-- WELCOME -->
+<div class="scene" id="welcome">
+ <button class="skip" id="skip" type="button">Skip</button>
+ <div class="emblem rise" style="animation-delay:.05s">
+  <svg viewBox="0 0 132 132" fill="none" stroke="#8FE3FF" stroke-linecap="round" stroke-linejoin="round">
+   <circle class="r1" cx="66" cy="66" r="62" stroke-width="1" stroke-dasharray="2 7" opacity=".7"/>
+   <circle class="r2" cx="66" cy="66" r="52" stroke-width="1.2" stroke-dasharray="30 12" opacity=".5"/>
+   <g stroke-width="2"><path d="M66 22v88M28 44l76 44M28 88l76-44"/>
+    <path d="M66 30l-8-8M66 30l8-8M66 102l-8 8M66 102l8 8M36 48l-11-2M36 48l-3 11M96 84l11 2M96 84l3-11M36 84l-11 2M36 84l-3-11M96 48l11-2M96 48l3 11" stroke-width="1.6"/></g>
+   <circle cx="66" cy="66" r="6" fill="#0A1420" stroke-width="2"/>
+  </svg>
+ </div>
+ <h1 class="wwm rise" style="animation-delay:.25s">NIFL<span>HEIM</span></h1>
+ <div class="wsub rise" style="animation-delay:.45s">Welcome, <b id="wname">Korii</b></div>
+ <div class="card pager rise" style="animation-delay:.65s">
+  <div class="pg show"><div class="k">The Realm</div><h3>CARVED FROM ICE</h3><p>Frost-bound towns, wild frontier routes and waters that <b>never fully thaw</b>. Something old sleeps beneath the surface.</p></div>
+  <div class="pg"><div class="k">The Arena</div><h3>THE MOONLIT COLOSSEUM</h3><p>Fight rivals, wolves and bosses on screen. <b>Every victory follows you home</b> to your WhatsApp character.</p></div>
+  <div class="pg"><div class="k">Your Legend</div><h3>YOURS TO DECIDE</h3><p>Level up, loot the frozen wild and climb the ranks. <b>Your status window</b> is one tap away, so check it often.</p></div>
+  <div class="dots" id="dots"><button class="on" aria-label="Page 1"></button><button aria-label="Page 2"></button><button aria-label="Page 3"></button></div>
+ </div>
+ <button class="go wgo rise" id="wnext" type="button" style="animation-delay:.85s">Continue</button>
+</div>
+
+<!-- HOME -->
+<div class="scene" id="home"><div class="screen">
+ <div class="home-header">
+  <button class="icon-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="home-title">NIFL<span>HEIM</span></div>
+  <button class="icon-btn bell unread" id="bell" aria-label="Notices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0112 0v6l1.500 2h-15zM10 21a2 2 0 004 0"/></svg></button>
+ </div>
+
+ <div class="view show" id="v-home">
+  <section class="hero2">
+   <div class="emblem2" id="pcard">
+    <svg viewBox="0 0 150 150" fill="none" stroke="#8FE3FF" stroke-linecap="round">
+     <circle class="r1" cx="75" cy="75" r="72" stroke-width="1" stroke-dasharray="2 7" opacity=".7"/>
+     <circle class="r2" cx="75" cy="75" r="62" stroke-width="1.4" stroke-dasharray="34 14" opacity=".55"/>
+     <circle cx="75" cy="75" r="52" stroke-width="1" opacity=".3"/>
+     <path d="M75 2v11M75 137v11M2 75h11M137 75h11" stroke-width="1.8" opacity=".8"/>
+    </svg>
+    <div class="swirl"></div>
+   </div>
+   <div class="eyebrow" style="justify-content:center">Adventurer</div>
+   <h1 class="pname" id="pn">Korii</h1>
+   <div class="pmeta"><span>Lv <b id="plv">12</b></span><i>◆</i><span id="ploc">Misty Glade</span></div>
+   <div class="bars2">
+    <div class="bar2"><span class="k">HP</span><div class="t"><i class="hp" id="hpi" style="width:92%"></i></div><span class="n" id="hpt">184 / 200</span></div>
+    <div class="bar2"><span class="k">EXP</span><div class="t"><i class="xp" id="xpi" style="width:48%"></i></div><span class="n" id="xpt">480 / 1000</span></div>
+   </div>
+  </section>
+
+  <div class="sec2"><span>◆</span>Go to fight<span>◆</span></div>
+  <div class="portals">
+   <button class="portal" id="goExplore">
+    <div class="ring"><svg viewBox="0 0 78 78" fill="none" stroke="#8FE3FF" stroke-linecap="round"><circle class="r1" cx="39" cy="39" r="37" stroke-width="1.2" stroke-dasharray="3 6" opacity=".75"/><circle cx="39" cy="39" r="29" stroke-width="1" opacity=".35"/></svg>
+     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.500 8.500l-2 5-5 2 2-5z"/></svg></div>
+    <b>EXPLORE</b><span class="s">Search the frost for a fight.</span>
+   </button>
+   <button class="portal" id="goDuel">
+    <div class="ring"><svg viewBox="0 0 78 78" fill="none" stroke="#8FE3FF" stroke-linecap="round"><circle class="r2" cx="39" cy="39" r="37" stroke-width="1.2" stroke-dasharray="3 6" opacity=".75"/><circle cx="39" cy="39" r="29" stroke-width="1" opacity=".35"/></svg>
+     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l9 9M13 13l-2 2M7 14l-3 3 2 2 3-3M7 14l4 4M20 4l-9 9M11 13l2 2M17 14l3 3-2 2-3-3M17 14l-4 4"/></svg></div>
+    <b>DUEL</b><span class="s on" id="duelSub">Challenge a friend · 2 online</span>
+   </button>
+  </div>
+  <button class="go ghost" id="goMap" type="button">OPEN MAP</button>
+
+  <div class="status">
+   <div class="tab-bar"><button class="tab-btn active">Status</button><button class="tab-btn">Inventory</button><button class="tab-btn">Badges</button></div>
+   <div class="tab-scroll" id="tabScroll">
+    <div class="tab-pane">
+     <div class="runes"><div class="rune"><b id="sd">38</b><span>Damage</span></div><div class="rune"><b id="sc">1,240</b><span>Coins</span></div><div class="rune"><b id="si">17</b><span>Items</span></div></div>
+     <div class="stats-rect">
+      <div class="stat-line"><span class="k">Location</span><span class="v" id="sloc">-</span></div>
+      <div class="stat-line"><span class="k">Next level in</span><span class="v" id="snx">-</span></div>
+     </div><span id="bFr" hidden></span>
+    </div>
+    <div class="tab-pane" id="invp"></div>
+    <div class="tab-pane"><p class="note" style="margin:10px 0 14px">No badges yet.</p></div>
+   </div>
+  </div>
+
+  <div class="notice" id="nt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h4l7 4V6L7 10zM17 9a4 4 0 010 6M19 6a8 8 0 010 12"/></svg><div><b>System Notice</b><span>Welcome back, <span id="wn2">Korii</span>!</span></div><em>2h ago</em></div>
+ </div>
+
+ <div class="view" id="v-friends">
+  <div class="lb-page-head"><h1>FRIENDS</h1><p>Tap a friend to challenge them to a duel.</p></div>
+  <div class="section-block" style="margin-top:20px"><div class="section-head"><h3>DUEL // <span>FRIENDS</span></h3><em id="fcount"></em></div><div id="flist"></div></div>
+  <div class="section-block" style="margin-top:20px"><div class="section-head"><h3>REQUESTS // <span>INCOMING</span></h3><em id="rcount"></em></div><div id="rlist"></div></div>
+  <p class="note">To add someone, tap their name in Rankings to open their page, or send <b>.friendreq Name</b> on WhatsApp.</p>
+ </div>
+
+ <div class="view" id="v-rank">
+  <div class="lb-page-head"><h1>RANKINGS</h1><p>Top adventurers across Niflheim, ranked by level.</p></div>
+  <div class="lb-list" id="rlistall"></div>
+  <p class="note">Tap a name to open their page.</p>
+ </div>
+
+ <div class="view" id="v-profile">
+  <button class="back" id="pback" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>Back</button>
+  <div class="pp">
+   <div class="avatar-frame"><div class="swirl"></div></div>
+   <h2 id="ppn">Name</h2><div class="s2" id="pps"></div>
+   <div class="stats-rect"><div class="stat-line"><span class="k">Level</span><span class="v" id="ppv"></span></div><div class="stat-line"><span class="k">Rank</span><span class="v" id="ppr"></span></div><div class="stat-line"><span class="k">Wins</span><span class="v" id="ppw"></span></div><div class="stat-line"><span class="k">Losses</span><span class="v" id="ppl"></span></div></div>
+   <button class="go" id="ppa" type="button">Add friend</button>
+   <p class="note" id="ppnote" style="margin-top:12px"></p>
+  </div>
+ </div>
+
+<div class="view" id="v-edit">
+  <button class="back" id="eback" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>Back</button>
+  <div class="pp">
+   <div class="avatar-frame"><div class="swirl" id="edAv"></div></div>
+   <h2 id="edNm">Name</h2><div class="s2">Edit your profile</div>
+   <div class="card edc">
+    <label class="lb">Profile picture</label>
+    <div class="edrow"><button class="go" id="picBtn" type="button">Choose picture</button><button class="go ghost" id="picRm" type="button" hidden>Remove</button></div>
+    <input id="edPic" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+    <div class="hint">PNG, JPG or WebP. It is cropped square and shrunk for you.</div>
+    <div class="edmsg" id="picMsg" role="status"></div>
+   </div>
+   <div class="card edc">
+    <label class="lb" for="edName">Adventurer name</label>
+    <input class="in" id="edName" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Your name">
+    <div class="hint">2 to 20 characters: letters, numbers, spaces, - and _</div>
+    <button class="go" id="nameBtn" type="button">Save name</button>
+    <div class="edmsg" id="nameMsg" role="status"></div>
+   </div>
+   <p class="note">You can also rename on WhatsApp with <b>.setname NewName</b>.</p>
+  </div>
+ </div>
+
+ <div class="view" id="v-inv"></div>
+ <div class="view" id="v-bestiary"></div>
+ <div class="view" id="v-weapons"></div>
+ <div class="view" id="v-pshop"></div>
+ <div class="view" id="v-shop">
+  <div class="lb-page-head"><h1>SHOP</h1><p>Your coins: <span style="color:var(--yellow);font-weight:600">1,240</span></p></div>
+  <div class="lb-list">
+   <div class="gym-row" style="cursor:default"><div class="inv-icon">🧪</div><div class="gym-meta"><div class="name">HP Potion</div><div class="sub">Restores health mid-fight.</div></div><button class="mini buy">50</button></div>
+   <div class="gym-row" style="cursor:default"><div class="inv-icon">🗡️</div><div class="gym-meta"><div class="name">Iron Sword</div><div class="sub">+8 damage when equipped.</div></div><button class="mini buy">300</button></div>
+   <div class="gym-row" style="cursor:default"><div class="inv-icon">🛡️</div><div class="gym-meta"><div class="name">Leather Armor</div><div class="sub">Softens every hit you take.</div></div><button class="mini buy">180</button></div>
+   <div class="gym-row" style="cursor:default"><div class="inv-icon">❄️</div><div class="gym-meta"><div class="name">Frost Charm</div><div class="sub">A keepsake from the old ice.</div></div><button class="mini buy">220</button></div>
+  </div>
+  <p class="note">Sample items for now. Buy for real on WhatsApp with .shop and .buy.</p>
+ </div>
+
+ <div class="view" id="v-stats">
+  <div class="lb-page-head"><h1>STATS</h1><p>Your character and attribute points</p></div>
+  <div id="stBody"></div>
+ </div>
+
+ <div class="view" id="v-asc">
+  <div class="lb-page-head"><h1>ASCENSION</h1><p>Your class, your path, your power</p></div>
+  <section class="ahero" id="ascHero">
+   <div class="rune" aria-hidden="true">
+    <svg viewBox="0 0 172 172" fill="none" stroke="#8FE3FF" stroke-linecap="round" stroke-linejoin="round">
+     <g class="rg1"><circle cx="86" cy="86" r="82" stroke-width="1" stroke-dasharray="1 8" opacity=".75"/><circle cx="86" cy="86" r="72" stroke-width="1.3" stroke-dasharray="40 14" opacity=".5"/>
+      <path d="M86 2v10M86 160v10M2 86h10M160 86h10M26 26l7 7M139 139l7 7M146 26l-7 7M33 139l-7 7" stroke-width="1.6" opacity=".8"/></g>
+     <g class="rg2"><circle cx="86" cy="86" r="60" stroke-width="1.2" stroke-dasharray="3 9" opacity=".6"/><path d="M86 24l6 12-6 12-6-12zM86 148l6-12-6-12-6 12zM24 86l12-6 12 6-12 6zM148 86l-12-6-12 6 12 6z" stroke="#4ADE80" stroke-width="1.3" fill="rgba(74,222,128,.1)" opacity=".7"/></g>
+     <g class="rg3"><circle cx="86" cy="86" r="40" stroke-width="1.4" opacity=".55"/><path d="M86 58l8 20 20 8-20 8-8 20-8-20-20-8 20-8z" stroke="#C9F3FF" stroke-width="1.8" fill="rgba(143,227,255,.12)"/></g>
+    </svg>
+   </div>
+   <div class="ak">Ascension</div>
+   <h1 id="ahName">Unbound</h1>
+   <div class="ahs" id="ahSub">Your class, your path, your power</div>
+  </section>
+  <div class="pts" id="ascPts"></div>
+  <div class="ahub" id="ascHub">
+   <button class="atile" type="button" data-t="classes"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><b>Classes</b><span>Choose the path you will walk</span><em></em></button>
+   <button class="atile" type="button" data-t="ctree"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-6 5M12 12l6 5"/></svg></div><b>Class Tree</b><span>Your ancestry and evolutions</span><em></em></button>
+   <button class="atile" type="button" data-t="skills"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div><b>Skills</b><span>Unlock and sharpen your techniques</span><em></em></button>
+   <button class="atile" type="button" data-t="library"><div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/><path d="M9 7h6M9 11h4"/></svg></div><b>Library</b><span>Every class you have discovered</span><em></em></button>
+  </div>
+  <div id="ascSub" hidden>
+   <div class="ahead"><button class="mini" id="ascBack" type="button">‹ Ascension</button><h2 id="ascTitle"></h2></div>
+   <div id="ascBody"></div>
+  </div>
+ </div>
+
+ <div class="view" id="v-map">
+  <canvas id="mapc"></canvas><div class="mholo"></div><div class="mshade"></div>
+  <div class="mhead"><h1>MAP</h1><div class="mchip" id="mcur">Locating…</div></div>
+  <div class="mhint">ONE FINGER: MOVE · TWO FINGERS: ROTATE &amp; ZOOM</div>
+  <div class="mcomp" id="mcomp" aria-label="Compass"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="rgba(5,10,18,.6)" stroke="#3E7A94" stroke-width="1.2"/><g id="mneedle"><path d="M32 12l6 20H26z" fill="#ff8a8a"/><path d="M32 52l6-20H26z" fill="#8FE3FF" opacity=".55"/><text class="n" x="32" y="9" text-anchor="middle">N</text><text x="58" y="35" text-anchor="middle">E</text><text x="32" y="61" text-anchor="middle">S</text><text x="6" y="35" text-anchor="middle">W</text></g></svg></div>
+  <div class="mjour" id="mjour" hidden></div>
+  <div id="mlabels"></div>
+  <div class="mview"><small>VERTICAL VIEW</small><span class="e">TOP</span><input id="mtilt" type="range" min="0.18" max="1.12" step="0.01" value="0.58" aria-label="Vertical view angle"><span class="e">LOW</span></div>
+  <div class="mctl"><button id="mplus" aria-label="Zoom in">+</button><button id="mminus" aria-label="Zoom out">−</button><button id="mreset" aria-label="Back to my location">↺</button></div>
+  <div class="mcard"><div class="mprev" id="mprev">♢</div><div class="minfo"><strong id="mname">—</strong><small id="mdesc"></small></div><button class="mgo" id="mgo" disabled>—</button></div>
+  <div class="mmsg" id="mmsg"></div>
+ </div>
+</div></div>
+
+<div class="ribbon">
+ <button class="item active" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v11h5v-6h4v6h5V10"/></svg>Home</button>
+ <button class="item" data-tab="friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.6-4 3.200-6 6.500-6s5.900 2 6.500 6M16 5a3.500 3.500 0 010 7M18.500 14.500c1.700.8 2.800 2.600 3 5.500"/></svg>Friends<span class="badge" id="fbadge">1</span></button>
+ <button class="item" data-tab="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.200 12H5.200zM8 8V6a4 4 0 018 0v2"/></svg>Shop</button>
+ <button class="item" data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></svg>Map</button>
+ <button class="item" data-tab="rank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 01-10 0zM7 5H3v2a4 4 0 004 4M17 5h4v2a4 4 0 01-4 4M12 14v4M8 21h8"/></svg>Rankings</button>
+</div>
+
+<div id="dim"></div>
+<aside id="drawer" aria-label="Menu">
+ <div class="dh"><div class="avatar-frame"><div class="swirl"></div></div><div><b id="dn">Korii</b><span id="dlv">Level 12 Adventurer</span></div></div>
+ <button class="di" id="editBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.200 4-6 8-6s7.300 1.800 8 6"/></svg>Profile</button>
+ <button class="di" id="statsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
+ <button class="di" id="ascBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3 6 6 1-4.500 4.500L18 21l-6-3-6 3 1.500-6.500L3 10l6-1z"/></svg>Ascension</button>
+ <button class="di" id="invBtn" type="button"><span style="width:20px;text-align:center">🎒</span>Inventory</button>
+ <button class="di" id="bestBtn" type="button"><span style="width:20px;text-align:center">📖</span>Bestiary</button>
+ <button class="di" id="wepBtn" type="button"><span style="width:20px;text-align:center">⚔️</span>Weapons</button>
+  <button class="di" id="pshopBtn" type="button"><span style="width:20px;text-align:center">🏪</span>PShop</button>
+ <button class="di" data-soon="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</button>
+ <button class="di out2" id="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
+</aside>
+<div id="sheetdim"></div>
+<div id="sheet"><div class="eyebrow" id="shE"></div><h3 id="shT"></h3><p id="shP"></p><div class="sgrid" id="shB"></div></div>
+
+<script>
+const LIVE=true;
+const $=id=>document.getElementById(id);
+for(let i=0;i<34;i++){const f=document.createElement('div');f.className='flake';const z=1+Math.random()*2.6;
+ f.style.cssText=`left:${Math.random()*100}%;width:${z}px;height:${z}px;animation-duration:${8+Math.random()*12}s;animation-delay:${-Math.random()*14}s`;$('snow').appendChild(f)}
+function scene(id){document.querySelectorAll('.scene').forEach(s=>s.classList.toggle('active',s.id===id));document.body.classList.toggle('in',id==='home')}
+let mode='login';
+function setMode(m){mode=m;$('tl').classList.toggle('on',m==='login');$('ts').classList.toggle('on',m==='signup');$('su').hidden=m!=='signup';
+ $('sub').textContent=m==='signup'?'Create Account':'Log In';
+ $('swl').innerHTML=m==='signup'?'Already have an account? <button type="button" id="sw">Log in</button>':'New here? <button type="button" id="sw">Create an account</button>';
+ $('sw').onclick=()=>setMode(m==='signup'?'login':'signup')}
+$('tl').onclick=()=>setMode('login');$('ts').onclick=()=>setMode('signup');$('sw').onclick=()=>setMode('signup');
+$('eye').onclick=()=>{const p=$('pw');p.type=p.type==='password'?'text':'password'};
+let tm;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>t.classList.remove('on'),1600)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-soon]');if(b){drawer(false);toast(b.dataset.soon+' coming soon')}});
+const API='https://ariel-bot-38kh.onrender.com';
+const TICKET=new URLSearchParams(location.search).get('t');
+const DUELTOK=new URLSearchParams(location.search).get('duel');
+const GO=new URLSearchParams(location.search).get('go')||'';const GOMAP=GO==='map';
+async function api(path,opt){const r=await fetch(API+path,{credentials:'include',...opt});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(a,b)=>Math.max(0,Math.min(100,b>0?a/b*100:0))+'%';
+const pretty=k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).replace(/\b(Hp|Mp|Atk|Def)\b/g,m=>m.toUpperCase());
+function fill(username,p){
+ const n=(p&&p.name)||username||'Adventurer';ME=p||null;setAvatar(p&&p.avatar||null);$('edNm').textContent=n;$('edName').value=n;
+ ['pn','dn','wn2','wname'].forEach(id=>$(id).textContent=n);
+ $('nt').querySelector('em').textContent='just now';
+ if(!p){$('plv').textContent='-';$('ploc').textContent='Not registered';$('dlv').textContent='Not registered yet';$('hpt').textContent='- / -';$('xpt').textContent='- / -';
+  $('hpi').style.width='0';$('xpi').style.width='0';['sd','sc','si'].forEach(id=>$(id).textContent='-');$('sloc').textContent='-';$('snx').textContent='-';
+  $('invp').innerHTML='<p class="note">Register first to get a bag.</p>';
+  $('nt').querySelector('span').innerHTML='Your character is created when you sign up. If you see this, <b style="color:var(--ice)">refresh the page</b> in a moment.';return}
+ $('plv').textContent=p.level;$('ploc').textContent=p.location||'';$('dlv').textContent='Level '+p.level+' Adventurer';
+ $('hpi').style.width=pct(p.hp,p.max_hp);$('hpt').textContent=p.hp+' / '+p.max_hp;
+ $('xpi').style.width=pct(p.xp,p.xp_needed);$('xpt').textContent=p.xp+' / '+p.xp_needed;
+ $('sd').innerHTML=(+p.damage||0)+(p.damage_flat?` <small class="gearbonus" style="font-size:.6em;color:var(--ice)">+${+p.damage_flat}</small>`:'')+(p.damage_pct?` <small class="gearbonus" style="font-size:.6em;color:var(--ice)">+${+p.damage_pct}%</small>`:'');$('sc').textContent=(+p.coins).toLocaleString();
+ const inv=Object.entries(p.inventory||{}).filter(([k,v])=>+v>0);
+ $('si').textContent=inv.reduce((a,[k,v])=>a+(+v),0);
+ $('sloc').textContent=p.location||'-';$('snx').textContent=Math.max(0,p.xp_needed-p.xp)+' XP';
+ $('invp').innerHTML=inv.length?inv.map(([k,v])=>`<div class="inv-row"><div class="inv-icon sm">◆</div><div><div class="nm">${esc(pretty(k))}</div></div><div class="q">×${v}</div></div>`).join(''):'<p class="note">Your bag is empty.</p>';
+}
+function forwardToArena(){
+ if(!TICKET&&!DUELTOK)return false;
+ try{const t=+sessionStorage.getItem('nif_fwd')||0;if(Date.now()-t<15000)return false;sessionStorage.setItem('nif_fwd',Date.now())}catch(e){}
+ location.replace(DUELTOK?'arena.html?duel='+encodeURIComponent(DUELTOK):'arena.html?t='+encodeURIComponent(TICKET));return true;
+}
+async function enter(username,withBoot){
+ if(withBoot){scene('boot');$('fill').style.width='0';
+  ['b1','b2','b3'].forEach((id,i)=>{$(id).classList.remove('show');setTimeout(()=>$(id).classList.add('show'),250+i*700)});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('fill').style.width='100%'))}
+ let p=null;
+ const [r]=await Promise.all([api('/api/niflheim/me').catch(()=>null),new Promise(ok=>setTimeout(ok,withBoot?2700:0))]);
+ if(r&&r.ok&&r.j.player)p=r.j.player;
+ fill(username,p);
+ if(forwardToArena())return;
+ let seen=false;const k='nif_welcomed_'+(username||'');try{seen=!!localStorage.getItem(k);localStorage.setItem(k,'1')}catch(e){}
+ if(seen)toHome();else openWelcome((p&&p.name)||username);
+ if(window.nifRestore)window.nifRestore();
+ if(GO&&!window.__gomapDone){window.__gomapDone=true;try{history.replaceState(null,'',location.pathname)}catch(e){}scene('home');if(GOMAP)tab('map');else if(window.nifGo)window.nifGo(GO)}
+}
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault();const err=$('lerr'),btn=$('sub');err.textContent='';
+ const countryCode=$('co').value.trim(),phoneNumber=$('ph').value.trim().replace(/^0+/,''),password=$('pw').value,username=$('un').value.trim();
+ if(!/^[0-9]{1,4}$/.test(countryCode))return err.textContent='Enter a valid country code, like 234.';
+ if(!/^[0-9]{5,}$/.test(phoneNumber))return err.textContent='Enter a valid phone number.';
+ if(mode==='signup'&&!username)return err.textContent='Choose an adventurer name.';
+ if(password.length<5)return err.textContent='Password must be at least 5 characters.';
+ btn.disabled=true;const old=btn.textContent;btn.textContent='One moment…';
+ try{
+  const body=mode==='signup'?{username,countryCode,phoneNumber,password}:{countryCode,phoneNumber,password};
+  const r=await api('/api/auth/'+(mode==='signup'?'signup':'login'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  btn.disabled=false;btn.textContent=old;
+  if(!r.ok){err.textContent=r.j.error||'That did not work. Try again.';return}
+  if(window.nifClearState)window.nifClearState();enter(r.j.username||username,true);
+ }catch(x){btn.disabled=false;btn.textContent=old;err.textContent='Server unreachable. It may be waking up, try again in a moment.'}
+});
+api('/api/auth/me').then(r=>{if(r.ok&&r.j.username)enter(r.j.username,false)}).catch(()=>{});
+let wp=0;const pgs=[...document.querySelectorAll('.pg')],dts=[...document.querySelectorAll('#dots button')];
+function showPage(i){wp=i;pgs.forEach((p,j)=>p.classList.toggle('show',j===i));dts.forEach((d,j)=>d.classList.toggle('on',j===i));$('wnext').textContent=i===pgs.length-1?'Begin Your Journey':'Continue'}
+function openWelcome(n){showPage(0);const w=$('welcome');w.classList.remove('on-w');scene('welcome');void w.offsetWidth;w.classList.add('on-w')}
+function toHome(){$('welcome').classList.remove('on-w');scene('home')}
+$('wnext').onclick=()=>wp<pgs.length-1?showPage(wp+1):toHome();
+dts.forEach((d,i)=>d.onclick=()=>showPage(i));$('skip').onclick=toHome;
+// profile edit: rename + picture
+let ME=null;
+function setAvatar(url){
+ document.querySelectorAll('#pcard .swirl,.dh .swirl,#edAv').forEach(e=>{
+  if(url){e.style.setProperty('--av','url("'+url+'")');e.classList.add('has')}
+  else{e.style.removeProperty('--av');e.classList.remove('has')}});
+ $('picRm').hidden=!url;
+}
+function edMsg(id,t,cls){const e=$(id);e.textContent=t||'';e.className='edmsg'+(cls?' '+cls:'')}
+function toSquare(file,size){return new Promise((ok,no)=>{
+ const u=URL.createObjectURL(file),im=new Image();
+ im.onload=()=>{try{const s=Math.min(im.naturalWidth,im.naturalHeight),sx=(im.naturalWidth-s)/2,sy=(im.naturalHeight-s)/2;
+  const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+  x.fillStyle='#081420';x.fillRect(0,0,size,size);x.drawImage(im,sx,sy,s,s,0,0,size,size);
+  URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85))}catch(e){no(e)}};
+ im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('unreadable'))};im.src=u})}
+$('editBtn').onclick=()=>{drawer(false);edMsg('picMsg','');edMsg('nameMsg','');$('edName').value=(ME&&ME.name)||$('edNm').textContent;tab('edit')};
+$('eback').onclick=()=>tab('home');
+$('picBtn').onclick=()=>{if(!ME)return edMsg('picMsg','Your character is not ready yet. Refresh the page and try again.','bad');$('edPic').click()};
+$('edPic').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ if(f.size>20*1024*1024)return edMsg('picMsg','That file is too big.','bad');
+ const b=$('picBtn');b.disabled=true;edMsg('picMsg','Uploading…');
+ try{
+  const img=await toSquare(f,256);
+  const r=await api('/api/niflheim/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:img})});
+  if(!r.ok)edMsg('picMsg',r.j.error||'Upload failed. Try again.','bad');
+  else{ME.avatar=r.j.avatar;setAvatar(r.j.avatar);edMsg('picMsg','Picture updated.','ok')}
+ }catch(x){edMsg('picMsg','That picture could not be read.','bad')}
+ b.disabled=false};
+$('picRm').onclick=async()=>{
+ const b=$('picRm');b.disabled=true;
+ try{const r=await api('/api/niflheim/avatar',{method:'DELETE'});
+  if(r.ok){if(ME)ME.avatar=null;setAvatar(null);edMsg('picMsg','Picture removed.','ok')}else edMsg('picMsg',r.j.error||'Could not remove it.','bad')
+ }catch(x){edMsg('picMsg','Server unreachable. Try again.','bad')}
+ b.disabled=false};
+async function saveName(){
+ const v=$('edName').value.trim();
+ if(!ME)return edMsg('nameMsg','Your character is not ready yet. Refresh the page and try again.','bad');
+ if(!v)return edMsg('nameMsg','Type a name first.','bad');
+ const b=$('nameBtn');b.disabled=true;edMsg('nameMsg','Saving…');
+ try{
+  const r=await api('/api/niflheim/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:v})});
+  if(!r.ok)edMsg('nameMsg',r.j.error||'Could not rename. Try again.','bad');
+  else{ME.name=r.j.name;['pn','dn','wn2','wname','edNm'].forEach(id=>{const e=$(id);if(e)e.textContent=r.j.name});$('edName').value=r.j.name;edMsg('nameMsg','Name changed to '+r.j.name+'.','ok')}
+ }catch(x){edMsg('nameMsg','Server unreachable. Try again.','bad')}
+ b.disabled=false}
+$('nameBtn').onclick=saveName;$('edName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName()}};
+// drawer + ribbon tabs
+function drawer(o){document.body.classList.toggle('dr',o)}
+$('menuBtn').onclick=()=>drawer(true);$('dim').onclick=()=>drawer(false);
+function tab(t){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id==='v-'+t));
+ document.querySelectorAll('.ribbon .item').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));$('home').scrollTop=0}
+document.querySelectorAll('.ribbon .item').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+$('logout').onclick=()=>{drawer(false);closeSheet();tab('home');$('form').reset();setMode('login');scene('login')};
+$('pcard').onclick=()=>{const e=$('pcard');e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse')};
+$('bell').onclick=()=>{tab('home');$('bell').classList.remove('unread');const n=$('nt');n.scrollIntoView({behavior:'smooth',block:'center'});n.classList.remove('flash');void n.offsetWidth;n.classList.add('flash')};
+// home tabs (swipe or tap)
+const ts=$('tabScroll'),tbs=[...document.querySelectorAll('.tab-btn')];
+tbs.forEach((b,i)=>b.onclick=()=>ts.scrollTo({left:i*ts.clientWidth,behavior:'smooth'}));
+ts.addEventListener('scroll',()=>{const i=Math.round(ts.scrollLeft/ts.clientWidth);tbs.forEach((b,j)=>b.classList.toggle('active',j===i))});
+document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>toast('Buy on WhatsApp with .buy'));
+// bottom sheet
+function sheet(o){$('shE').textContent=o.e||'';$('shT').textContent=o.t;$('shP').textContent=o.p||'';const b=$('shB');b.innerHTML='';
+ o.b.forEach(x=>{const e=document.createElement(x.href?'a':'button');e.className='go'+(x.ghost?' ghost':'');e.textContent=x.l;if(x.href)e.href=x.href;e.onclick=()=>{closeSheet();x.f&&x.f()};b.appendChild(e)});document.body.classList.add('sh')}
+function closeSheet(){document.body.classList.remove('sh')}
+$('sheetdim').onclick=closeSheet;
+// sample social data (preview only)
+const PLAYERS=[{n:'Frostbane',lv:21,w:88,l:30,on:1},{n:'Mira',lv:17,w:61,l:34,on:0},{n:'Thorne',lv:14,w:40,l:22,on:1},{n:'Ashka',lv:13,w:35,l:19,on:0},{n:'Korii',lv:12,w:29,l:17,on:1,me:1},{n:'Vexa',lv:11,w:22,l:25,on:0},{n:'Dunmar',lv:9,w:15,l:21,on:0}];
+const rel={Frostbane:'friend',Mira:'friend',Thorne:'friend',Ashka:'incoming'};
+const ini=n=>n.slice(0,2).toUpperCase();
+const rankOf=n=>[...PLAYERS].sort((a,b)=>b.lv-a.lv).findIndex(p=>p.n===n)+1;
+function renderSocial(){
+ const fr=PLAYERS.filter(p=>rel[p.n]==='friend'&&!p.me),rq=PLAYERS.filter(p=>rel[p.n]==='incoming'),on=fr.filter(p=>p.on).length;
+ $('fcount').textContent=fr.length+' FRIENDS';$('rcount').textContent=rq.length?rq.length+' NEW':'';$('bFr').textContent=fr.length;
+ $('duelSub').textContent=fr.length?'Challenge a friend · '+on+' online':'Add a friend to duel';
+ const fb=$('fbadge');fb.textContent=rq.length;fb.style.display=rq.length?'flex':'none';
+ $('flist').innerHTML='';fr.forEach(p=>{const d=document.createElement('button');d.className='lr';
+  d.innerHTML=`<div class="av ${p.on?'on':''}">${ini(p.n)}</div><div class="mid"><b>${p.n}</b><span>Lv ${p.lv} · ${p.on?'Online':'Offline'}</span></div><span class="mini">Duel</span>`;
+  d.onclick=()=>sheet({e:'Duel',t:p.n,p:'Lv '+p.lv+'. '+(p.on?'They are online and can accept right now.':'They are offline. They will see your challenge when they are back.'),
+   b:[{l:'Send challenge',f:()=>sent(p)},{l:'View page',ghost:1,f:()=>openProfile(p.n,'friends')}]});$('flist').appendChild(d)});
+ if(!fr.length)$('flist').innerHTML='<p class="note" style="margin:0">No friends yet.</p>';
+ $('rlist').innerHTML='';rq.forEach(p=>{const d=document.createElement('div');d.className='lr';
+  d.innerHTML=`<div class="av">${ini(p.n)}</div><div class="mid"><b>${p.n}</b><span>Lv ${p.lv} wants to be friends</span></div><button class="mini" data-a>Accept</button><button class="mini no" data-d>✕</button>`;
+  d.querySelector('[data-a]').onclick=()=>{rel[p.n]='friend';renderSocial();toast(p.n+' is now your friend')};
+  d.querySelector('[data-d]').onclick=()=>{rel[p.n]='none';renderSocial()};$('rlist').appendChild(d)});
+ if(!rq.length)$('rlist').innerHTML='<p class="note" style="margin:0">No pending requests.</p>';
+ $('rlistall').innerHTML='';[...PLAYERS].sort((a,b)=>b.lv-a.lv).forEach((p,i)=>{const d=document.createElement('button');d.className='lr'+(p.me?' me':'');
+  d.innerHTML=`<div class="rk ${i<3?'t':''}">${i+1}</div><div class="av">${ini(p.n)}</div><div class="mid"><b>${p.n}${p.me?' (you)':''}</b><span>${p.w} wins</span></div><span class="sm">Lv ${p.lv}</span>`;
+  d.onclick=()=>openProfile(p.n,'rank');$('rlistall').appendChild(d)});
+}
+function sent(p){sheet({e:'Challenge sent',t:'Waiting for '+p.n,p:'You will be pulled into the fight the moment they accept.',b:[{l:'Okay',ghost:1}]})}
+let pfrom='rank',pcur=null;
+function openProfile(n,from){pfrom=from;pcur=PLAYERS.find(p=>p.n===n);const p=pcur;
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id==='v-profile'));
+ document.querySelectorAll('.ribbon .item').forEach(b=>b.classList.toggle('active',b.dataset.tab===from));$('home').scrollTop=0;
+ $('ppn').textContent=p.n;$('pps').textContent=p.me?'This is you':'Misty Glade · '+(p.on?'Online':'Offline');
+ $('ppv').textContent=p.lv;$('ppr').textContent='#'+rankOf(p.n);$('ppw').textContent=p.w;$('ppl').textContent=p.l;paintBtn()}
+function paintBtn(){const p=pcur,b=$('ppa'),r=rel[p.n]||'none',n=$('ppnote');b.disabled=false;b.className='go';n.textContent='';
+ if(p.me){b.style.display='none';return}b.style.display='';
+ if(r==='friend'){b.textContent='Challenge to a duel';b.onclick=()=>sent(p);n.textContent='You are friends.'}
+ else if(r==='sent'){b.textContent='Request sent';b.disabled=true;b.className='go ghost'}
+ else if(r==='incoming'){b.textContent='Accept friend request';b.onclick=()=>{rel[p.n]='friend';renderSocial();paintBtn();toast(p.n+' is now your friend')}}
+ else{b.textContent='Add friend';b.onclick=()=>{rel[p.n]='sent';paintBtn();toast('Friend request sent to '+p.n)};n.textContent='Or send .friendreq '+p.n+' on WhatsApp.'}}
+$('pback').onclick=()=>tab(pfrom);
+renderSocial();
+// ===== STATS + ASCENSION (Parts 2.11, 2.12) =====
+const ATTRS=['STR','VIT','AGI','INT','DEX','WIS'];
+const ATTR_HINT={STR:'Physical power',VIT:'Health and defence',AGI:'Speed and evasion',INT:'Magic power and mana',DEX:'Accuracy and crits',WIS:'Magic defence and resist'};
+const asum=o=>Object.values(o).reduce((a,b)=>a+b,0);
+let alloc={};
+const jpost=(p,b)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+async function refreshMe(){const r=await api('/api/niflheim/me');if(r.ok&&r.j.player)fill((ME&&ME.name)||'',r.j.player);return ME}
+function ptsBar(){const p=ME;$('ascPts').innerHTML=p?['AP|ap','CP|cp','SP|sp'].map(x=>{const[l,k]=x.split('|');return`<div class="pt"><b>${p[k]||0}</b><span>${l}</span></div>`}).join(''):''}
+function statsOpen(){alloc={};tab('stats');refreshMe().then(renderStats)}
+function renderStats(){
+ const p=ME,b=$('stBody');if(!p){b.innerHTML='<p class="note">Your character is not ready yet. Refresh in a moment.</p>';return}
+ const left=(p.ap||0)-asum(alloc),a=p.attributes||{},sec=p.secondary||{};
+ const mp=p.mp==null?0:p.mp,mmp=sec.max_mp||0;
+ b.innerHTML=`<div class="card pgrp"><h3>${esc(p.name)} · LEVEL ${p.level}${p.class?' · '+esc(pretty(p.class)):''}</h3>
+  <div class="bar2"><span class="k">HP</span><div class="t"><i class="hp" style="width:${pct(p.hp,p.max_hp)}"></i></div><span class="n">${p.hp} / ${p.max_hp}</span></div>
+  <div class="bar2" style="margin-top:8px"><span class="k">MP</span><div class="t"><i class="mp" style="width:${pct(mp,mmp)}"></i></div><span class="n">${mp} / ${mmp}</span></div>
+  <div class="bar2" style="margin-top:8px"><span class="k">XP</span><div class="t"><i class="xp" style="width:${pct(p.xp,p.xp_needed)}"></i></div><span class="n">${p.xp} / ${p.xp_needed}</span></div></div>
+  <div class="pts"><div class="pt"><b>${left}</b><span>AP</span></div><div class="pt"><b>${p.cp||0}</b><span>CP</span></div><div class="pt"><b>${p.sp||0}</b><span>SP</span></div></div>
+  <div class="card pgrp"><h3>ATTRIBUTES</h3>${ATTRS.map(k=>{const add=alloc[k]||0;return`<div class="arow"><span class="an">${k}</span><span class="am">${ATTR_HINT[k]}</span>
+   <button data-a="${k}" data-d="-1" ${add<1?'disabled':''}>−</button><span class="av2">${a[k]}${add?` → <em>${a[k]+add}</em>`:''}</span><button data-a="${k}" data-d="1" ${left<1?'disabled':''}>+</button></div>`}).join('')}
+   <button class="go" id="apGo" ${asum(alloc)?'':'disabled'}>${asum(alloc)?'Review '+asum(alloc)+' point'+(asum(alloc)>1?'s':''):(left?'Choose attributes to raise':'No attribute points to spend')}</button>
+   <div class="hint">You earn 1 AP per level and for class requirements. AP only raises attributes.</div></div>
+  <div class="card pgrp"><h3>SECONDARY STATS</h3><div class="sgrid2">${Object.entries(sec).map(([k,v])=>`<div><span>${esc(pretty(k))}</span><b>${v}</b></div>`).join('')}</div></div>
+  <p class="note">Class: <b>${p.class?esc(pretty(p.class)):'none yet (unlocks at Level 5)'}</b>. Open Ascension from the menu for classes and skills.</p>
+  <p class="note">SKILLS — <b>${p.skills_count||0}</b></p>`;
+}
+$('stBody').addEventListener('click',async e=>{
+ const bt=e.target.closest('button');if(!bt||!ME)return;
+ if(bt.dataset.a){const k=bt.dataset.a,d=+bt.dataset.d;alloc[k]=Math.max(0,(alloc[k]||0)+d);if(!alloc[k])delete alloc[k];renderStats();return}
+ if(bt.id==='apGo'){
+  bt.disabled=true;const r=await jpost('/api/niflheim/ap/preview',{allocation:alloc});
+  if(!r.ok){toast(r.j.error||'Could not preview that.');renderStats();return}
+  const i=r.j.info||r.j,bf=i.before||{},af=i.after||{};
+  const txt=ATTRS.filter(k=>af[k]!==bf[k]).map(k=>k+' '+bf[k]+' → '+af[k]).join(' · ');
+  sheet({e:'Confirm allocation',t:(i.spent||asum(alloc))+' AP',p:txt+'. You will have '+(i.ap_left!=null?i.ap_left:'')+' AP left.',b:[
+   {l:'Confirm',f:async()=>{const c=await jpost('/api/niflheim/ap/allocate',{allocation:alloc});
+     if(!c.ok){toast(c.j.error||'Allocation failed. No points were spent.');return}
+     alloc={};await refreshMe();renderStats();toast('Attributes updated')}},
+   {l:'Cancel',ghost:1,f:renderStats}]});
+ }
+});
+// ----- Ascension: a hub of four buttons (Classes, Class Tree, Skills, Library); each opens its own page -----
+let ascT=null,ascLoad=async()=>{};
+const ASC={classes:'Classes',ctree:'Class Tree',skills:'Skills',library:'Library'};
+const needClass=()=>{$('ascBody').innerHTML='<p class="note">Choose a class first (unlocks at Level 5).</p><div style="padding:0 20px"><button class="go" id="toCls">Go to Classes</button></div>';$('toCls').onclick=()=>ascOpen('classes')};
+function paintHub(){
+ const p=ME||{},unl=(p.level||1)>=5;
+ const st={classes:p.class?pretty(p.class):unl?'Choose your class':'Unlocks at Level 5',ctree:p.class?(p.cp||0)+' CP to spend':'Needs a class',
+  skills:'SKILLS — '+(p.skills_count||0),library:'Discovery catalogue'};
+ const hn=$('ahName');if(hn){hn.textContent=p.class?pretty(p.class):'Unbound';$('ahSub').textContent='Level '+(p.level||1)+' · '+(p.class?'Your path is chosen':unl?'Choose your class':'Classes unlock at Level 5')}
+ document.querySelectorAll('#ascHub .atile').forEach(b=>{b.querySelector('em').textContent=st[b.dataset.t];b.classList.toggle('hot',b.dataset.t==='classes'&&unl&&!p.class)});
+}
+function ascOpen(t){
+ ascT=ASC[t]?t:null;tab('asc');ptsBar();paintHub();
+ $('ascHub').hidden=!!ascT;$('ascSub').hidden=!ascT;$('ascHero').hidden=!!ascT;
+ if(ascT){$('ascTitle').textContent=ASC[ascT];ascLoad()}
+ refreshMe().then(()=>{ptsBar();paintHub()});
+}
+document.querySelectorAll('#ascHub .atile').forEach(b=>b.onclick=()=>ascOpen(b.dataset.t));
+$('ascBack').onclick=()=>ascOpen();
+// ?go=profile|classes|skills|bestiary links from WhatsApp
+window.nifGo=g=>{if(g==='profile'||g==='stats')statsOpen();else if(g==='ascension')ascOpen();else if(g==='classes'||g==='class')ascOpen('classes');else if(g==='skills')ascOpen('skills');else if(g==='ctree')ascOpen('ctree');else if(g==='library'||g==='compendium')ascOpen('library');else if(g==='weapons'||g==='weapon'){tab('weapons');window.wepOpen&&window.wepOpen()}else if(g==='pshop'||g==='market'){tab('pshop');window.pshopOpen&&window.pshopOpen()}};
+$('statsBtn').onclick=()=>{drawer(false);statsOpen()};$('ascBtn').onclick=()=>{drawer(false);ascOpen()};
+// Explore: find a wild fight; the arena only appears once a fight starts
+const FOES=[{n:'Frost Wolf',lv:11},{n:'Rival Knight',lv:13},{n:'Ice Wraith',lv:12}];
+$('goExplore').onclick=()=>tab('map');
+$('goDuel').onclick=()=>tab('friends');
+
+// ===== MAP (3D particle terrain, real locations) =====
+(()=>{
+const mv=$('v-map'),canvas=$('mapc'),ctx=canvas.getContext('2d'),labels=$('mlabels');
+let W=0,H=0,DPR=1,angle=-.32,tilt=.58,zoom=1,panX=0,panZ=0,drag=false,lastX=0,lastY=0,vx=0,vy=0,lastMove=0,moved=0,wasMulti=false;
+let pinchD=0,pinchA=0,pinchM=null;const ptrs=new Map();
+let pending=null;
+let nodes=[],byId={},els={},sel=null,cur=null,journey=null,jAt=0,running=false,loaded=false,lastFrame=0;
+const pts=[];let genX=NaN,genZ=NaN;
+const SEED=0x4e49464c,GRID=.54,CHUNK=10,SP=4.6;
+function hash2(ix,iz,salt=0){let n=(Math.imul(ix|0,374761393)+Math.imul(iz|0,668265263)+Math.imul(SEED+salt,1442695041))|0;n=Math.imul(n^(n>>>13),1274126177);n^=n>>>16;return(n>>>0)/4294967295}
+function noise(x,z,scale,salt){const gx=x/scale,gz=z/scale,ix=Math.floor(gx),iz=Math.floor(gz),fx=gx-ix,fz=gz-iz,ux=fx*fx*(3-2*fx),uz=fz*fz*(3-2*fz);
+ const a=hash2(ix,iz,salt),b=hash2(ix+1,iz,salt),c=hash2(ix,iz+1,salt),d=hash2(ix+1,iz+1,salt);return(a*(1-ux)+b*ux)*(1-uz)+(c*(1-ux)+d*ux)*uz}
+function rawTerrain(x,z){const broad=noise(x,z,15,2)-.5,detail=noise(x,z,5,3)-.5;let h=broad*5.2+detail*1.5;
+ const ridge=Math.abs(Math.sin(x*.105+noise(x,z,22,9)*2.2)+Math.cos(z*.085)*.42);h+=Math.max(0,1.08-ridge)*4.2;
+ h+=1.05*Math.sin(x*.19+z*.09)*Math.cos(z*.16);h+=.55*Math.sin(x*.42-z*.28);
+ const rx=5*Math.sin(z*.075)+2;if(Math.abs(x-rx)<1.25)h-=1.45*(1-Math.abs(x-rx)/1.25);return h}
+// the land is calmed around real places so every marker sits on open ground
+function terrain(x,z){let dn=99;for(const n of nodes){const d=Math.hypot(x-n.wx,z-n.wz);if(d<dn)dn=d}
+ const t=Math.min(1,dn/2.8),k=t*t*(3-2*t);return rawTerrain(x,z)*k}
+function build(force){const cx=Math.floor(panX/CHUNK),cz=Math.floor(panZ/CHUNK);if(!force&&cx===genX&&cz===genZ)return;genX=cx;genZ=cz;pts.length=0;
+ const minX=Math.floor((panX-34)/GRID),maxX=Math.ceil((panX+34)/GRID),minZ=Math.floor((panZ-29)/GRID),maxZ=Math.ceil((panZ+29)/GRID);
+ for(let iz=minZ;iz<=maxZ;iz++)for(let ix=minX;ix<=maxX;ix++){const j=(hash2(ix,iz,11)-.5)*.045,x=ix*GRID,z=iz*GRID;pts.push({x,z,y:terrain(x,z)+j})}}
+function project(x,y,z){x-=panX;z-=panZ;const ca=Math.cos(angle),sa=Math.sin(angle),xx=x*ca-z*sa,zz=x*sa+z*ca,ct=Math.cos(tilt),st=Math.sin(tilt),yy=y*ct-zz*st,depth=y*st+zz*ct,focal=H*.95,scale=focal/(focal+depth*24+85)*zoom;
+ return{x:W*.5+xx*25*scale,y:H*.49+yy*25*scale,scale,depth}}
+function resize(){const r=mv.getBoundingClientRect();if(r.width<10)return;DPR=Math.min(devicePixelRatio||1,1.5);W=r.width;H=r.height;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);build(true)}
+if(window.ResizeObserver)new ResizeObserver(resize).observe(mv);addEventListener('resize',resize);
+
+// ---------- data ----------
+const TYPE={town:'Town',hub:'Hub',place:'Place'};
+function setData(d){
+ nodes=d.locations.map(l=>({...l,wx:l.x*SP,wz:l.y*SP,q:null}));byId={};nodes.forEach(n=>byId[n.id]=n);
+ cur=byId[d.current]||null;journey=d.journey||null;jAt=Date.now();
+ labels.innerHTML='';els={};
+ nodes.forEach(n=>{const e=document.createElement('div');e.className='mlab';e.onclick=ev=>{ev.stopPropagation();select(n.id)};labels.appendChild(e);els[n.id]=e;paintLabel(n)});
+ $('mcur').textContent='📍 '+(cur?cur.name:'Unknown');
+ if(!loaded&&cur){panX=cur.wx;panZ=cur.wz}
+ loaded=true;
+ if(pending){const q=pending;pending=null;if(isFinite(q.panX)&&isFinite(q.panZ)){panX=q.panX;panZ=q.panZ}
+  if(isFinite(q.zoom))zoom=Math.max(.28,Math.min(2.25,q.zoom));if(isFinite(q.angle))angle=q.angle;
+  if(isFinite(q.tilt)){tilt=q.tilt;$('mtilt').value=q.tilt}if(q.sel&&byId[q.sel])sel=q.sel}
+ build(true);select(sel&&byId[sel]?sel:(cur?cur.id:null));
+}
+function paintLabel(n){const e=els[n.id];e.className='mlab'+(n.current?' cur':'')+(!n.discovered?' unk':'')+(n.locked?' lock':'')+(sel===n.id?' sel':'');
+ e.innerHTML='◇ '+(n.discovered?esc2(n.name):'???')+(n.current?'<em>YOU</em>':'')}
+const esc2=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function reqText(n){const r=n.requires||{},p=[];if(r.level)p.push('reach level '+r.level);if(r.item)p.push('needs '+String(r.item).replace(/_/g,' '));
+ for(const k in r)if(k!=='level'&&k!=='item')p.push('not available yet');return p.join(', ')}
+// shortest walk over places the map shows; returns [{dir,to}] or null
+function route(toId){if(!cur)return null;if(toId===cur.id)return[];const prev={[cur.id]:null},q=[cur.id];
+ while(q.length){const a=q.shift();for(const d in byId[a].exits){const t=byId[a].exits[d];if(t in prev||!byId[t])continue;if(byId[t].locked&&t!==toId)continue;prev[t]={from:a,dir:d};if(t===toId){const out=[];let c=t;while(prev[c]){out.unshift({dir:prev[c].dir,to:c});c=prev[c].from}return out}q.push(t)}}
+ return null}
+function select(id){sel=id;nodes.forEach(paintLabel);const n=byId[id],go=$('mgo');if(!n){$('mname').textContent='—';$('mdesc').textContent='';go.disabled=true;go.textContent='—';return}
+ const tag=n.current?'<span class="tg">You are here</span>':n.locked?'<span class="tg l">Locked</span>':'';
+ $('mname').innerHTML=esc2(n.discovered?n.name:'Unexplored')+tag;
+ $('mprev').textContent=!n.discovered?'?':n.type==='town'?'⌂':n.type==='hub'?'✦':'◇';
+ let d=n.discovered?(n.description||'')+(n.type?' · '+(TYPE[n.type]||n.type):''):'You have not been here yet.';
+ if(n.locked)d+=' Locked: '+reqText(n)+'.';
+ $('mdesc').textContent=d;
+ const r=route(id);
+ if(n.current){go.textContent='HERE';go.disabled=true;go.onclick=null}
+ else if(n.locked){go.textContent='LOCKED';go.disabled=true;go.onclick=null}
+ else if(!r){go.textContent='NO ROUTE';go.disabled=true;go.onclick=null}
+ else{go.disabled=false;go.textContent=r.length===1?'GO ›':'ROUTE ›';go.onclick=()=>travel(n,r)}}
+function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('Copied '+t),()=>toast('Send '+t))}catch(e){toast('Send '+t)}}
+function travel(n,r){const cmd='.explore '+r[0].dir,name=n.discovered?n.name:'the unknown';
+ const steps=r.map(s=>s.dir).join(' → ');
+ sheet({e:'Travel',t:name,p:r.length===1?'Send this on WhatsApp:  '+cmd:'Route: '+steps+'. Start with:  '+cmd+'. Send the next step after you arrive.',
+  b:[{l:'Copy '+cmd,f:()=>copy(cmd)},{l:'Close',ghost:1}]})}
+
+// ---------- drawing ----------
+function drawJourney(){const el=$('mjour');if(!journey){el.hidden=true;return}const left=Math.max(0,journey.eta-Math.floor((Date.now()-jAt)/1000));
+ el.hidden=false;el.textContent='Traveling to '+journey.to_name+' · '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0')}
+function draw(){
+ if(!W)return;build();
+ if(!drag&&ptrs.size===0&&(Math.abs(vx)+Math.abs(vy))>.025){pan(vx,vy);vx*=.91;vy*=.91}else if(!drag&&ptrs.size===0){vx=vy=0}
+ ctx.clearRect(0,0,W,H);
+ const bg=ctx.createRadialGradient(W*.5,H*.47,20,W*.5,H*.47,Math.max(W,H)*.72);bg.addColorStop(0,'#0a2840');bg.addColorStop(.55,'#061522');bg.addColorStop(1,'#020812');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<48;i++){const x=(i*173.7)%W,y=(i*91.3)%H;ctx.fillStyle=`rgba(45,125,255,${.14+(i%4)*.07})`;ctx.fillRect(x,y,1,1)}
+ for(const p of pts){const q=project(p.x,p.y,p.z);if(q.x<-12||q.x>W+12||q.y<-12||q.y>H+12)continue;
+  const ridge=Math.max(0,p.y-.15),fade=Math.max(.38,Math.min(1,1-q.depth/1900)),a=Math.max(.24,Math.min(.92,.48+ridge*.16))*fade,r=Math.max(.55,(.82+Math.min(ridge,4)*.13)*q.scale*1.55);
+  const c=ridge>1.1?[105,178,255]:ridge<.15?[25,78,190]:[48,125,248];ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${Math.min(.96,a*1.12)})`;ctx.beginPath();ctx.arc(q.x,q.y,r,0,6.2832);ctx.fill()}
+ // roads between the places the map shows
+ ctx.save();ctx.lineWidth=2;ctx.shadowBlur=9;
+ for(const n of nodes)for(const d in n.exits){const m=byId[n.exits[d]];if(!m||n.id>m.id)continue;const dim=!n.discovered||!m.discovered;
+  ctx.setLineDash(dim?[2,9]:[3,7]);ctx.strokeStyle=dim?'#2f5f94':'#4b9dff';ctx.shadowColor=dim?'transparent':'#176dff';ctx.beginPath();
+  for(let i=0;i<=10;i++){const t=i/10,x=n.wx+(m.wx-n.wx)*t,z=n.wz+(m.wz-n.wz)*t,q=project(x,terrain(x,z)+.3,z);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)}ctx.stroke()}
+ ctx.restore();
+ // markers, far ones first
+ const t=Date.now()*.003;
+ for(const n of nodes){n.q=project(n.wx,terrain(n.wx,n.wz)+.65,n.wz)}
+ [...nodes].sort((a,b)=>b.q.depth-a.q.depth).forEach(n=>{const q=n.q,pulse=1+Math.sin(t+n.wx)*.15,big=n.current?1.45:n.id===sel?1.2:1;
+  const col=n.current?'#9ff0ff':n.locked?'#ffb15c':n.discovered?'#65aaff':'#3a6aa0';
+  ctx.save();ctx.translate(q.x,q.y);ctx.scale(1,q.scale*.7);ctx.strokeStyle=col;ctx.shadowColor=n.current?'#3fd0ff':'#176dff';ctx.shadowBlur=n.discovered?16:4;ctx.lineWidth=n.discovered?1.6:1.2;
+  if(!n.discovered)ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.ellipse(0,8,22*pulse*big,8*pulse*big,0,0,7);ctx.stroke();
+  if(n.id===sel){ctx.setLineDash([]);ctx.strokeStyle='#fff';ctx.globalAlpha=.8;ctx.beginPath();ctx.ellipse(0,8,30*big,11*big,0,0,7);ctx.stroke();ctx.globalAlpha=1}
+  ctx.setLineDash([]);ctx.fillStyle=n.discovered?(n.current?'#d6fbff':'#8fc4ff'):'#4a79ad';ctx.beginPath();ctx.moveTo(0,-23*big);ctx.lineTo(7*big,0);ctx.lineTo(0,10*big);ctx.lineTo(-7*big,0);ctx.closePath();ctx.fill();ctx.restore()});
+ // labels follow their markers
+ for(const n of nodes){const e=els[n.id],q=n.q,show=q.x>-30&&q.x<W+30&&q.y>10&&q.y<H-6&&(zoom>.55||n.current||n.id===sel||n.discovered);
+  e.style.display=show?'':'none';if(show)e.style.transform=`translate(${q.x}px,${q.y-26*q.scale*Math.max(.8,zoom)}px) translate(-50%,-100%)`}
+ drawJourney();
+}
+function frame(now){if(!running)return;if(now-lastFrame>=40){draw();lastFrame=now}requestAnimationFrame(frame)}
+
+// ---------- input ----------
+const zoomAt=(nz,sx=W/2,sy=H/2)=>{const old=zoom;nz=Math.max(.28,Math.min(2.25,nz));if(nz===old)return;const f=nz/old;panX+=(sx-W/2)*(1/f-1)*.012;panZ+=(sy-H*.49)*(1/f-1)*.012;zoom=nz};
+function pan(dx,dy){const s=1/(zoom||1),ca=Math.cos(angle),sa=Math.sin(angle),wx=-dx*.018*s,wz=dy*.018*s;panX+=wx*ca+wz*sa;panZ+=-wx*sa+wz*ca}
+$('mplus').onclick=()=>zoomAt(zoom+.12);$('mminus').onclick=()=>zoomAt(zoom-.12);
+const tc=$('mtilt');tc.addEventListener('input',()=>{tilt=Number(tc.value)});
+$('mreset').onclick=()=>{angle=-.32;tilt=.58;tc.value='.58';zoom=1;vx=vy=0;if(cur){panX=cur.wx;panZ=cur.wz;select(cur.id)}};
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});vx=vy=0;lastMove=performance.now();
+ if(ptrs.size===1){drag=true;lastX=e.clientX;lastY=e.clientY;moved=0;wasMulti=false}
+ if(ptrs.size===2){wasMulti=true;drag=false;const a=[...ptrs.values()];pinchD=dist(a[0],a[1]);pinchA=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x);pinchM=mid(a[0],a[1])}});
+canvas.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(ptrs.size>=2){const a=[...ptrs.values()],d=dist(a[0],a[1]),m=mid(a[0],a[1]),ca=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x);
+  if(pinchD>0)zoomAt(zoom*d/pinchD,m.x,m.y);if(pinchM)pan(m.x-pinchM.x,m.y-pinchM.y);let tw=ca-pinchA;while(tw>Math.PI)tw-=6.2832;while(tw<-Math.PI)tw+=6.2832;angle-=tw;pinchD=d;pinchA=ca;pinchM=m;return}
+ if(!drag)return;const dx=e.clientX-lastX,dy=e.clientY-lastY,now=performance.now(),dt=Math.max(8,now-lastMove);moved+=Math.abs(dx)+Math.abs(dy);pan(dx,dy);vx=dx/dt*16;vy=dy/dt*16;lastX=e.clientX;lastY=e.clientY;lastMove=now});
+function release(e){const wasTap=drag&&!wasMulti&&moved<8&&ptrs.size===1;ptrs.delete(e.pointerId);
+ if(wasTap&&e.type==='pointerup'){const r=canvas.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;let best=null,bd=40;for(const n of nodes){if(!n.q)continue;const d=Math.hypot(n.q.x-px,n.q.y-(py+12*n.q.scale));if(d<bd){bd=d;best=n}}if(best)select(best.id)}
+ if(ptrs.size===0){drag=false;pinchD=0;pinchM=null}else if(ptrs.size===1){const a=[...ptrs.values()][0];lastX=a.x;lastY=a.y;drag=true;vx=vy=0}}
+canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoomAt(zoom*Math.exp(-e.deltaY*.0012),e.clientX,e.clientY)},{passive:false});
+canvas.addEventListener('dblclick',e=>zoomAt(zoom*1.35,e.clientX,e.clientY));
+
+// ---------- open / close ----------
+function msg(t){const m=$('mmsg');m.textContent=t||'';m.classList.toggle('on',!!t)}
+async function load(){
+ try{
+  let d;
+  if(LIVE){const r=await api('/api/niflheim/map');if(!r.ok){msg(r.j.error||'The map could not be loaded.');return}d=r.j}
+  else d=SAMPLE_MAP;
+  msg('');setData(d);
+ }catch(e){msg('The map could not be loaded. Try again in a moment.')}
+}
+window.mapOpen=()=>{$('home').classList.add('maplock');resize();load();if(!running){running=true;requestAnimationFrame(frame)}};
+window.mapClose=()=>{$('home').classList.remove('maplock');running=false};
+window.mapGet=()=>({panX,panZ,zoom,angle,tilt,sel});
+window.mapSet=q=>{pending=q};
+})();
+
+(()=>{const _t=tab;tab=function(t){_t(t);if(t==='map')window.mapOpen();else window.mapClose()}})();
+
+// ---- live: sections that need systems not built yet show an honest empty state ----
+(()=>{
+ const soon=(id,h,t,p)=>{$(id).innerHTML=`<div class="lb-page-head"><h1>${h}</h1><p>${t}</p></div><p class="note">${p}</p>`};
+ soon('v-friends','FRIENDS','Coming soon.','For now, challenge someone with <b>.duel @player</b> on WhatsApp.');
+ soon('v-shop','SHOP','Coming soon.','Use <b>.shop</b> and <b>.buy</b> on WhatsApp for now.');
+ $('fbadge').style.display='none';
+ $('duelSub').textContent='Send .duel @player on WhatsApp';$('duelSub').classList.remove('on');
+ $('goDuel').onclick=()=>sheet({e:'Duel',t:'Duels are on WhatsApp',p:'Friends and site duels are coming. For now send .duel @player in the group.',b:[{l:'Okay',ghost:1}]});
+ $('logout').onclick=async()=>{drawer(false);closeSheet();try{await api('/api/auth/logout',{method:'POST'})}catch(e){}if(window.nifClearState)window.nifClearState();tab('home');$('form').reset();$('lerr').textContent='';setMode('login');scene('login')};
+})();
+
+// ===== Rankings: live leaderboard (public /api/niflheim/leaderboard) =====
+(()=>{
+const BOARDS=[['level','Level','Lv'],['coins','Coins','coins'],['kills','Kills','kills'],['xp','XP','XP']];
+let cur='level',data=null;
+const hd=(t)=>`<div class="lb-page-head"><h1>RANKINGS</h1><p>${t}</p></div>`;
+const ini=n=>String(n).slice(0,2).toUpperCase();
+function paint(){
+ const B=$('v-rank'),b=BOARDS.find(x=>x[0]===cur),rows=(data&&data[cur])||[];
+ const me=(typeof ME!=='undefined'&&ME&&ME.name)?String(ME.name).toLowerCase():'';
+ B.innerHTML=hd('Top adventurers across Niflheim · '+(data?data.total:0)+' players')
+  +`<div class="lb-list" style="padding-bottom:0;display:flex;gap:6px;flex-wrap:wrap">${BOARDS.map(x=>`<button class="mini" data-b="${x[0]}" style="${x[0]===cur?'background:var(--ice-dim);color:#fff':''}">${x[1]}</button>`).join('')}</div>`
+  +`<div class="lb-list">${rows.length?rows.map(r=>`<div class="lr${me&&String(r.name).toLowerCase()===me?' me':''}" style="cursor:default"><div class="rk ${r.rank<=3?'t':''}">${r.rank}</div><div class="av">${esc(ini(r.name))}</div><div class="mid"><b>${esc(r.name)}${me&&String(r.name).toLowerCase()===me?' (you)':''}</b><span>Level ${r.level}</span></div><span class="sm">${Number(r.value).toLocaleString()} ${b[2]}</span></div>`).join(''):'<p class="note" style="margin:0">No adventurers ranked yet.</p>'}</div>`;
+ B.querySelectorAll('[data-b]').forEach(x=>x.onclick=()=>{cur=x.dataset.b;paint()});
+}
+async function load(){
+ const B=$('v-rank');
+ if(!data)B.innerHTML=hd('Loading…');
+ const r=await api('/api/niflheim/leaderboard');
+ if(!r.ok){if(!data)B.innerHTML=hd('')+'<p class="note">The leaderboard couldn’t be loaded. Try again in a moment.</p>';return}
+ data=r.j;paint();
+}
+const _t=tab;tab=function(t){_t(t);if(t==='rank')load()};
+})();
+
+// ===== session continuity =====
+// Opening the site link (a fresh navigation) always lands on Home.
+// Coming back to a tab that is already open (switching apps, the browser reloading a
+// background tab) restores the exact page + state. Saved per tab in sessionStorage.
+(()=>{
+ const KEY='nif_state';
+ let nav='navigate';
+ try{const e=performance.getEntriesByType('navigation')[0];if(e)nav=e.type}catch(x){}
+ let saved=null;
+ if(nav==='reload'||nav==='back_forward'){try{saved=JSON.parse(sessionStorage.getItem(KEY)||'null')}catch(x){}}
+ else{try{sessionStorage.removeItem(KEY)}catch(x){}}
+ const curTab=()=>{const v=document.querySelector('.view.show');return v?v.id.slice(2):'home'};
+ let ready=false,hold=false;
+ function save(){
+  if(!ready||hold||!document.body.classList.contains('in'))return;
+  const ts=$('tabScroll');
+  const st={t:curTab(),scroll:$('home').scrollTop,ht:ts?Math.round(ts.scrollLeft/(ts.clientWidth||1)):0};
+  if(st.t==='profile'&&pcur){st.pn=pcur.n;st.pf=pfrom}
+  if(st.t==='map'&&window.mapGet)st.map=window.mapGet();
+  try{sessionStorage.setItem(KEY,JSON.stringify(st))}catch(x){}
+ }
+ const _tab=tab;tab=function(t){_tab(t);save()};
+ const _op=openProfile;openProfile=function(n,f){_op(n,f);save()};
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
+ addEventListener('pagehide',save);
+ setInterval(save,2500);
+ window.nifRestore=function(){
+  if(!saved){ready=true;return}
+  const st=saved;saved=null;hold=true;
+  try{
+   if(st.t==='profile'&&st.pn&&PLAYERS.find(p=>p.n===st.pn))openProfile(st.pn,st.pf||'rank');
+   else if(st.t&&st.t!=='profile'&&$('v-'+st.t)){
+    if(st.t==='map'&&st.map&&window.mapSet)window.mapSet(st.map);
+    tab(st.t)}
+   requestAnimationFrame(()=>{
+    $('home').scrollTop=st.scroll||0;
+    const ts=$('tabScroll');if(ts&&st.ht)ts.scrollTo({left:st.ht*ts.clientWidth})});
+  }catch(x){}
+  hold=false;ready=true;save();
+ };
+ window.nifClearState=()=>{try{sessionStorage.removeItem(KEY)}catch(x){}};
+})();
+
+// ===== Niflheim website pages: Explore summon, Shop, Inventory, Bestiary, compass =====
+(()=>{
+const hd=(h,t)=>`<div class="lb-page-head"><h1>${h}</h1><p>${t}</p></div>`;
+const ico=c=>({consumable:'🧪',weapon:'🗡️',armour:'🛡️',accessory:'💍',material:'🔹'}[c]||'◆');
+const fail=(id,h,r,m)=>{$(id).innerHTML=hd(h,'')+`<p class="note">${esc((r.j&&r.j.error)||m)}</p>`};
+const _tab=tab;tab=function(t){_tab(t);if(t==='shop')shop()};
+async function shop(){
+ const B=$('v-shop');B.innerHTML=hd('SHOP','Loading…');
+ const r=await api('/api/niflheim/shop');if(!r.ok)return fail('v-shop','SHOP',r,'The shop couldn’t be loaded.');
+ const j=r.j;
+ B.innerHTML=hd('SHOP',`Your coins: <span style="color:var(--yellow);font-weight:600">${j.coins.toLocaleString()}</span>`)+`<div class="lb-list">${j.items.map(i=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(i.category)}</div><div class="gym-meta"><div class="name">${esc(i.name)}</div><div class="sub">${esc(i.desc||'')}</div></div><button class="mini buy" data-b="${esc(i.name)}" ${j.coins<i.buy?'disabled':''}>${i.buy.toLocaleString()}</button></div>`).join('')}</div><p class="note">Same items and prices as .shop on WhatsApp.</p>`;
+ B.querySelectorAll('[data-b]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/shop/buy',{name:b.dataset.b,qty:1});if(!c.ok){toast(c.j.error||'Purchase failed. No coins spent.');b.disabled=false;return}toast(c.j.message||'Purchased');shop()});
+}
+async function inv(){
+ const B=$('v-inv');B.innerHTML=hd('INVENTORY','Loading…');
+ const r=await api('/api/niflheim/inventory');if(!r.ok)return fail('v-inv','INVENTORY',r,'Your inventory couldn’t be loaded.');
+ const j=r.j,G={consumables:'Consumables',equipment:'Equipment',other:'Other'};
+ B.innerHTML=hd('INVENTORY',`HP ${j.hp} / ${j.max_hp} · Coins ${j.coins.toLocaleString()}`)+(j.items.length?Object.keys(G).map(g=>{const rows=j.items.filter(x=>x.group===g);return rows.length?`<div class="grp">${G[g]}</div><div class="lb-list">${rows.map(x=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(x.category)}</div><div class="gym-meta"><div class="name">${esc(x.name)} ×${x.qty}</div><div class="sub">${esc(x.desc||'')}</div></div>${x.usable?`<button class="mini buy" data-u="${esc(x.name)}">Use</button>`:''}</div>`).join('')}</div>`:''}).join(''):'<p class="note">Your bag is empty. Visit the Shop.</p>');
+ B.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/inventory/use',{name:b.dataset.u});if(!c.ok){toast(c.j.error||'You can’t use that now.');b.disabled=false;return}toast(c.j.message||'Used');await refreshMe();inv()});
+}
+async function best(){
+ const B=$('v-bestiary');B.innerHTML=hd('BESTIARY','Loading…');
+ const r=await api('/api/niflheim/bestiary');if(!r.ok)return fail('v-bestiary','BESTIARY',r,'The bestiary couldn’t be loaded.');
+ const L=r.j.monsters,at=a=>Object.entries(a||{}).map(([k,v])=>`${k} ${v}`).join(' · ');
+ B.innerHTML=hd('BESTIARY',L.length+' creatures recorded')+L.map(m=>`<details class="card crow bc"><summary><div class="art">${esc(m.name[0])}</div><div style="flex:1"><h4 style="margin:0">${esc(m.name)}</h4><div class="sp">${esc(m.race||'?')} · ${esc(m.element||'?')} · ${esc(m.rarity||'?')}</div></div><div><span class="chip">Rank ${esc(m.rank)}</span> <span class="chip">${esc(m.classification)}</span></div></summary><div class="bd"><div class="sgrid2"><div><span>Level</span><b>${m.level}</b></div><div><span>HP</span><b>${m.hp}</b></div><div><span>MP</span><b>${m.mp}</b></div></div><p><b>Attributes</b> ${at(m.attributes)}</p><p><b>Abilities</b> ${esc((m.abilities||[]).join(' '))}</p><p>${esc(m.description||'')}</p><p><b>Drops</b> ${esc((m.drops||[]).join(' '))||'—'}</p><p>Base HP ${m.base.HP} × rank ${m.rank_mult} × ${esc(m.classification)} ${m.class_mult}.</p></div></details>`).join('');
+}
+async function wep(sel){
+ const B=$('v-weapons');B.innerHTML=hd('WEAPONS','Loading…');
+ const r=await api('/api/niflheim/weapons');if(!r.ok)return fail('v-weapons','WEAPONS',r,'The weapons couldn’t be loaded.');
+ const j=r.j,cur=j.bases.find(b=>b.id===sel)||j.bases.find(b=>b.variants.some(v=>v.equipped))||j.bases[0];
+ const RC={Common:'#9fb2c8',Uncommon:'#6fd18a',Rare:'#6aa8ff',Epic:'#c58bff',Divine:'#ffe38a'};
+ const sk=cur.skill,tot=sk.total;
+ const tl=sk.phases.map(p=>`<div style="flex:${p.seconds};background:linear-gradient(#244867,#1b3552);border:1px solid #3d6a92;padding:6px 4px;text-align:center;font-size:11px;min-width:0"><b>${esc(p.name)}</b><br>${p.seconds.toFixed(2)}s</div>`).join('');
+ const rows=cur.variants.map((v,i)=>`<div class="gym-row" style="cursor:default;opacity:${v.owned?1:.62}"><div class="inv-icon" style="color:${RC[v.rarity]}">${i+1}</div><div class="gym-meta"><div class="name" style="color:${RC[v.rarity]}">${esc(v.name)}${v.equipped?' <span class="chip ok">Equipped</span>':v.owned?' <span class="chip ok">Owned</span>':''}</div><div class="sub">+${v.damage} damage · +${v.per_round} per round · ${esc(v.rarity)} · ${esc(v.obtain)}</div></div><a class="chip" style="text-decoration:none" target="_blank" rel="noopener" href="/niflheim-weapon-atelier.html?weapon=${cur.id}&tier=${v.tier}">3D</a></div>`).join('');
+ const f=j.forge;
+ B.innerHTML=hd('WEAPONS','Four weapon types, ten variants each. Variants change damage only.')
+  +`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">${j.bases.map(b=>`<button class="go${b.id===cur.id?'':' ghost'}" data-w="${b.id}">${esc(b.label)}</button>`).join('')}</div>`
+  +`<div class="card crow"><h4>${esc(cur.label)} — ${esc(sk.name)}</h4><div class="sp">${esc(cur.identity)} · ${esc(cur.damage_type)} · ${esc(cur.range)}</div><p>${esc(sk.description)}</p><div style="display:flex;gap:3px;margin:8px 0">${tl}</div><div class="gr">${esc(sk.execution)} · ${esc(sk.target)} · ${tot.toFixed(2)}s · fits <b>${cur.strikes_per_round}</b> in a ${j.round_budget}s fight round</div></div>`
+  +`<div class="lb-list">${rows}</div>`
+  +(f?`<p class="note">Divine weapons are forged: the Celestial weapon of the same type, ${Object.entries(f.materials).map(([k,q])=>q+'× '+esc(k)).join(', ')} and ${f.coins.toLocaleString()} coins. Use .forge in WhatsApp.</p>`:'');
+ B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>wep(b.dataset.w));
+}
+window.wepOpen=wep;
+// ===== PShop: player marketplace (browse / sell / my listings). Rules and tax live on the server. =====
+const PSC={Weapons:'weapon',Armour:'armour',Materials:'material',Consumables:'consumable',Accessories:'accessory'};
+const PS={view:'browse',q:'',cat:'',sort:'new'};
+const psLeft=e=>{const t=e>1e12?e/1000:e,s=Math.max(0,t-Date.now()/1000),h=Math.floor(s/3600);return h>=24?Math.floor(h/24)+'d '+h%24+'h':h>0?h+'h':Math.max(1,Math.ceil(s/60))+'m'};
+const psRow=(L,right)=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${ico(PSC[L.category])}</div><div class="gym-meta"><div class="name">${L.qty.toLocaleString()}× ${esc(L.item)} <span class="chip">${esc(L.category)}</span></div><div class="sub">🪙 ${L.price.toLocaleString()} each · by ${esc(L.seller)}${L.details?' · '+esc(L.details):''} · ${psLeft(L.expires)} left · #${esc(L.short)}</div></div>${right}</div>`;
+async function ps(v){
+ if(v)PS.view=v;
+ const B=$('v-pshop');B.innerHTML=hd('PSHOP','Loading…');
+ const r=await api('/api/niflheim/pshop/state');if(!r.ok)return fail('v-pshop','PSHOP',r,'The marketplace couldn’t be loaded.');
+ const S=r.j,R=S.rules;
+ const nav=[['browse','Browse'],['sell','Sell'],['mine','My listings']].map(([k,l])=>`<button class="go${PS.view===k?'':' ghost'}" data-pv="${k}">${l}</button>`).join('');
+ B.innerHTML=hd('PSHOP',`Your coins: <span style="color:var(--yellow);font-weight:600">${S.coins.toLocaleString()}</span> · ${R.tax_pct}% sale tax`)+`<div class="edrow" style="padding:0 20px 6px">${nav}</div><div id="psb"></div>`;
+ B.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>ps(b.dataset.pv));
+ const P=$('psb');
+ if(PS.view==='browse')await psBrowse(P,S);else if(PS.view==='sell')psSell(P,S);else await psMine(P,S);
+}
+async function psBrowse(P,S){
+ const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+ P.innerHTML=`<div class="filt"><input id="psq" placeholder="Search items" value="${esc(PS.q)}"><select id="psc">${opt('','All categories',!PS.cat)}${S.categories.map(c=>opt(c,c,PS.cat===c)).join('')}</select><select id="pss">${opt('new','Newest',PS.sort==='new')}${opt('price','Price: low',PS.sort==='price')}${opt('price_desc','Price: high',PS.sort==='price_desc')}</select></div><div id="psl" style="margin-top:12px"><p class="note">Loading…</p></div>`;
+ let tm;const load=async()=>{
+  const r=await api('/api/niflheim/pshop/browse?'+new URLSearchParams({q:PS.q,category:PS.cat,sort:PS.sort}));
+  const L=$('psl');if(!L)return;
+  if(!r.ok){L.innerHTML=`<p class="note">${esc((r.j&&r.j.error)||'Listings couldn’t be loaded.')}</p>`;return}
+  const rows=r.j.listings;
+  L.innerHTML=rows.length?`<div class="lb-list">${rows.map(x=>psRow(x,x.mine?'<span class="chip ok">Yours</span>':`<div style="display:flex;gap:6px;align-items:center">${x.qty>1?`<input type="number" min="1" max="${x.qty}" value="1" data-n="${esc(x.id)}" style="width:54px;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px">`:''}<button class="mini buy" data-b="${esc(x.id)}" ${S.coins<x.price?'disabled':''}>Buy</button></div>`)).join('')}</div>`:'<p class="note">No listings match. Be the first to sell something.</p>';
+  L.querySelectorAll('[data-b]').forEach(b=>b.onclick=async()=>{
+   const id=b.dataset.b,ni=L.querySelector(`[data-n="${id}"]`),qty=ni?Math.max(1,parseInt(ni.value)||1):1;b.disabled=true;
+   const c=await jpost('/api/niflheim/pshop/buy',{id,qty});
+   if(!c.ok){toast((c.j&&c.j.error)||'Purchase failed. No coins spent.');b.disabled=false;return}
+   toast(`Bought ${c.j.qty}× ${c.j.item} for ${c.j.total.toLocaleString()} coins`);refreshMe&&refreshMe();ps('browse')});
+ };
+ $('psq').oninput=e=>{PS.q=e.target.value;clearTimeout(tm);tm=setTimeout(load,300)};
+ $('psc').onchange=e=>{PS.cat=e.target.value;load()};$('pss').onchange=e=>{PS.sort=e.target.value;load()};
+ load();
+}
+function psSell(P,S){
+ const inv=Object.entries(S.inventory||{}).map(([n,q])=>[n,typeof q==='object'&&q?(q.qty||q.count||0):Number(q)||0]).filter(x=>x[1]>0);
+ if(!inv.length){P.innerHTML='<p class="note">Your bag is empty. Hunt or buy something first, then list it here.</p>';return}
+ const fld='width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font:inherit';
+ P.innerHTML=`<div class="card crow" style="margin:12px 20px"><h4>List an item</h4><div style="display:grid;gap:10px;margin-top:8px"><select id="psi" style="${fld}">${inv.map(([n,q])=>`<option value="${esc(n)}" data-max="${q}">${esc(n)} (×${q})</option>`).join('')}</select><div style="display:flex;gap:10px"><input id="psn" type="number" min="1" value="1" placeholder="Quantity" style="${fld}"><input id="psp" type="number" min="${R_MIN(S)}" placeholder="Price each" style="${fld}"></div><input id="psd" maxlength="80" placeholder="Details (optional)" style="${fld}"><div class="sp" id="pss2">Pick a price to see what you’ll earn.</div><button class="go" id="psgo" style="margin:0">List item</button></div></div><p class="note">The item leaves your bag while listed and comes back if you cancel or it expires (${S.rules.expire_hours}h). Up to ${S.rules.max_active} active listings${S.rules.listing_fee?`, ${S.rules.listing_fee} coins per listing`:''}. ${S.rules.tax_pct}% tax is taken from each sale.</p>`;
+ const sum=()=>{const n=parseInt($('psn').value)||0,p=parseInt($('psp').value)||0,t=n*p,tax=Math.floor(t*S.rules.tax_pct/100);$('pss2').textContent=t?`Total ${t.toLocaleString()} · tax ≈ ${tax.toLocaleString()} · you receive ≈ ${(t-tax).toLocaleString()} coins if it all sells`:'Pick a price to see what you’ll earn.'};
+ $('psn').oninput=sum;$('psp').oninput=sum;
+ $('psi').onchange=()=>{const m=+$('psi').selectedOptions[0].dataset.max;if(+$('psn').value>m)$('psn').value=m;sum()};
+ $('psgo').onclick=async()=>{
+  const b=$('psgo'),qty=parseInt($('psn').value),price=parseInt($('psp').value);
+  if(!(qty>0)||!(price>0))return toast('Enter a quantity and a price.');
+  b.disabled=true;const c=await jpost('/api/niflheim/pshop/sell',{item:$('psi').value,qty,price,details:$('psd').value.trim()});
+  if(!c.ok){toast((c.j&&c.j.error)||'Couldn’t list that.');b.disabled=false;return}
+  toast('Listed. It’s live in the marketplace.');ps('mine')};
+}
+const R_MIN=S=>(S.rules&&S.rules.min_price)||1;
+async function psMine(P,S){
+ const r=await api('/api/niflheim/pshop/mine');if(!r.ok){P.innerHTML=`<p class="note">${esc((r.j&&r.j.error)||'Your listings couldn’t be loaded.')}</p>`;return}
+ const j=r.j,rp=j.reputation||{};
+ P.innerHTML=`<p class="note" style="margin-top:10px">${rp.sales||0} sold (earned ${(rp.earned||0).toLocaleString()} coins) · ${rp.purchases||0} bought (spent ${(rp.spent||0).toLocaleString()} coins)</p>`
+  +'<div class="grp">Active listings</div>'+(j.listings.length?`<div class="lb-list">${j.listings.map(x=>psRow(x,`<button class="mini no" data-c="${esc(x.id)}">Cancel</button>`)).join('')}</div>`:'<p class="note">You have nothing listed.</p>')
+  +'<div class="grp">History</div>'+(j.history.length?`<div class="lb-list">${j.history.map(h=>`<div class="gym-row" style="cursor:default"><div class="inv-icon">${h.side==='sold'?'💰':'🛒'}</div><div class="gym-meta"><div class="name">${h.side==='sold'?'Sold':'Bought'} ${h.qty}× ${esc(h.item)}</div><div class="sub">${h.side==='sold'?'to':'from'} ${esc(h.other)} · ${h.side==='sold'?'you received':'you paid'} ${h.net.toLocaleString()} coins</div></div></div>`).join('')}</div>`:'<p class="note">No sales or purchases yet.</p>');
+ P.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{b.disabled=true;const c=await jpost('/api/niflheim/pshop/cancel',{id:b.dataset.c});if(!c.ok){toast((c.j&&c.j.error)||'Couldn’t cancel.');b.disabled=false;return}toast(`Cancelled. ${c.j.qty}× ${c.j.item} is back in your bag.`);ps('mine')});
+}
+window.pshopOpen=()=>ps('browse');
+$('pshopBtn').onclick=()=>{drawer(false);tab('pshop');ps('browse')};
+$('wepBtn').onclick=()=>{drawer(false);tab('weapons');wep()};
+$('invBtn').onclick=()=>{drawer(false);tab('inv');inv()};
+$('bestBtn').onclick=()=>{drawer(false);tab('bestiary');best()};
+$('goMap').onclick=()=>tab('map');
+// Explore summons a monster: show its appraisal, then fight it in the arena (Player vs Monster).
+$('goExplore').onclick=async()=>{
+ const b=$('goExplore');if(b.disabled)return;b.disabled=true;
+ const r=await jpost('/api/niflheim/battle/start',{});b.disabled=false;
+ if(!r.ok)return toast(r.j.error||'Nothing answered the call. Try again.');
+ const t=r.j,f=t.foe;let m=null;
+ try{const x=await api('/api/niflheim/bestiary');m=((x.j&&x.j.monsters)||[]).find(z=>z.id===f.id)}catch(e){}
+ sheet({e:'A monster appears',t:`${f.name} · Lv ${f.level}`,p:[m&&`Rank ${m.rank} ${m.classification} · ${m.race} · ${m.element} · ${m.rarity}`,`HP ${f.hp} · Damage about ${f.damage}`,m&&(m.abilities||[]).join(' '),m&&m.description].filter(Boolean).join(' · '),b:[
+  {l:'Fight',f:()=>{location.href='arena.html?t='+encodeURIComponent(t.ticket)}},{l:'Flee',ghost:1}]});
+};
+// Compass: follows the map’s rotation (mapGet().angle); north is the red tip.
+const ng=$('mneedle');
+(function spin(){const g=window.mapGet&&window.mapGet();if(g&&$('v-map').classList.contains('show'))ng.setAttribute('transform',`rotate(${(g.angle*180/Math.PI).toFixed(1)} 32 32)`);requestAnimationFrame(spin)})();
+})();
+
+// ===== Stage 8: class selection, family-tree Class Tree, Skills filters, Compendium, notices =====
+const RANKC={common:'#9aa0a6',uncommon:'#4caf50',rare:'#3b82f6',epic:'#a855f7'};   // same table as engine/niflheim/ranks.py (Legendary not used yet)
+const rk=r=>`<span class="rk" style="color:${RANKC[r]||RANKC.common};border-color:${RANKC[r]||RANKC.common}">${esc(r)}</span>`;
+const gro=g=>Object.entries(g||{}).map(([k,v])=>`${k} +${v}`).join(' · ');
+const nbody=h=>{$('ascBody').innerHTML=h};
+const NOTE=t=>'<p class="note">'+t+'</p>';
+let classGo=null;
+// --- notices: shown one at a time, each with its own Go button; acknowledged when seen ---
+async function showNotices(){
+ const r=await api('/api/niflheim/notices');if(!r.ok||!(r.j.notices||[]).length)return;
+ const n=r.j.notices[0];
+ const next=async()=>{await jpost('/api/niflheim/notices/ack',{id:n.id});showNotices()};
+ const to=n.go_to==='skills'?'skills':n.go_to==='class_tree'?'ctree':n.go_to==='class_select'?'classes':'classes';
+ sheet({e:'Notice',t:n.title,p:n.body,b:[{l:n.button||'OK',f:async()=>{await jpost('/api/niflheim/notices/ack',{id:n.id});ascOpen(to);setTimeout(showNotices,400)}},{l:'Later',ghost:1,f:next}]});
+}
+window.addEventListener('load',()=>setTimeout(()=>{if(ME)showNotices()},2500));
+// --- awakening: a short sequence, then Profile, then the unlock notices ---
+function awaken(a){
+ const lines=a.lines||[];let i=0;
+ const step=()=>{if(i>=lines.length){statsOpen();setTimeout(showNotices,500);return}
+  sheet({e:a.title||'Awakening',t:lines[i],p:'',b:[{l:i<lines.length-1?'Continue':'Enter Niflheim',f:()=>{i++;step()}}]})};
+ step();
+}
+// --- Classes: four cards -> detail + confirm -> awakening ---
+async function loadClasses(){
+ const r=await api('/api/niflheim/classes/select');if(!r.ok)return nbody(NOTE(esc(r.j.error||'Could not load classes.')));
+ const s=r.j.selection;
+ const head=s.available?NOTE('Choose the path you will walk. Nothing is chosen until you confirm.'):s.current?NOTE('Your class: <b>'+esc(s.current)+'</b>'):NOTE('Classes unlock at Level <b>'+s.unlock_level+'</b>. You are Level '+s.level+'.');
+ nbody(head+s.cards.map(c=>`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.weight)} · ${esc(c.range)} · ${esc(c.damage_type)}</div><p>${esc(c.summary)}</p>
+  <div class="gr">Affinities <b>${c.affinities.join(' · ')}</b></div><p><i>${esc(c.philosophy)}</i></p>
+  ${s.current===c.id?'<span class="chip ok">Your class</span>':s.available?`<button class="go" data-pick="${c.id}">Inspect ${esc(c.name)}</button>`:'<span class="chip">Locked</span>'}</div>`).join(''));
+ $('ascBody').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>inspect(b.dataset.pick));
+}
+async function inspect(id){
+ const r=await jpost('/api/niflheim/classes/preview',{class:id});if(!r.ok)return toast(r.j.error||'Cannot inspect that class.');
+ const c=r.j.class;
+ nbody(`<div class="card crow"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.weight)} · ${esc(c.range)} · ${esc(c.damage_type)}</div><p>${esc(c.description)}</p><p><i>${esc(c.philosophy)}</i></p>
+  <div class="gr">Primary affinities <b>${c.affinities.join(' · ')}</b></div><div class="gr">Natural growth per level <b>${esc(gro(c.natural_growth))}</b></div>
+  <div class="gr">Characteristics: ${(c.characteristics||[]).map(esc).join(' · ')}</div><div class="gr">Skill categories: ${(c.categories||[]).map(esc).join(' · ')}</div>
+  <button class="go" id="cfm">Confirm ${esc(c.name)}</button><button class="go ghost" id="cnc">Cancel</button></div>`);
+ $('cnc').onclick=loadClasses;
+ $('cfm').onclick=async()=>{$('cfm').disabled=true;const k=await jpost('/api/niflheim/classes/choose',{class:id,confirm:true});
+  if(!k.ok){toast(k.j.error||'Could not choose that class.');return loadClasses()}
+  await refreshMe();awaken(k.j.awakening||{lines:['You awaken as a '+id+'.']})};
+}
+// --- Class Tree: family tree (generations top to bottom), pan by scrolling, zoom buttons ---
+let zoom=1;
+async function loadCTree(){
+ const r=await api('/api/niflheim/classes/genealogy');if(!r.ok)return needClass();
+ const t=r.j,tiers={};t.nodes.forEach(n=>(tiers[n.tier]=tiers[n.tier]||[]).push(n));
+ const rows=Object.keys(tiers).sort((a,b)=>a-b).map(k=>`<div class="frow">${tiers[k].map(n=>`<div class="fn" data-c="${n.id}"><div class="tn ${n.state}"><b>${esc(n.name)}</b><div class="m">Tier ${n.tier} ${rk(n.rank)}${n.special?'<br>Special':''}${n.cp_cost?'<br>'+n.cp_cost+' CP':''}${n.min_level?' · Lv '+n.min_level+'+':''}</div>
+  <span class="chip ${n.state==='current'?'ok':n.state==='available'?'av':''}">${esc(n.state)}</span></div></div>`).join('')}</div>`).join('');
+ nbody(`<div class="zbar"><button id="zo">−</button><button id="zi">+</button></div><div class="ftree" id="ftree"><div class="fwrap" id="fwrap">${rows}<svg class="fsvg" id="fsvg"></svg></div></div>${NOTE('Class Points: <b>'+t.cp+'</b>. Tap a class for details.')}`);
+ const wrap=$('fwrap'),svg=$('fsvg'),draw=()=>{const wr=wrap.getBoundingClientRect(),z=zoom;svg.setAttribute('width',wrap.scrollWidth);svg.setAttribute('height',wrap.scrollHeight);
+  svg.innerHTML=t.edges.map(e=>{const a=wrap.querySelector(`[data-c="${e.from}"] .tn`),b=wrap.querySelector(`[data-c="${e.to}"] .tn`);if(!a||!b)return'';
+   const A=a.getBoundingClientRect(),B=b.getBoundingClientRect(),x1=(A.left+A.width/2-wr.left)/z,y1=(A.bottom-wr.top)/z,x2=(B.left+B.width/2-wr.left)/z,y2=(B.top-wr.top)/z;
+   return`<path d="M${x1} ${y1}C${x1} ${y1+22},${x2} ${y2-22},${x2} ${y2}" fill="none" stroke="#3E7A94" stroke-width="2"/>`}).join('')};
+ const zset=v=>{zoom=Math.min(1.6,Math.max(.5,v));wrap.style.transform=`scale(${zoom})`;draw()};
+ $('zi').onclick=()=>zset(zoom+.15);$('zo').onclick=()=>zset(zoom-.15);zset(zoom);
+ wrap.querySelectorAll('.fn').forEach(el=>el.onclick=()=>{const n=t.nodes.find(x=>x.id===el.dataset.c);
+  const need=(n.requirements||[]).map(q=>(q.met?'✓ ':'✗ ')+q.label).join('\n');
+  sheet({e:'Tier '+n.tier+' · '+n.rank+(n.placeholder?' · placeholder':''),t:n.name,p:(n.summary||'')+(need?'\n\n'+need:''),
+   b:(n.state==='available'?[{l:'Evolve · '+n.cp_cost+' CP',f:()=>evolve(n)}]:[]).concat([{l:'Close',ghost:1}])})});
+}
+function evolve(n){sheet({e:'Evolve',t:'Become '+n.name+'?',p:'Costs '+n.cp_cost+' CP. Your attributes stay; future growth follows the new class.',b:[
+ {l:'Confirm',f:async()=>{const k=await jpost('/api/niflheim/classes/evolve',{class:n.id,confirm:true});if(!k.ok)return toast(k.j.error||'Could not evolve.');await refreshMe();ptsBar();awaken(k.j.awakening||{lines:['You evolved.']})}},{l:'Cancel',ghost:1}]})}
+// --- Skills: category + rank dropdowns + name search, all combined; one card per skill; each skill opens its own page + Skill Tree ---
+const rcol=s=>s.rank_color||RANKC[s.rank]||RANKC.common;
+const rkb=s=>`<span class="rk" style="color:${rcol(s)};border-color:${rcol(s)}">${esc(s.rank_name||pretty(s.rank))}</span>`;
+const pipsH=s=>`<div class="pips">${Array.from({length:s.max_level},(_,i)=>`<i class="${i<s.level?'f':''}"></i>`).join('')}</div>`;
+let skF={c:'',r:'',q:''};
+async function loadSkills(){
+ const r=await api('/api/niflheim/skills');if(!r.ok)return nbody(NOTE(esc(r.j.error||'Could not load skills.')));
+ const t=r.j,all=t.skills||[];
+ const head=`<div class="skhead"><h3>SKILLS — <b>${t.unlocked_count||0}</b></h3><span>🔺 SP ${t.sp||0}</span></div>`;
+ if(!t.class)return nbody(head+NOTE('Your skills appear here once you choose a class at Level 5.')+'<div style="padding:0 20px"><button class="go" id="toCls">Go to Classes</button></div>'),$('toCls').onclick=()=>ascOpen('classes');
+ const opt=(v,l,sel)=>`<option value="${esc(v)}"${sel?' selected':''}>${esc(l)}</option>`;
+ nbody(head+`<div class="filt"><select id="fc">${opt('','All categories',!skF.c)}${t.categories.map(c=>opt(c,c,skF.c===c)).join('')}</select>
+  <select id="fr">${opt('','All ranks',!skF.r)}${t.ranks.map(x=>opt(x.id,x.name,skF.r===x.id)).join('')}</select></div>
+  <div class="filt"><input id="fq" placeholder="Search skills by name" value="${esc(skF.q)}"></div><div class="skgrid" id="sg"></div>`);
+ const paint=()=>{skF={c:$('fc').value,r:$('fr').value,q:$('fq').value.trim()};const q=skF.q.toLowerCase();
+  const rows=all.filter(s=>(!skF.c||s.category===skF.c)&&(!skF.r||s.rank===skF.r)&&(!q||s.name.toLowerCase().includes(q)));
+  $('sg').innerHTML=rows.length?rows.map(s=>`<button class="skc ${s.unlocked?'on':''}" data-s="${esc(s.id)}" style="--rc:${rcol(s)}"><div class="skt"><span class="ski">${s.icon||'✦'}</span>${rkb(s)}</div>
+   <b>${esc(s.name)}</b><span class="m">${esc(s.category)}</span>${pipsH(s)}<span class="m2">${s.unlocked?'Level '+s.level+(s.state==='maxed'?' · Max':''):'Locked'}</span></button>`).join(''):'<p class="note" style="grid-column:1/-1">No skills match.</p>';
+  $('sg').querySelectorAll('.skc').forEach(b=>b.onclick=()=>skillPage(b.dataset.s))};
+ ['fc','fr'].forEach(i=>$(i).onchange=paint);$('fq').oninput=paint;paint();
+}
+async function skillPage(id){   // the skill's own page + its own Skill Tree (there is no separate Skills Tree page)
+ const r=await api('/api/niflheim/skills/'+encodeURIComponent(id));if(!r.ok)return toast(r.j.error||'Could not open that skill.');
+ const s=r.j;
+ nbody(`<div class="ahead" style="padding-top:8px"><button class="mini" id="skBack" type="button">‹ Skills</button></div>
+  <div class="card skp" style="--rc:${rcol(s)}"><div class="skph"><span class="ski big">${s.icon||'✦'}</span><div><h4>${esc(s.name)}</h4><div class="sp">${esc(s.class)} · ${esc(s.category)}</div>${rkb(s)}</div></div>
+   <p>${esc(s.description)}</p>${s.effect?`<div class="gr" style="margin-top:10px">Current effect <b>${esc(s.effect)}</b></div>`:''}
+   ${(s.requires||[]).length?`<div class="gr">Requires skill: <b>${s.requires.map(esc).join(', ')}</b></div>`:''}</div>
+  <div class="grp">SKILL TREE</div>
+  <div class="stree" style="--rc:${rcol(s)}">${s.tree.map(n=>`<div class="sn ${n.state}"><div class="sdot"></div><div class="sbody"><b>${esc(n.name)}</b><span class="m">${esc(n.effect)}</span><span class="m">${n.sp_cost} SP · Lv ${n.min_level}+</span>
+   ${n.state==='owned'?'<span class="chip ok" style="margin-top:6px">Unlocked</span>':n.state==='next'&&s.in_class?`<button class="go" data-buy="1">${s.level?'Upgrade':'Unlock'} · ${n.sp_cost} SP</button>`:`<div class="why">${esc(s.in_class?(n.blocked_by||'Locked'):'Not in your class')}</div>`}</div></div>`).join('')}</div>
+  ${NOTE('Skill Points: <b>'+s.sp+'</b>')}`);
+ $('skBack').onclick=loadSkills;
+ const bb=$('ascBody').querySelector('[data-buy]');
+ if(bb)bb.onclick=async()=>{bb.disabled=true;const c=await jpost('/api/niflheim/skills/buy',{skill:id});if(!c.ok){toast(c.j.error||'No points spent.');bb.disabled=false;return}
+  toast(c.j.message||'Done');await refreshMe();ptsBar();paintHub();skillPage(id)};
+}
+// --- Library (the class compendium): tier picker -> discovered classes grouped by rank, rank dropdown jumps to a section ---
+async function loadComp(tier){
+ if(!tier){const r=await api('/api/niflheim/compendium');if(!r.ok)return nbody(NOTE('Could not load the Library.'));
+  return nbody(NOTE('Every class you discover is recorded here, chosen or not.')+r.j.tiers.map(x=>`<div class="card crow"><h4>${esc(x.label)}</h4><div class="sp">${x.discovered} discovered</div><button class="go" data-t="${x.tier}">Open</button></div>`).join(''))||$('ascBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>loadComp(+b.dataset.t))}
+ const r=await api('/api/niflheim/compendium/tier?tier='+tier);if(!r.ok)return nbody(NOTE(esc(r.j.error||'Error')));
+ const v=r.j.compendium;
+ nbody(`<div class="filt"><button class="go" id="cb" style="margin:0">← Tiers</button><select id="cj"><option value="">Jump to rank</option>${v.rank_options.map(o=>`<option value="${o.rank}">${esc(o.label)} (${o.count})</option>`).join('')}</select></div>
+  ${v.empty?NOTE('Nothing discovered in this tier yet.'):v.sections.map(sec=>`<div id="sec-${sec.rank}"><p class="note" style="text-align:left">${rk(sec.rank)}</p>${sec.classes.map(c=>`<div class="card crow" data-c="${c.id}"><h4>${esc(c.name)}</h4><div class="sp">${esc(c.status)}</div><p>${esc(c.summary)}</p></div>`).join('')}</div>`).join('')}`);
+ $('cb').onclick=()=>loadComp();
+ $('cj').onchange=e=>{const el=$('sec-'+e.target.value);el?el.scrollIntoView({behavior:'smooth'}):toast('Nothing of that rank discovered yet.')};
+ $('ascBody').querySelectorAll('[data-c]').forEach(el=>el.onclick=async()=>{const d=await jpost('/api/niflheim/compendium/class',{class:el.dataset.c});if(!d.ok)return;const c=d.j.class;
+  sheet({e:'Tier '+c.tier+' · '+c.rank,t:c.name,p:(c.description||'')+'\n'+(c.philosophy||''),b:[{l:'Close',ghost:1}]})});
+}
+ascLoad=async function(){
+ const B=$('ascBody');B.innerHTML=NOTE('Loading…');
+ try{ascT==='classes'?await loadClasses():ascT==='ctree'?await loadCTree():ascT==='skills'?await loadSkills():ascT==='library'?await loadComp():0}
+ catch(x){B.innerHTML=NOTE('Server unreachable. Try again in a moment.')}
+};
+</script>
+</body></html>
